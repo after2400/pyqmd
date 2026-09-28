@@ -1,6 +1,17 @@
 # CHANGELOG
 
 
+## v0.5.0 (2026-09-28)
+
+### ✨ Features
+
+- **bench**: Search-quality benchmarks against your own corpus
+  ([#5](https://github.com/after2400/pyqmd/pull/5),
+  [`8c5a227`](https://github.com/after2400/pyqmd/commit/8c5a22719b42e55e48ee5e2a6030a9090513522b))
+
+`pyqmd bench <fixture.json>` scores bm25, vector, hybrid and full (reranked) retrieval with Recall@k, MRR and nDCG@k; --samples N reports the spread across expansion seeds.
+
+
 ## v0.4.0 (2026-09-28)
 
 ### ✨ Features
@@ -9,6 +20,11 @@
   [`04c3538`](https://github.com/after2400/pyqmd/commit/04c3538d839b8c43e0d9457ada7dcd79d84b4dcd))
 
 `pyqmd mcp` serves query, get, multi_get and status tools plus a qmd:// document resource to MCP clients, over stdio or Streamable HTTP (with an origin guard).
+
+### 🏗 Chores
+
+- **release**: V0.4.0 [skip ci]
+  ([`129f8f3`](https://github.com/after2400/pyqmd/commit/129f8f3c19b5da16f3cf68011a1cff21d2cba83a))
 
 
 ## v0.3.0 (2026-09-28)
