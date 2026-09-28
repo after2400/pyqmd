@@ -1,6 +1,25 @@
 # CHANGELOG
 
 
+## v0.6.1 (2026-09-28)
+
+### ✅ Testing
+
+- **parity**: Golden-snapshot parity suite against Node qmd
+  ([#7](https://github.com/after2400/pyqmd/pull/7),
+  [`1ae9883`](https://github.com/after2400/pyqmd/commit/1ae98832a1e3eadf10482a428eddcbb8d3705a7b))
+
+Golden-snapshot comparisons of pyqmd's CLI and MCP output against a frozen Node qmd reference on the public SciFact dataset, plus a quality baseline and performance benchmark.
+
+### 🏗 Chores
+
+- **scripts**: Development and model-maintenance scripts
+  ([#8](https://github.com/after2400/pyqmd/pull/8),
+  [`fdf84e7`](https://github.com/after2400/pyqmd/commit/fdf84e7d1fb08633a6d640496d2f389bcb38844e))
+
+Expansion-model GGUF conversion, rerank fixture scoring, SciFact corpus preparation, query replay and store validation.
+
+
 ## v0.6.0 (2026-09-28)
 
 ### ✨ Features
@@ -10,6 +29,11 @@
   [`1937466`](https://github.com/after2400/pyqmd/commit/193746693a377414e26e9138ebca6527bfacbdcd))
 
 pyqmd, pyqmd-librarian, pyqmd-researcher and pyqmd-bench skills, with `pyqmd skill list|show|install` and `pyqmd skills list|get|path`.
+
+### 🏗 Chores
+
+- **release**: V0.6.0 [skip ci]
+  ([`eb64e32`](https://github.com/after2400/pyqmd/commit/eb64e32dcc5e407900e95f54b897ca593c165734))
 
 
 ## v0.5.0 (2026-09-28)
