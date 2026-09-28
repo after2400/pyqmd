@@ -28,6 +28,7 @@ from pyqmd_mlx.cli.commands import (
     context,
     documents,
     embed,
+    mcp,
     pull,
     search,
     status,
@@ -49,6 +50,7 @@ app.command("embed")(embed.embed)
 app.command("status")(status.status)
 app.command("update")(update.update)
 app.command("cleanup")(cleanup.cleanup)
+app.command("mcp")(mcp.mcp)
 app.command("pull")(pull.pull)
 
 
