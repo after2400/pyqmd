@@ -1,6 +1,16 @@
 # CHANGELOG
 
 
+## v0.4.0 (2026-09-28)
+
+### ✨ Features
+
+- **mcp**: Serve pyqmd over MCP (stdio and HTTP) ([#4](https://github.com/after2400/pyqmd/pull/4),
+  [`04c3538`](https://github.com/after2400/pyqmd/commit/04c3538d839b8c43e0d9457ada7dcd79d84b4dcd))
+
+`pyqmd mcp` serves query, get, multi_get and status tools plus a qmd:// document resource to MCP clients, over stdio or Streamable HTTP (with an origin guard).
+
+
 ## v0.3.0 (2026-09-28)
 
 ### ✨ Features
@@ -9,6 +19,11 @@
   [`c52aaa8`](https://github.com/after2400/pyqmd/commit/c52aaa881b148a8a75ee25025e733b61b3ec8031))
 
 Collections (add/list/show/remove/rename/include/exclude/update-cmd), embed, update, cleanup, pull, status, context, search/vsearch/query, get/multi-get/ls, output formats (cli/json/csv/md/xml/files), line numbers, full paths and --version.
+
+### 🏗 Chores
+
+- **release**: V0.3.0 [skip ci]
+  ([`108d5d4`](https://github.com/after2400/pyqmd/commit/108d5d4dac186004b92e8f6ee5053629c79da6f1))
 
 
 ## v0.2.0 (2026-09-28)
