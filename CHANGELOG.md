@@ -1,6 +1,22 @@
 # CHANGELOG
 
 
+## v0.6.4 (2026-09-28)
+
+### 🐞 Bug Fixes
+
+- **config**: Keep release commits and trailers out of the changelog
+  ([#11](https://github.com/after2400/pyqmd/pull/11),
+  [`caf62b3`](https://github.com/after2400/pyqmd/commit/caf62b389b8d00095eab6f4f377ccbef31797dcc))
+
+- Skip chore(release) commits: PSR's exclude_commit_patterns keeps any
+  commit that bumps the version, and chore is a patch tag
+- Match co-author and sign-off trailers case-insensitively, so GitHub's
+  "Co-authored-by" lines from squash merges are dropped too
+- Lint PR titles with commitlint: a multi-commit squash merge takes the
+  PR title as its subject, which the commit-msg hook never sees
+
+
 ## v0.6.3 (2026-09-28)
 
 ### 📖 Documentation
@@ -21,11 +37,6 @@ Install from a release tag, beta feedback note, the CLAUDE.md/AGENTS.md agent gu
 
 The design history behind each subsystem, including spike results and rejected alternatives. Superseded designs are kept, marked with their successor.
 
-### 🏗 Chores
-
-- **release**: V0.6.2 [skip ci]
-  ([`a461b58`](https://github.com/after2400/pyqmd/commit/a461b5819f65432685bb904bec8a8f6253a317b4))
-
 
 ## v0.6.1 (2026-09-28)
 
@@ -38,9 +49,6 @@ The design history behind each subsystem, including spike results and rejected a
 Golden-snapshot comparisons of pyqmd's CLI and MCP output against a frozen Node qmd reference on the public SciFact dataset, plus a quality baseline and performance benchmark.
 
 ### 🏗 Chores
-
-- **release**: V0.6.1 [skip ci]
-  ([`e934639`](https://github.com/after2400/pyqmd/commit/e93463998511941c2a118b2ad2ba0b8f5be23197))
 
 - **scripts**: Development and model-maintenance scripts
   ([#8](https://github.com/after2400/pyqmd/pull/8),
@@ -59,11 +67,6 @@ Expansion-model GGUF conversion, rerank fixture scoring, SciFact corpus preparat
 
 pyqmd, pyqmd-librarian, pyqmd-researcher and pyqmd-bench skills, with `pyqmd skill list|show|install` and `pyqmd skills list|get|path`.
 
-### 🏗 Chores
-
-- **release**: V0.6.0 [skip ci]
-  ([`eb64e32`](https://github.com/after2400/pyqmd/commit/eb64e32dcc5e407900e95f54b897ca593c165734))
-
 
 ## v0.5.0 (2026-09-28)
 
@@ -75,11 +78,6 @@ pyqmd, pyqmd-librarian, pyqmd-researcher and pyqmd-bench skills, with `pyqmd ski
 
 `pyqmd bench <fixture.json>` scores bm25, vector, hybrid and full (reranked) retrieval with Recall@k, MRR and nDCG@k; --samples N reports the spread across expansion seeds.
 
-### 🏗 Chores
-
-- **release**: V0.5.0 [skip ci]
-  ([`35e3180`](https://github.com/after2400/pyqmd/commit/35e31809d1c1b69e8f98133814fda2f299590ff4))
-
 
 ## v0.4.0 (2026-09-28)
 
@@ -90,11 +88,6 @@ pyqmd, pyqmd-librarian, pyqmd-researcher and pyqmd-bench skills, with `pyqmd ski
 
 `pyqmd mcp` serves query, get, multi_get and status tools plus a qmd:// document resource to MCP clients, over stdio or Streamable HTTP (with an origin guard).
 
-### 🏗 Chores
-
-- **release**: V0.4.0 [skip ci]
-  ([`129f8f3`](https://github.com/after2400/pyqmd/commit/129f8f3c19b5da16f3cf68011a1cff21d2cba83a))
-
 
 ## v0.3.0 (2026-09-28)
 
@@ -104,11 +97,6 @@ pyqmd, pyqmd-librarian, pyqmd-researcher and pyqmd-bench skills, with `pyqmd ski
   [`c52aaa8`](https://github.com/after2400/pyqmd/commit/c52aaa881b148a8a75ee25025e733b61b3ec8031))
 
 Collections (add/list/show/remove/rename/include/exclude/update-cmd), embed, update, cleanup, pull, status, context, search/vsearch/query, get/multi-get/ls, output formats (cli/json/csv/md/xml/files), line numbers, full paths and --version.
-
-### 🏗 Chores
-
-- **release**: V0.3.0 [skip ci]
-  ([`108d5d4`](https://github.com/after2400/pyqmd/commit/108d5d4dac186004b92e8f6ee5053629c79da6f1))
 
 
 ## v0.2.0 (2026-09-28)
@@ -126,11 +114,6 @@ Collections (add/list/show/remove/rename/include/exclude/update-cmd), embed, upd
 - AST-aware chunking for code files (Python, TypeScript, JavaScript,
   Go, Rust) and folder context
 
-### 🏗 Chores
-
-- **release**: V0.2.0 [skip ci]
-  ([`da947fa`](https://github.com/after2400/pyqmd/commit/da947fa352a0c97f4a5fefe5a24cc9aba5792a45))
-
 
 ## v0.1.0 (2026-09-28)
 
@@ -146,15 +129,6 @@ Collections (add/list/show/remove/rename/include/exclude/update-cmd), embed, upd
   conversion), grammar-constrained output and per-query seeded
   sampling; overridable with PYQMD_EXPAND_MODEL
 - Models download from the Hugging Face Hub on first use
-
-Co-authored-by: Chuck Lunskis <17775963+after2400@users.noreply.github.com>
-
-Co-authored-by: Claude Haiku 4.5 <noreply@anthropic.com>
-
-### 🏗 Chores
-
-- **release**: V0.1.0 [skip ci]
-  ([`f5d57e6`](https://github.com/after2400/pyqmd/commit/f5d57e6a6055730590f9357a31e167bcbd50ce3f))
 
 
 ## v0.0.1 (2026-09-28)
