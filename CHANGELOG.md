@@ -1,6 +1,16 @@
 # CHANGELOG
 
 
+## v0.3.0 (2026-09-28)
+
+### ✨ Features
+
+- **cli**: The pyqmd command line ([#3](https://github.com/after2400/pyqmd/pull/3),
+  [`c52aaa8`](https://github.com/after2400/pyqmd/commit/c52aaa881b148a8a75ee25025e733b61b3ec8031))
+
+Collections (add/list/show/remove/rename/include/exclude/update-cmd), embed, update, cleanup, pull, status, context, search/vsearch/query, get/multi-get/ls, output formats (cli/json/csv/md/xml/files), line numbers, full paths and --version.
+
+
 ## v0.2.0 (2026-09-28)
 
 ### ✨ Features
@@ -15,6 +25,11 @@
   (and/or/not, comparisons, in/nin/all, exists)
 - AST-aware chunking for code files (Python, TypeScript, JavaScript,
   Go, Rust) and folder context
+
+### 🏗 Chores
+
+- **release**: V0.2.0 [skip ci]
+  ([`da947fa`](https://github.com/after2400/pyqmd/commit/da947fa352a0c97f4a5fefe5a24cc9aba5792a45))
 
 
 ## v0.1.0 (2026-09-28)
