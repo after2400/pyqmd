@@ -23,6 +23,7 @@ is safe.
 import typer
 
 from pyqmd_mlx.cli.commands import (
+    bench,
     cleanup,
     collection,
     context,
@@ -46,6 +47,7 @@ app.add_typer(context.app, name="context")
 app.add_typer(documents.app)
 app.add_typer(search.app)
 
+app.command("bench")(bench.bench)
 app.command("embed")(embed.embed)
 app.command("status")(status.status)
 app.command("update")(update.update)
