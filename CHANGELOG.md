@@ -1,6 +1,22 @@
 # CHANGELOG
 
 
+## v0.2.0 (2026-09-28)
+
+### ✨ Features
+
+- **store**: Hybrid SQLite search with metadata filtering
+  ([#2](https://github.com/after2400/pyqmd/pull/2),
+  [`93a6e4a`](https://github.com/after2400/pyqmd/commit/93a6e4a91c3cbf0995c90ea61df9069f65e22688))
+
+- FTS5 (BM25) full-text search and sqlite-vec vector search
+- Hybrid query: expansion, reciprocal rank fusion and LLM reranking
+- Front-matter metadata extraction with a recursive filter language
+  (and/or/not, comparisons, in/nin/all, exists)
+- AST-aware chunking for code files (Python, TypeScript, JavaScript,
+  Go, Rust) and folder context
+
+
 ## v0.1.0 (2026-09-28)
 
 ### ✨ Features
@@ -19,6 +35,11 @@
 Co-authored-by: Chuck Lunskis <17775963+after2400@users.noreply.github.com>
 
 Co-authored-by: Claude Haiku 4.5 <noreply@anthropic.com>
+
+### 🏗 Chores
+
+- **release**: V0.1.0 [skip ci]
+  ([`f5d57e6`](https://github.com/after2400/pyqmd/commit/f5d57e6a6055730590f9357a31e167bcbd50ce3f))
 
 
 ## v0.0.1 (2026-09-28)
