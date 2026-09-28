@@ -1,6 +1,17 @@
 # CHANGELOG
 
 
+## v0.6.0 (2026-09-28)
+
+### ✨ Features
+
+- **skills**: Bundled agent skills and skill commands
+  ([#6](https://github.com/after2400/pyqmd/pull/6),
+  [`1937466`](https://github.com/after2400/pyqmd/commit/193746693a377414e26e9138ebca6527bfacbdcd))
+
+pyqmd, pyqmd-librarian, pyqmd-researcher and pyqmd-bench skills, with `pyqmd skill list|show|install` and `pyqmd skills list|get|path`.
+
+
 ## v0.5.0 (2026-09-28)
 
 ### ✨ Features
@@ -10,6 +21,11 @@
   [`8c5a227`](https://github.com/after2400/pyqmd/commit/8c5a22719b42e55e48ee5e2a6030a9090513522b))
 
 `pyqmd bench <fixture.json>` scores bm25, vector, hybrid and full (reranked) retrieval with Recall@k, MRR and nDCG@k; --samples N reports the spread across expansion seeds.
+
+### 🏗 Chores
+
+- **release**: V0.5.0 [skip ci]
+  ([`35e3180`](https://github.com/after2400/pyqmd/commit/35e31809d1c1b69e8f98133814fda2f299590ff4))
 
 
 ## v0.4.0 (2026-09-28)
