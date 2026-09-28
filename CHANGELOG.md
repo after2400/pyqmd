@@ -1,6 +1,17 @@
 # CHANGELOG
 
 
+## v0.6.3 (2026-09-28)
+
+### 📖 Documentation
+
+- The README, agent guide and command parity status
+  ([#10](https://github.com/after2400/pyqmd/pull/10),
+  [`ceb075b`](https://github.com/after2400/pyqmd/commit/ceb075bc0fade9e3b5b39365b7f428b1d7496fb0))
+
+Install from a release tag, beta feedback note, the CLAUDE.md/AGENTS.md agent guide and COMMAND_STATUS.md (command-by-command parity with Node qmd).
+
+
 ## v0.6.2 (2026-09-28)
 
 ### 📖 Documentation
@@ -9,6 +20,11 @@
   [`15c8344`](https://github.com/after2400/pyqmd/commit/15c8344ef1c6355f7fa1af067b72ab606e05c909))
 
 The design history behind each subsystem, including spike results and rejected alternatives. Superseded designs are kept, marked with their successor.
+
+### 🏗 Chores
+
+- **release**: V0.6.2 [skip ci]
+  ([`a461b58`](https://github.com/after2400/pyqmd/commit/a461b5819f65432685bb904bec8a8f6253a317b4))
 
 
 ## v0.6.1 (2026-09-28)
