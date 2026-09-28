@@ -1,0 +1,25 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "QMD Index Status:\n  Total documents: 5183\n  Needs embedding: 0\n  Vector index: yes\n  Collections: 1\n    - scifact: <qmd-repo>/python/data/scifact/corpus (5183 docs)"
+    }
+  ],
+  "structuredContent": {
+    "totalDocuments": 5183,
+    "needsEmbedding": 0,
+    "hasVectorIndex": true,
+    "pendingMetadata": 0,
+    "collections": [
+      {
+        "name": "scifact",
+        "path": "<qmd-repo>/python/data/scifact/corpus",
+        "pattern": "**/*.md",
+        "documents": 5183,
+        "lastUpdated": "2026-09-10T22:56:39.000Z"
+      }
+    ]
+  },
+  "isError": false,
+  "resultType": "complete"
+}

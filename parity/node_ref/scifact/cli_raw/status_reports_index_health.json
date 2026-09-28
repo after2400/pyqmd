@@ -1,0 +1,6 @@
+{
+  "args": ["status"],
+  "stdout": "QMD Status\n\nIndex: <qmd-repo>/python/parity/node_ref/scifact/_structural_capture/index.sqlite\nSize:  48.9 MB\n\nDocuments\n  Total:    5183 files indexed\n  Vectors:  5352 embedded\n  Updated:  2d ago\n\nAST Chunking\n  Status:   active\n  Languages: typescript, tsx, javascript, python, go, rust\n\nCollections\n  scifact (qmd://scifact/)\n    Pattern:  **/*.md\n    Files:    5183 (updated 2d ago)\n\nExamples\n  # List files in a collection\n  qmd ls scifact\n  # Get a document\n  qmd get qmd://scifact/path/to/file.md\n  # Search within a collection\n  qmd search \"query\" -c scifact\n\nModels\n  Embedding:   https://huggingface.co/ggml-org/embeddinggemma-300M-GGUF\n  Reranking:   https://huggingface.co/ggml-org/Qwen3-Reranker-0.6B-Q8_0-GGUF\n  Generation:  https://huggingface.co/tobil/qmd-query-expansion-1.7B-gguf\n\nTips\n  Add context to collections for better search results: scifact\n    qmd context add qmd://<name>/ \"What this collection contains\"\n    qmd context add qmd://<name>/meeting-notes \"Weekly team meeting notes\"\n",
+  "stderr": "",
+  "exit_code": 0
+}

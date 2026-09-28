@@ -1,0 +1,6 @@
+{
+  "args": ["search", "zzqqxx_no_such_term_zzqqxx", "--format", "json"],
+  "stdout": "[]\n",
+  "stderr": "",
+  "exit_code": 0
+}

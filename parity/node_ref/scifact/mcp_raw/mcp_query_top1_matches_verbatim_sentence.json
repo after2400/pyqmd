@@ -1,0 +1,104 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "Found 10 results for \"As the nervous system develops, there is an inherent variability in the connections formed between differentiating neurons.\":\n\n#975c9b 100% scifact/10009203.md - Structural Homeostasis: Compensatory Adjustments of Dendritic Arbor Geometry in Response to Variations of Synaptic Input\n#f8596c 62% scifact/10605189.md - Cerebral cortex assembly: generating and reprogramming projection neuron diversity\n#5f918a 59% scifact/26993601.md - Molecular layers underlying cytoskeletal remodelling during cortical development\n#88e6cd 33% scifact/35008773.md - Neural induction and early patterning in vertebrates.\n#c7b340 32% scifact/28436879.md - Neuromodulation of neurons and synapses.\n#e7110b 28% scifact/27569370.md - Emerging mechanisms in morphogen-mediated axon guidance.\n#f309e0 28% scifact/6079486.md - Direct neuronal reprogramming: learning from and for development.\n#b4c460 21% scifact/4418269.md - Specificity of sensory\u2013motor connections encoded by Sema3e\u2013Plxnd1 recognition\n#80a82a 20% scifact/13072113.md - Neurite sprouting and synapse deterioration in the aging Caenorhabditis elegans nervous system.\n#bf2726 19% scifact/17631671.md - Cadherins in brain morphogenesis and wiring."
+    }
+  ],
+  "structuredContent": {
+    "results": [
+      {
+        "docid": "#975c9b",
+        "file": "scifact/10009203.md",
+        "title": "Structural Homeostasis: Compensatory Adjustments of Dendritic Arbor Geometry in Response to Variations of Synaptic Input",
+        "score": 1,
+        "context": null,
+        "line": 3,
+        "snippet": "3: @@ -2,3 @@ (1 before, 0 after)\n4: \n5: As the nervous system develops, there is an inherent variability in the connections formed between differentiating neurons. Despite this variability, neural circuits form that are functional and remarkably robust. One way in which neurons deal with variability in their inputs is through compensa..."
+      },
+      {
+        "docid": "#f8596c",
+        "file": "scifact/10605189.md",
+        "title": "Cerebral cortex assembly: generating and reprogramming projection neuron diversity",
+        "score": 0.62,
+        "context": null,
+        "line": 3,
+        "snippet": "3: @@ -2,3 @@ (1 before, 0 after)\n4: \n5: The mammalian cerebral cortex is responsible for the highest levels of associative, cognitive and motor functions. In the central nervous system (CNS) the cortex stands as a prime example of extreme neuronal diversity, broadly classified into excitatory projection neurons (PNs) and inhibitory in..."
+      },
+      {
+        "docid": "#5f918a",
+        "file": "scifact/26993601.md",
+        "title": "Molecular layers underlying cytoskeletal remodelling during cortical development",
+        "score": 0.59,
+        "context": null,
+        "line": 3,
+        "snippet": "3: @@ -2,3 @@ (1 before, 0 after)\n4: \n5: During neural development, the cytoskeleton of newborn neurons undergoes extensive and dynamic remodelling to facilitate the sequential steps of neurogenesis, cell migration and terminal differentiation. It is clear from studying the mechanisms that precipitate these functions that different con..."
+      },
+      {
+        "docid": "#88e6cd",
+        "file": "scifact/35008773.md",
+        "title": "Neural induction and early patterning in vertebrates.",
+        "score": 0.33,
+        "context": null,
+        "line": 3,
+        "snippet": "3: @@ -2,3 @@ (1 before, 0 after)\n4: \n5: In vertebrates, the development of the nervous system is triggered by signals from a powerful 'organizing' region of the early embryo during gastrulation. This phenomenon--neural induction--was originally discovered and given conceptual definition by experimental embryologists working with amphi..."
+      },
+      {
+        "docid": "#c7b340",
+        "file": "scifact/28436879.md",
+        "title": "Neuromodulation of neurons and synapses.",
+        "score": 0.32,
+        "context": null,
+        "line": 3,
+        "snippet": "3: @@ -2,3 @@ (1 before, 0 after)\n4: \n5: Neuromodulation underlies the flexibility of neural circuit operation and behavior. Individual neuromodulators can have divergent actions in a neuron by targeting multiple physiological mechanisms. Conversely, multiple neuromodulators may have convergent actions through overlapping targets. The ..."
+      },
+      {
+        "docid": "#e7110b",
+        "file": "scifact/27569370.md",
+        "title": "Emerging mechanisms in morphogen-mediated axon guidance.",
+        "score": 0.28,
+        "context": null,
+        "line": 3,
+        "snippet": "3: @@ -2,3 @@ (1 before, 0 after)\n4: \n5: Early in animal development, gradients of secreted morphogenic molecules, such as Sonic hedgehog (Shh), Wnt and TGFbeta/Bmp family members, regulate cell proliferation and determine the fate and phenotype of the target cells by activating well-characterized signalling pathways, which ultimately ..."
+      },
+      {
+        "docid": "#f309e0",
+        "file": "scifact/6079486.md",
+        "title": "Direct neuronal reprogramming: learning from and for development.",
+        "score": 0.28,
+        "context": null,
+        "line": 3,
+        "snippet": "3: @@ -2,3 @@ (1 before, 0 after)\n4: \n5: The key signalling pathways and transcriptional programmes that instruct neuronal diversity during development have largely been identified. In this Review, we discuss how this knowledge has been used to successfully reprogramme various cell types into an amazing array of distinct types of funct..."
+      },
+      {
+        "docid": "#b4c460",
+        "file": "scifact/4418269.md",
+        "title": "Specificity of sensory\u2013motor connections encoded by Sema3e\u2013Plxnd1 recognition",
+        "score": 0.21,
+        "context": null,
+        "line": 3,
+        "snippet": "3: @@ -2,3 @@ (1 before, 0 after)\n4: \n5: Spinal reflexes are mediated by synaptic connections between sensory afferents and motor neurons. The organization of these circuits shows several levels of specificity. Only certain classes of proprioceptive sensory neurons make direct, monosynaptic connections with motor neurons. Those that do..."
+      },
+      {
+        "docid": "#80a82a",
+        "file": "scifact/13072113.md",
+        "title": "Neurite sprouting and synapse deterioration in the aging Caenorhabditis elegans nervous system.",
+        "score": 0.2,
+        "context": null,
+        "line": 3,
+        "snippet": "3: @@ -2,3 @@ (1 before, 0 after)\n4: \n5: Caenorhabditis elegans is a powerful model for analysis of the conserved mechanisms that modulate healthy aging. In the aging nematode nervous system, neuronal death and/or detectable loss of processes are not readily apparent, but because dendrite restructuring and loss of synaptic integrity ar..."
+      },
+      {
+        "docid": "#bf2726",
+        "file": "scifact/17631671.md",
+        "title": "Cadherins in brain morphogenesis and wiring.",
+        "score": 0.19,
+        "context": null,
+        "line": 3,
+        "snippet": "3: @@ -2,3 @@ (1 before, 0 after)\n4: \n5: Cadherins are Ca(2+)-dependent cell-cell adhesion molecules that play critical roles in animal morphogenesis. Various cadherin-related molecules have also been identified, which show diverse functions, not only for the regulation of cell adhesion but also for that of cell proliferation and plana..."
+      }
+    ]
+  },
+  "isError": false,
+  "resultType": "complete"
+}

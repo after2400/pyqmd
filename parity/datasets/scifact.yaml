@@ -1,0 +1,4 @@
+name: scifact
+corpus_dir: ../../data/scifact/corpus
+queries_file: ../../data/scifact/rerank-fixture.json
+qrels_file: ../../data/scifact/qrels-test.tsv
