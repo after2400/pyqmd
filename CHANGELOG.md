@@ -1,6 +1,17 @@
 # CHANGELOG
 
 
+## v0.6.5 (2026-09-28)
+
+### 📖 Documentation
+
+- **specs**: Publish the multi-agent skills design
+  ([#12](https://github.com/after2400/pyqmd/pull/12),
+  [`b754705`](https://github.com/after2400/pyqmd/commit/b754705ccd44946746c3b34282497be576ac2b16))
+
+The design behind the pyqmd-librarian, pyqmd-researcher and pyqmd-bench skills and the bundled pyqmd skill fix, plus the shared HTTP server pattern its mcp-setup reference documents.
+
+
 ## v0.6.4 (2026-09-28)
 
 ### 🐞 Bug Fixes
