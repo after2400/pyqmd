@@ -1,0 +1,11 @@
+{
+  "args": [
+    "search",
+    "0-dimensional biomaterials show inductive properties.",
+    "--format",
+    "json"
+  ],
+  "stdout": "[]\n",
+  "stderr": "",
+  "exit_code": 0
+}

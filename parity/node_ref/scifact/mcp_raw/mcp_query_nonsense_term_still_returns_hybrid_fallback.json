@@ -1,0 +1,104 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "Found 10 results for \"zzqqxx_no_such_term_zzqqxx\":\n\n#f37021 75% scifact/4455466.md - ZMYND11 links histone H3.3K36me3 to transcription elongation and tumour suppression\n#a63f4a 38% scifact/40971746.md - A bird's-eye view of sex chromosome dosage compensation.\n#6d4185 25% scifact/26058927.md - Thiazolidinediones improve beta-cell function in type 2 diabetic patients.\n#65d9db 15% scifact/70516463.md - To err is human. Building a safer health system\n#b37eb6 12% scifact/4423327.md - Nanog safeguards pluripotency and mediates germline development\n#2ae0e3 10% scifact/22178316.md - Disrupted-in-schizophrenia 1 and neuregulin 1 are required for the specification of oligodendrocytes and neurones in the zebrafish brain.\n#9dc161 9% scifact/4085204.md - Transcripts of the MHM region on the chicken Z chromosome accumulate as non-coding RNA in the nucleus of female cells adjacent to the DMRT1 locus\n#a09c40 8% scifact/20321154.md - A population-based cohort study to elucidate temporal relationship between schizophrenia and metabolic syndrome (KCIS no. PSY3).\n#a69408 7% scifact/15795880.md - Overview of the CCP4 suite and current developments\n#b4c1b3 6% scifact/42520882.md - Slipped (CTG)\u2022(CAG) repeats can be correctly repaired, escape repair or undergo error-prone repair"
+    }
+  ],
+  "structuredContent": {
+    "results": [
+      {
+        "docid": "#f37021",
+        "file": "scifact/4455466.md",
+        "title": "ZMYND11 links histone H3.3K36me3 to transcription elongation and tumour suppression",
+        "score": 0.75,
+        "context": null,
+        "line": 1,
+        "snippet": "1: @@ -1,3 @@ (0 before, 1 after)\n2: # ZMYND11 links histone H3.3K36me3 to transcription elongation and tumour suppression\n3: \n4: Recognition of modified histones by \u2018reader\u2019 proteins plays a critical role in the regulation of chromatin. H3K36 trimethylation (H3K36me3) is deposited onto the nucleosomes in the transcribed regions after RNA..."
+      },
+      {
+        "docid": "#a63f4a",
+        "file": "scifact/40971746.md",
+        "title": "A bird's-eye view of sex chromosome dosage compensation.",
+        "score": 0.38,
+        "context": null,
+        "line": 1,
+        "snippet": "1: @@ -1,3 @@ (0 before, 1 after)\n2: # A bird's-eye view of sex chromosome dosage compensation.\n3: \n4: Intensive study of a few genetically tractable species with XX/XY sex chromosomes has produced generalizations about the process of sex chromosome dosage compensation that do not fare well when applied to ZZ/ZW sex chromosome systems, su..."
+      },
+      {
+        "docid": "#6d4185",
+        "file": "scifact/26058927.md",
+        "title": "Thiazolidinediones improve beta-cell function in type 2 diabetic patients.",
+        "score": 0.25,
+        "context": null,
+        "line": 1,
+        "snippet": "1: @@ -1,3 @@ (0 before, 1 after)\n2: # Thiazolidinediones improve beta-cell function in type 2 diabetic patients.\n3: \n4: Thiazolidinediones (TZDs) improve glycemic control and insulin sensitivity in patients with type 2 diabetes mellitus (T2DM). There is growing evidence from in vivo and in vitro studies that TZDs improve pancreatic beta-..."
+      },
+      {
+        "docid": "#65d9db",
+        "file": "scifact/70516463.md",
+        "title": "To err is human. Building a safer health system",
+        "score": 0.15,
+        "context": null,
+        "line": 1,
+        "snippet": "1: @@ -1,3 @@ (0 before, 1 after)\n2: # To err is human. Building a safer health system\n3: \n4: Human beings, make errors Healthcare Services is a complex industry prone to accidents. The IOM Report [1] points out that some systems are more prone to accidents than others. When a system fails there are often multiple faults. In healthcare,hu..."
+      },
+      {
+        "docid": "#b37eb6",
+        "file": "scifact/4423327.md",
+        "title": "Nanog safeguards pluripotency and mediates germline development",
+        "score": 0.12,
+        "context": null,
+        "line": 1,
+        "snippet": "1: @@ -1,3 @@ (0 before, 1 after)\n2: # Nanog safeguards pluripotency and mediates germline development\n3: \n4: Nanog is a divergent homeodomain protein found in mammalian pluripotent cells and developing germ cells. Deletion of Nanog causes early embryonic lethality, whereas constitutive expression enables autonomous self-renewal of embryo..."
+      },
+      {
+        "docid": "#2ae0e3",
+        "file": "scifact/22178316.md",
+        "title": "Disrupted-in-schizophrenia 1 and neuregulin 1 are required for the specification of oligodendrocytes and neurones in the zebrafish brain.",
+        "score": 0.1,
+        "context": null,
+        "line": 1,
+        "snippet": "1: @@ -1,3 @@ (0 before, 1 after)\n2: # Disrupted-in-schizophrenia 1 and neuregulin 1 are required for the specification of oligodendrocytes and neurones in the zebrafish brain.\n3: \n4: Schizophrenia may arise from subtle abnormalities in brain development due to alterations in the functions of candidate susceptibility genes such as Disrupt..."
+      },
+      {
+        "docid": "#9dc161",
+        "file": "scifact/4085204.md",
+        "title": "Transcripts of the MHM region on the chicken Z chromosome accumulate as non-coding RNA in the nucleus of female cells adjacent to the DMRT1 locus",
+        "score": 0.09,
+        "context": null,
+        "line": 1,
+        "snippet": "1: @@ -1,3 @@ (0 before, 1 after)\n2: # Transcripts of the MHM region on the chicken Z chromosome accumulate as non-coding RNA in the nucleus of female cells adjacent to the DMRT1 locus\n3: \n4: The male hypermethylated (MHM) region, located near the middle of the short arm of the Z chromosome of chickens, consists of approximately 210 tande..."
+      },
+      {
+        "docid": "#a09c40",
+        "file": "scifact/20321154.md",
+        "title": "A population-based cohort study to elucidate temporal relationship between schizophrenia and metabolic syndrome (KCIS no. PSY3).",
+        "score": 0.08,
+        "context": null,
+        "line": 1,
+        "snippet": "1: @@ -1,3 @@ (0 before, 1 after)\n2: # A population-based cohort study to elucidate temporal relationship between schizophrenia and metabolic syndrome (KCIS no. PSY3).\n3: \n4: BACKGROUND The bidirectional relationships between metabolic syndrome (MetS) and schizophrenia (SCZ) play a crucial role in clinical treatment of both diseases but s..."
+      },
+      {
+        "docid": "#a69408",
+        "file": "scifact/15795880.md",
+        "title": "Overview of the CCP4 suite and current developments",
+        "score": 0.07,
+        "context": null,
+        "line": 1,
+        "snippet": "1: @@ -1,3 @@ (0 before, 1 after)\n2: # Overview of the CCP4 suite and current developments\n3: \n4: The CCP4 (Collaborative Computational Project, Number 4) software suite is a collection of programs and associated data and software libraries which can be used for macromolecular structure determination by X-ray crystallography. The suite is..."
+      },
+      {
+        "docid": "#b4c1b3",
+        "file": "scifact/42520882.md",
+        "title": "Slipped (CTG)\u2022(CAG) repeats can be correctly repaired, escape repair or undergo error-prone repair",
+        "score": 0.06,
+        "context": null,
+        "line": 1,
+        "snippet": "1: @@ -1,3 @@ (0 before, 1 after)\n2: # Slipped (CTG)\u2022(CAG) repeats can be correctly repaired, escape repair or undergo error-prone repair\n3: \n4: Expansion of (CTG)\u2022(CAG) repeats, the cause of 14 or more diseases, is presumed to arise through escaped repair of slipped DNAs. We report the fidelity of slipped-DNA repair using human cell extr..."
+      }
+    ]
+  },
+  "isError": false,
+  "resultType": "complete"
+}

@@ -1,0 +1,104 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "Found 10 results for \"0-dimensional biomaterials show inductive properties.\":\n\n#c31e05 75% scifact/17388232.md - Mechanical regulation of cell function with geometrically modulated elastomeric substrates\n#a1e332 38% scifact/31715818.md - New opportunities: the use of nanotechnologies to manipulate and track stem cells.\n#c707a5 25% scifact/7583104.md - IDEAL in meshes for prolapse, urinary incontinence, and hernia repair.\n#e20ead 18% scifact/4346436.md - Nonlinear Elasticity in Biological Gels\n#f4b53c 12% scifact/25435456.md - Microenvironmental regulation of biomacromolecular therapies\n#e61f6d 11% scifact/16532419.md - Induction of stem-like cells with malignant properties by chronic exposure of human lung epithelial cells to single-walled carbon nanotubes\n#82f135 10% scifact/21456232.md - A graphene-based platform for induced pluripotent stem cells culture and differentiation.\n#e8b64d 9% scifact/43990286.md - Cell and biomolecule delivery for tissue repair and regeneration in the central nervous system.\n#dde31d 8% scifact/14082855.md - Inflammatory Reaction as Determinant of Foreign Body Reaction Is an Early and Susceptible Event after Mesh Implantation\n#ccba98 6% scifact/8290953.md - Scaffold-based three-dimensional human fibroblast culture provides a structural matrix that supports angiogenesis in infarcted heart tissue."
+    }
+  ],
+  "structuredContent": {
+    "results": [
+      {
+        "docid": "#c31e05",
+        "file": "scifact/17388232.md",
+        "title": "Mechanical regulation of cell function with geometrically modulated elastomeric substrates",
+        "score": 0.75,
+        "context": null,
+        "line": 3,
+        "snippet": "3: @@ -2,3 @@ (1 before, 0 after)\n4: \n5: We report the establishment of a library of micromolded elastomeric micropost arrays to modulate substrate rigidity independently of effects on adhesive and other material surface properties. We demonstrated that micropost rigidity impacts cell morphology, focal adhesions, cytoskeletal contracti..."
+      },
+      {
+        "docid": "#a1e332",
+        "file": "scifact/31715818.md",
+        "title": "New opportunities: the use of nanotechnologies to manipulate and track stem cells.",
+        "score": 0.38,
+        "context": null,
+        "line": 1,
+        "snippet": "1: @@ -1,3 @@ (0 before, 1 after)\n2: # New opportunities: the use of nanotechnologies to manipulate and track stem cells.\n3: \n4: Nanotechnologies are emerging platforms that could be useful in measuring, understanding, and manipulating stem cells. Examples include magnetic nanoparticles and quantum dots for stem cell labeling and in vivo ..."
+      },
+      {
+        "docid": "#c707a5",
+        "file": "scifact/7583104.md",
+        "title": "IDEAL in meshes for prolapse, urinary incontinence, and hernia repair.",
+        "score": 0.25,
+        "context": null,
+        "line": 1,
+        "snippet": "1: @@ -1,3 @@ (0 before, 1 after)\n2: # IDEAL in meshes for prolapse, urinary incontinence, and hernia repair.\n3: \n4: PURPOSE Mesh surgeries are counted among the most frequently applied surgical procedures. Despite global spread of mesh applying surgeries, there is no current systematic analysis of incidence and possible prevention of adv..."
+      },
+      {
+        "docid": "#e20ead",
+        "file": "scifact/4346436.md",
+        "title": "Nonlinear Elasticity in Biological Gels",
+        "score": 0.18,
+        "context": null,
+        "line": 3,
+        "snippet": "3: @@ -2,3 @@ (1 before, 0 after)\n4: \n5: Unlike most synthetic materials, biological materials often stiffen as they are deformed. This nonlinear elastic response, critical for the physiological function of some tissues, has been documented since at least the 19th century, but the molecular structure and the design principles responsib..."
+      },
+      {
+        "docid": "#f4b53c",
+        "file": "scifact/25435456.md",
+        "title": "Microenvironmental regulation of biomacromolecular therapies",
+        "score": 0.12,
+        "context": null,
+        "line": 1,
+        "snippet": "1: @@ -1,3 @@ (0 before, 1 after)\n2: # Microenvironmental regulation of biomacromolecular therapies\n3: \n4: There is currently great interest in molecular therapies to treat various diseases, and this has prompted extensive efforts to achieve target-specific and controlled delivery of bioactive macromolecules (for example, proteins, antibo..."
+      },
+      {
+        "docid": "#e61f6d",
+        "file": "scifact/16532419.md",
+        "title": "Induction of stem-like cells with malignant properties by chronic exposure of human lung epithelial cells to single-walled carbon nanotubes",
+        "score": 0.11,
+        "context": null,
+        "line": 1,
+        "snippet": "1: @@ -1,3 @@ (0 before, 1 after)\n2: # Induction of stem-like cells with malignant properties by chronic exposure of human lung epithelial cells to single-walled carbon nanotubes\n3: \n4: BACKGROUND Carbon nanotubes (CNT) hold great promise to create new and better products for commercial and biomedical applications, but their long-term adv..."
+      },
+      {
+        "docid": "#82f135",
+        "file": "scifact/21456232.md",
+        "title": "A graphene-based platform for induced pluripotent stem cells culture and differentiation.",
+        "score": 0.1,
+        "context": null,
+        "line": 1,
+        "snippet": "1: @@ -1,3 @@ (0 before, 1 after)\n2: # A graphene-based platform for induced pluripotent stem cells culture and differentiation.\n3: \n4: Induced pluripotent stem cells (iPSCs) hold great promise as a cell source for regenerative medicine yet its culture, maintenance of pluripotency and induction of differentiation remain challenging. Conve..."
+      },
+      {
+        "docid": "#e8b64d",
+        "file": "scifact/43990286.md",
+        "title": "Cell and biomolecule delivery for tissue repair and regeneration in the central nervous system.",
+        "score": 0.09,
+        "context": null,
+        "line": 1,
+        "snippet": "1: @@ -1,3 @@ (0 before, 1 after)\n2: # Cell and biomolecule delivery for tissue repair and regeneration in the central nervous system.\n3: \n4: Tissue engineering frequently involves cells and scaffolds to replace damaged or diseased tissue. It originated, in part, as a means of effecting the delivery of biomolecules such as insulin or neur..."
+      },
+      {
+        "docid": "#dde31d",
+        "file": "scifact/14082855.md",
+        "title": "Inflammatory Reaction as Determinant of Foreign Body Reaction Is an Early and Susceptible Event after Mesh Implantation",
+        "score": 0.08,
+        "context": null,
+        "line": 1,
+        "snippet": "1: @@ -1,3 @@ (0 before, 1 after)\n2: # Inflammatory Reaction as Determinant of Foreign Body Reaction Is an Early and Susceptible Event after Mesh Implantation\n3: \n4: PURPOSE To investigate and relate the ultrashort-term and long-term courses of determinants for foreign body reaction as biocompatibility predictors for meshes in an animal m..."
+      },
+      {
+        "docid": "#ccba98",
+        "file": "scifact/8290953.md",
+        "title": "Scaffold-based three-dimensional human fibroblast culture provides a structural matrix that supports angiogenesis in infarcted heart tissue.",
+        "score": 0.06,
+        "context": null,
+        "line": 3,
+        "snippet": "3: @@ -2,3 @@ (1 before, 0 after)\n4: \n5: BACKGROUND We have developed techniques to implant angiogenic patches onto the epicardium over regions of infarcted cardiac tissue to stimulate revascularization of the damaged tissue. These experiments used a scaffold-based 3D human dermal fibroblast culture (3DFC) as an epicardial patch. The 3..."
+      }
+    ]
+  },
+  "isError": false,
+  "resultType": "complete"
+}

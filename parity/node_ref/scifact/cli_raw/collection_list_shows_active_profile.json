@@ -1,0 +1,6 @@
+{
+  "args": ["collection", "list"],
+  "stdout": "Collections (1):\n\nscifact (qmd://scifact/)\n  Pattern:  **/*.md\n  Files:    5183\n  Updated:  2d ago\n\n",
+  "stderr": "",
+  "exit_code": 0
+}

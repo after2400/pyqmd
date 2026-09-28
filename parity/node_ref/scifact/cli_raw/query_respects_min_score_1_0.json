@@ -1,0 +1,13 @@
+{
+  "args": [
+    "query",
+    "0-dimensional biomaterials show inductive properties.",
+    "--min-score",
+    "1.0",
+    "--format",
+    "json"
+  ],
+  "stdout": "[]\n",
+  "stderr": "Expanding query... (0ms)\n\u251c\u2500 0-dimensional biomaterials show inductive properties.\n\u251c\u2500 lex: 0-dimensionality of biomaterials\n\u251c\u2500 lex: inductive characteristics in biodegradable\n\u251c\u2500 vec: 0-dimensional biomaterials and their applications\n\u251c\u2500 vec: inductive characteristics in biodegradable biomaterials\n\u2514\u2500 hyde: The topic of 0-dimensional biomaterials show inductive properties. co...\nSearching 6 queries...\nEmbedding 4 queries... (819ms)\nReranking 31 chunks... (0ms)\n",
+  "exit_code": 0
+}

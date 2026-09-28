@@ -1,0 +1,6 @@
+{
+  "args": ["ls"],
+  "stdout": "Collections:\n\n  qmd://scifact/  (5183 files)\n",
+  "stderr": "",
+  "exit_code": 0
+}

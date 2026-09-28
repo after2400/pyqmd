@@ -1,0 +1,6 @@
+{
+  "args": ["collection", "show", "scifact"],
+  "stdout": "Collection: scifact\n  Path:     <qmd-repo>/python/data/scifact/corpus\n  Pattern:  **/*.md\n  Include:  yes (default)\n",
+  "stderr": "",
+  "exit_code": 0
+}
