@@ -1,0 +1,60 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# uv / venv
+.venv/
+
+# tooling caches
+.pytest_cache/
+.ruff_cache/
+
+# env / secrets
+.env
+
+# editor / OS
+.DS_Store
+.idea/
+.vscode/
+
+# generated data and models (large, re-fetchable)
+data/
+models/
+
+# A user's own dataset profile + private data for the parity suite --
+# never committed. .gitkeep above keeps the directory itself tracked.
+parity/datasets/local/*
+!parity/datasets/local/.gitkeep
+
+# A user's own captured Node baseline lands in parity/node_ref/<profile>/
+# regardless of where their profile YAML lives -- ignore every profile's
+# captured data there except the built-in scifact one (the project's own
+# tracked golden-reference data). Without this, README's "your data and
+# captured baseline never get committed" claim was false for anything
+# outside parity/datasets/local/ itself.
+parity/node_ref/*
+!parity/node_ref/scifact/
+
+# Scratch Node collection-registry/index-DB state the capture script
+# creates as isolation artifacts, not intended captured output --
+# baked-in absolute paths make these non-portable across machines.
+parity/node_ref/*/config/
+parity/node_ref/*/_capture*.sqlite*
+parity/node_ref/*/_structural_capture/
+parity/node_ref/*/_quality_capture/
+parity/node_ref/*/_mcp_capture/
+parity/node_ref/*/_flow_*_capture/
+
+# benchmark.py's generated report -- machine- and moment-dependent timing
+# numbers, not something to track in git.
+parity/BENCHMARK_RESULTS.md
+
+# isolated git worktrees (per using-git-worktrees skill)
+.worktrees/
+
+# Private specs, plans, notes, leak-check tooling and history archive --
+# see CLAUDE.md "Workflow". Public specs live in docs/specs/.
+docs/superpowers/

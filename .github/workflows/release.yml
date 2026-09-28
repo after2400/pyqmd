@@ -1,0 +1,35 @@
+name: Release
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    concurrency: release
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          token: ${{ secrets.RELEASE_PAT }}
+      - uses: astral-sh/setup-uv@v8.2.0
+        with:
+          python-version: "3.12"
+      - run: uv tool install python-semantic-release==10.6.1
+      - run: semantic-release version --skip-build --no-commit --no-tag --no-changelog
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PAT }}
+      - run: |
+          uv lock --upgrade-package pyqmd-mlx
+          git add uv.lock
+      - run: semantic-release version
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PAT }}
