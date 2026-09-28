@@ -1,0 +1,24 @@
+name: PR title
+
+# A squash merge of a multi-commit PR takes the PR title as its commit
+# subject, and semantic-release reads that subject to decide the release.
+# The commit-msg hook never sees it, so lint it here.
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  pr-title:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+      - run: npm install --no-save --no-package-lock @commitlint/cli@21.2.3 @commitlint/config-conventional@21.2.3
+      - run: printf '%s\n' "$PR_TITLE" | npx --no-install commitlint --config .commitlintrc.mjs
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
