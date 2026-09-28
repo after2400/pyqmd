@@ -1,6 +1,16 @@
 # CHANGELOG
 
 
+## v0.6.2 (2026-09-28)
+
+### 📖 Documentation
+
+- **specs**: Publish the design specs ([#9](https://github.com/after2400/pyqmd/pull/9),
+  [`15c8344`](https://github.com/after2400/pyqmd/commit/15c8344ef1c6355f7fa1af067b72ab606e05c909))
+
+The design history behind each subsystem, including spike results and rejected alternatives. Superseded designs are kept, marked with their successor.
+
+
 ## v0.6.1 (2026-09-28)
 
 ### ✅ Testing
@@ -12,6 +22,9 @@
 Golden-snapshot comparisons of pyqmd's CLI and MCP output against a frozen Node qmd reference on the public SciFact dataset, plus a quality baseline and performance benchmark.
 
 ### 🏗 Chores
+
+- **release**: V0.6.1 [skip ci]
+  ([`e934639`](https://github.com/after2400/pyqmd/commit/e93463998511941c2a118b2ad2ba0b8f5be23197))
 
 - **scripts**: Development and model-maintenance scripts
   ([#8](https://github.com/after2400/pyqmd/pull/8),
