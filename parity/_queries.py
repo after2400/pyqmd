@@ -14,7 +14,8 @@ from parity.dataset_profile import DatasetProfile
 
 def load_queries(profile: DatasetProfile) -> list[dict]:
     """Normalize either accepted queries_file shape into a uniform
-    [{"query_id": str, "query": str}, ...] list. The shape (dict-list vs.
+    [{"query_id": str, "query": str}, ...] list (plus an "intent" key on
+    the dict-list entries that have one). The shape (dict-list vs.
     flat string list) is determined by inspecting the parsed content, not
     the file extension -- both JSON and YAML are legal for either shape per
     the design spec's "Dataset profiles" section, so extension alone cannot
@@ -28,5 +29,14 @@ def load_queries(profile: DatasetProfile) -> list[dict]:
         raw = yaml.safe_load(text)
 
     if raw and isinstance(raw[0], dict):
-        return [{"query_id": str(entry["query_id"]), "query": entry["query"]} for entry in raw]
+        # `intent` is optional (the ConditionalQA profile's scenarios); left
+        # out entirely when absent so intent-free profiles keep their shape.
+        return [
+            {
+                "query_id": str(entry["query_id"]),
+                "query": entry["query"],
+                **({"intent": entry["intent"]} if entry.get("intent") else {}),
+            }
+            for entry in raw
+        ]
     return [{"query_id": str(i), "query": q} for i, q in enumerate(raw)]

@@ -243,9 +243,10 @@ def _run_query_pass(
 ) -> dict[str, list[str]]:
     per_query_ranked: dict[str, list[str]] = {}
     for entry in queries:
-        result = run_node_cli(
-            qmd_repo_root, ["query", entry["query"], "--format", "json"], index_path
-        )
+        args = ["query", entry["query"], "--format", "json"]
+        if entry.get("intent"):
+            args += ["--intent", entry["intent"]]
+        result = run_node_cli(qmd_repo_root, args, index_path)
         rows = json.loads(result.stdout) if result.exit_code == 0 else []
         if has_qrels:
             per_query_ranked[entry["query_id"]] = [
@@ -298,6 +299,12 @@ def capture_quality_baseline(
                 raise RuntimeError(f"Node `cleanup` failed: {cleanup_result.stderr}")
         started = time.monotonic()
         per_query_ranked = _run_query_pass(qmd_repo_root, index_path, queries, has_qrels=True)
+        if i == 0:
+            # One pass's rankings, for comparing pyqmd's top 10 with Node's
+            # (test_quality prints the overlap; it doesn't assert on it).
+            (quality_dir / "node_query_ranked.json").write_text(
+                json.dumps(per_query_ranked, indent=2)
+            )
         metrics = compute_metrics([per_query_ranked[q["query_id"]] for q in queries], relevant_sets)
         per_run.append(metrics)
         summary = ", ".join(f"{name}={value:.4f}" for name, value in metrics.items())
