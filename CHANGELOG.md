@@ -1,6 +1,17 @@
 # CHANGELOG
 
 
+## v0.6.6 (2026-09-29)
+
+### ⚡️ Performance Improvements
+
+- **llm**: Score rerank candidates from the last position only
+  ([#13](https://github.com/after2400/pyqmd/pull/13),
+  [`8b53138`](https://github.com/after2400/pyqmd/commit/8b53138a1e9aadbf5e718ec6ee81ae2b751e68d0))
+
+The reranker called the full model, which applies the output layer (~152k vocab) to every prompt position, then read two logits at the last one. Run the transformer body and apply the output layer to the last hidden state only: identical scores, about half the rerank time.
+
+
 ## v0.6.5 (2026-09-28)
 
 ### 📖 Documentation
