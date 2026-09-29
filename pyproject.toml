@@ -21,7 +21,10 @@ classifiers = [
   "Topic :: Text Processing :: Indexing",
 ]
 dependencies = [
-  "mlx-embeddings>=0.1.0",
+  # Exact: pyqmd_mlx.llm.embed carries its own copy of this release's
+  # gemma3_text forward pass (to fix its padding mask), so a new release
+  # must be checked against it before the pin moves.
+  "mlx-embeddings==0.1.0",
   "mlx-lm>=0.31.3",
   "sqlite-vec>=0.1.9",
   "typer>=0.15",

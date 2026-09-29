@@ -1228,7 +1228,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "mcp", specifier = ">=2.0.0" },
-    { name = "mlx-embeddings", specifier = ">=0.1.0" },
+    { name = "mlx-embeddings", specifier = "==0.1.0" },
     { name = "mlx-lm", specifier = ">=0.31.3" },
     { name = "pyyaml", specifier = ">=6.0" },
     { name = "sqlite-vec", specifier = ">=0.1.9" },
