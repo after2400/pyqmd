@@ -890,6 +890,17 @@ class Store:
         )
         self.conn.commit()
 
+    def _representative_path(self, content_hash: str) -> str | None:
+        """MIN(path) over active documents with this content: the path
+        get_indexable_content pairs with each hash (Node's
+        getPendingEmbeddingDocs), used when index_content's caller passes
+        none. None when no active document has this content."""
+        row = self.conn.execute(
+            "SELECT MIN(path) AS path FROM documents WHERE hash = ? AND active = 1",
+            (content_hash,),
+        ).fetchone()
+        return row["path"]
+
     def index_content(
         self,
         content_hash: str,
@@ -900,9 +911,10 @@ class Store:
     ) -> int:
         """Chunk `content`, embed each chunk (unless already embedded with
         this model), and store the vectors. Returns the chunk count.
-        `filepath`/`chunk_strategy` are forwarded to chunk_document() for
-        AST-aware chunking -- see pyqmd_mlx.store._ast. filepath is typically
-        get_indexable_content()'s MIN(path) for this hash.
+        `filepath` is get_indexable_content()'s MIN(path) for this hash; when
+        None it is looked up the same way. It drives the title passed to the
+        embedder and chunk_strategy="auto"'s language detection (see
+        pyqmd_mlx.store._ast).
 
         The already-embedded check compares stored chunk *positions*
         against a fresh chunking pass, not just the chunk count: switching
@@ -917,9 +929,12 @@ class Store:
         import sqlite_vec
 
         from ._chunking import chunk_document, validate_chunk_strategy
+        from ._title import extract_title
 
         validate_chunk_strategy(chunk_strategy)
         model = model or self._embed_model
+        if filepath is None:
+            filepath = self._representative_path(content_hash)
         existing_positions = [
             row["pos"]
             for row in self.conn.execute(
@@ -935,7 +950,11 @@ class Store:
         self.conn.execute("DELETE FROM content_vectors WHERE hash = ?", (content_hash,))
 
         texts = [text for text, _pos in chunks]
-        embeddings = self._embed_fn(texts, model, kind="document")
+        # Node embeds every chunk as "title: <extractTitle(body, path)> |
+        # text: <chunk>" (store.ts:2125). Content with no document at all
+        # (bare unit tests) has no path, so no title: "title: none".
+        title = extract_title(content, filepath) if filepath is not None else None
+        embeddings = self._embed_fn(texts, model, kind="document", title=title)
         self.ensure_vec_table(len(embeddings[0]))
 
         # vectors_vec only exists once ensure_vec_table has run at least
@@ -1006,12 +1025,11 @@ class Store:
         scoped to one collection. `path` is MIN(d.path) across every
         document sharing that content hash -- an arbitrary but
         deterministic representative, matching Node's own
-        getPendingEmbeddingDocs (store.ts:1925). It's only ever used for
-        extension-based chunk_strategy="auto" language detection, never
-        stored, so which duplicate's path wins doesn't affect correctness.
-        Used by the CLI's `embed` command to find content to pass to
-        index_content() -- Store owns all SQL, the CLI never touches
-        `conn` directly."""
+        getPendingEmbeddingDocs (store.ts:1925). It picks the title every
+        chunk is embedded with and chunk_strategy="auto"'s language, so
+        MIN(path) must stay what Node uses. Used by the CLI's `embed`
+        command to find content to pass to index_content() -- Store owns
+        all SQL, the CLI never touches `conn` directly."""
         if collection:
             rows = self.conn.execute(
                 """

@@ -61,7 +61,7 @@ def test_sqlite_vec_extension_is_loaded():
 
 
 def test_store_injected_llm_functions_override_defaults():
-    def fake_embed(texts, model, kind="query"):
+    def fake_embed(texts, model, kind="query", title=None):
         return [[0.0] * 4 for _ in texts]
 
     store = Store(":memory:", embed_fn=fake_embed)

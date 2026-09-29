@@ -2,7 +2,7 @@ from pyqmd_mlx.store import Store
 from pyqmd_mlx.store._metadata_filter import parse_metadata_filter
 
 
-def _fake_embed(texts, model, kind="query"):
+def _fake_embed(texts, model, kind="query", title=None):
     return [[1.0, 0.0] if "auth" in t.lower() else [0.0, 1.0] for t in texts]
 
 

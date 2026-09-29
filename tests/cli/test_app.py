@@ -52,7 +52,7 @@ def test_short_h_is_an_alias_for_help(path):
 def test_end_to_end_add_embed_query_via_real_app(tmp_path, monkeypatch):
     (tmp_path / "auth.md").write_text("# Authentication\nHow to configure auth for your app.")
 
-    def _fake_embed(texts, model, kind="query"):
+    def _fake_embed(texts, model, kind="query", title=None):
         return [[1.0, 0.0] for _ in texts]
 
     def _fake_rerank(query, documents, model):
@@ -90,7 +90,7 @@ def test_embed_and_status_do_not_emit_callback_not_supported_warning(tmp_path, m
     underlying command functions directly via `app.command(...)`.
     """
 
-    def _fake_embed(texts, model, kind="query"):
+    def _fake_embed(texts, model, kind="query", title=None):
         return [[1.0, 0.0] for _ in texts]
 
     def _fake_rerank(query, documents, model):

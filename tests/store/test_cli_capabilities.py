@@ -10,7 +10,7 @@ def _seed_doc(store, collection, path, title, body):
     return content_hash
 
 
-def _fake_embed(texts, model, kind="query"):
+def _fake_embed(texts, model, kind="query", title=None):
     return [[1.0, 0.0] for _ in texts]
 
 
@@ -210,9 +210,9 @@ def test_find_documents_by_glob_returns_empty_list_when_nothing_matches():
 def test_clear_embeddings_makes_hash_eligible_for_reembedding():
     calls = []
 
-    def counting_embed(texts, model, kind="query"):
+    def counting_embed(texts, model, kind="query", title=None):
         calls.append(texts)
-        return _fake_embed(texts, model, kind)
+        return _fake_embed(texts, model, kind, title)
 
     store = Store(":memory:", embed_fn=counting_embed)
     store.add_collection("notes", "/notes")

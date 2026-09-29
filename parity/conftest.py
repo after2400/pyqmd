@@ -42,6 +42,6 @@ def indexed_pyqmd_store(active_profile, tmp_path_factory) -> Store:
     )
     content = store.get_indexable_content(active_profile.name)
     for row in content:
-        store.index_content(row["hash"], row["doc"])
+        store.index_content(row["hash"], row["doc"], filepath=row["path"])
     yield store
     store.close()

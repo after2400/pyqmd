@@ -23,7 +23,7 @@ def _init_git_repo(path, initial_content="# Doc\ninitial"):
     subprocess.run(["git", "commit", "-q", "-m", "initial"], cwd=path, check=True)
 
 
-def _fake_embed(texts, model, kind="query"):
+def _fake_embed(texts, model, kind="query", title=None):
     return [[1.0, 0.0] for _ in texts]
 
 

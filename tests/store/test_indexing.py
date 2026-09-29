@@ -1,7 +1,7 @@
 from pyqmd_mlx.store import Store
 
 
-def _fake_embed(texts, model, kind="query"):
+def _fake_embed(texts, model, kind="query", title=None):
     # deterministic, distinguishable fake vectors: encode text length so
     # tests can assert on which vectors got inserted.
     return [[float(len(t)), 0.0, 0.0, 0.0] for t in texts]
@@ -54,9 +54,9 @@ def test_index_content_inserts_into_vectors_vec():
 def test_index_content_is_a_noop_when_already_embedded_with_same_model():
     calls = []
 
-    def counting_embed(texts, model, kind="query"):
+    def counting_embed(texts, model, kind="query", title=None):
         calls.append(texts)
-        return _fake_embed(texts, model, kind)
+        return _fake_embed(texts, model, kind, title)
 
     store = Store(":memory:", embed_fn=counting_embed)
     content_hash = store.hash_content("doc")
@@ -214,9 +214,9 @@ def test_index_content_skips_reembed_when_boundaries_identical():
     # identically, switching strategy must NOT burn embedding work.
     calls = []
 
-    def counting_embed(texts, model, kind="query"):
+    def counting_embed(texts, model, kind="query", title=None):
         calls.append(texts)
-        return _fake_embed(texts, model, kind)
+        return _fake_embed(texts, model, kind, title)
 
     store = Store(":memory:", embed_fn=counting_embed)
     body = "short markdown doc"
@@ -242,4 +242,45 @@ def test_store_rejects_invalid_chunk_strategy():
             pass
         else:
             raise AssertionError("expected ValueError")
+    store.close()
+
+
+def _recording_store(calls):
+    def recording_embed(texts, model, kind="query", title=None):
+        calls.append({"texts": list(texts), "kind": kind, "title": title})
+        return [[1.0, 0.0, 0.0, 0.0] for _ in texts]
+
+    return Store(":memory:", embed_fn=recording_embed)
+
+
+def test_index_content_passes_the_title_from_the_filepath():
+    calls = []
+    store = _recording_store(calls)
+    body = "# setup helpers\n\ndef setup():\n    pass\n"
+    store.index_content(store.hash_content(body), body, filepath="src/helpers.py")
+    assert calls == [{"texts": [body], "kind": "document", "title": "helpers"}]
+    store.close()
+
+
+def test_index_content_without_filepath_uses_the_documents_min_path():
+    calls = []
+    store = _recording_store(calls)
+    store.add_collection("notes", "/notes")
+    body = "# Rivers\nwater"
+    h = store.hash_content(body)
+    store.insert_content(h, body, "2026-01-01T00:00:00Z")
+    # Inserted MAX-first, so neither "first inserted" nor MAX(path) passes.
+    for path in ("b/copy.md", "a/rivers.txt"):
+        store.insert_document("notes", path, "t", h, "2026-01-01T00:00:00Z", "2026-01-01T00:00:00Z")
+    store.index_content(h, body)
+    # MIN(path) is a/rivers.txt: no .txt extractor, so the file name wins.
+    assert calls[0]["title"] == "rivers"
+    store.close()
+
+
+def test_index_content_with_no_document_and_no_filepath_embeds_untitled():
+    calls = []
+    store = _recording_store(calls)
+    store.index_content(store.hash_content("bare"), "bare")
+    assert calls[0]["title"] is None
     store.close()

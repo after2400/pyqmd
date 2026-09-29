@@ -126,3 +126,30 @@ def test_vocab_token_bytes_agree_with_decode():
         assert tokenizer.decode([tid]) == text, tid
         checked += 1
     assert checked > 100_000
+
+
+@pytest.mark.slow
+def test_embed_sees_text_past_token_512():
+    # ~800 tokens of shared prefix, then different endings: with the old
+    # 512-token cut both texts embedded to the same vector.
+    prefix = "The river delta forms where sediment settles slowly. " * 80
+    a, b = embed(
+        [
+            prefix + "Zebras migrate across the plains every spring.",
+            prefix + "Quantum chips need very cold refrigerators.",
+        ],
+        kind="document",
+        title="Notes",
+    )
+    cosine = sum(x * y for x, y in zip(a, b, strict=True))
+    assert cosine < 0.9999
+
+
+@pytest.mark.slow
+def test_padding_in_a_batch_does_not_change_a_vector():
+    short = "Cats sleep most of the day."
+    long = "The river delta forms where sediment settles slowly. " * 60
+    alone = embed([short], kind="document")[0]
+    batched = embed([short, long], kind="document")[0]
+    cosine = sum(x * y for x, y in zip(alone, batched, strict=True))
+    assert cosine >= 0.9999

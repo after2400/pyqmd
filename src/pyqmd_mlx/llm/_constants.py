@@ -13,3 +13,8 @@ DEFAULT_EXPAND_MODEL = "after2400/qmd-query-expansion-1.7B-mlx-mixed-4-6"
 
 # Overrides DEFAULT_EXPAND_MODEL with a Hub repo id or a local MLX model dir.
 EXPAND_MODEL_ENV_VAR = "PYQMD_EXPAND_MODEL"
+
+# Embedding context in tokens, Node's EMBED_CONTEXT_SIZE (llm.ts). embed()
+# truncates at min(this, the tokenizer's model_max_length), mirroring
+# resolveEmbedTokenLimit(); both are 2048 for the default model.
+EMBED_CONTEXT_TOKENS = 2048
