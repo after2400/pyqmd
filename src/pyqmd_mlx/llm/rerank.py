@@ -7,6 +7,7 @@ intact, so we implement the scoring ourselves.
 
 from ._cache import get_or_load
 from ._constants import DEFAULT_RERANK_MODEL
+from ._hub import load_quietly_if_cached
 from ._prompts import build_rerank_prompt, score_from_logits
 
 _rerank_cache: dict = {}
@@ -17,7 +18,7 @@ def _load(model_id: str):
     # would tax every CLI command via pyqmd_mlx.store.Store, not just rerank().
     from mlx_lm import load as _load_lm_model
 
-    return _load_lm_model(model_id)
+    return load_quietly_if_cached(model_id, _load_lm_model)
 
 
 def _last_position_logits(rerank_model, inputs):
