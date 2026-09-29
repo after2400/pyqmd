@@ -27,11 +27,14 @@ def _last_position_logits(rerank_model, inputs):
     a vocab-sized (~152k) row per prompt token, ~1 GB for a long candidate,
     of which scoring reads two values. Running the transformer body and
     applying the output layer to just the last hidden state gives the same
-    logits there, bit for bit."""
+    logits there, bit for bit.
+
+    Batching candidates (right-padded) was tried and rejected: no faster on
+    Apple Silicon, and padding shifted scores enough to reorder results."""
     hidden = rerank_model.model(inputs)[:, -1:, :]
     if rerank_model.args.tie_word_embeddings:
-        return rerank_model.model.embed_tokens.as_linear(hidden)[0, -1, :]
-    return rerank_model.lm_head(hidden)[0, -1, :]
+        return rerank_model.model.embed_tokens.as_linear(hidden)[0, 0, :]
+    return rerank_model.lm_head(hidden)[0, 0, :]
 
 
 def rerank(query: str, documents: list[str], model: str = DEFAULT_RERANK_MODEL) -> list[float]:
