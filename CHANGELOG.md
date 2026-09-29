@@ -1,6 +1,50 @@
 # CHANGELOG
 
 
+## v0.7.0 (2026-09-29)
+
+### ✨ Features
+
+- **config**: Publish releases to PyPI as pyqmd-mlx
+  ([#14](https://github.com/after2400/pyqmd/pull/14),
+  [`1251e00`](https://github.com/after2400/pyqmd/commit/1251e008a00936051c4b27e7fc53d0cb79b44e25))
+
+Every release PSR cuts is now built, checked and uploaded to PyPI via trusted publishing (no stored token). A reusable build workflow builds on Apple Silicon, runs twine check and smoke-tests the wheel with the latest dependencies; CI runs it on every PR. docs commits no longer release.
+
+### 🐞 Bug Fixes
+
+- **config**: Render multi-commit squash merges cleanly in the changelog
+  ([#14](https://github.com/after2400/pyqmd/pull/14),
+  [`1251e00`](https://github.com/after2400/pyqmd/commit/1251e008a00936051c4b27e7fc53d0cb79b44e25))
+
+PSR splits a squash body into one entry per branch commit, but also parses the squash title, so the title's commit was listed twice; and GitHub's "---------" separator before the co-author trailers leaked into the last entry. Keep one entry per summary line (preferring the one with a body) and drop the separator paragraph.
+
+- **llm**: Hide the Hugging Face progress bar for cached models
+  ([#14](https://github.com/after2400/pyqmd/pull/14),
+  [`1251e00`](https://github.com/after2400/pyqmd/commit/1251e008a00936051c4b27e7fc53d0cb79b44e25))
+
+Model loads printed Hugging Face's "Fetching N files" bar on every run, even when every file was already cached. It's now hidden when the model is a local directory or its config.json is in the HF cache; a real first download still shows progress.
+
+### 📖 Documentation
+
+- Install from PyPI and state measured query timings
+  ([#14](https://github.com/after2400/pyqmd/pull/14),
+  [`1251e00`](https://github.com/after2400/pyqmd/commit/1251e008a00936051c4b27e7fc53d0cb79b44e25))
+
+The README installs pyqmd-mlx from PyPI instead of a pinned git tag that went stale every release, and the performance note gives measured per-stage timings instead of "several seconds cold".
+
+- **specs**: Publish the PyPI publishing design ([#14](https://github.com/after2400/pyqmd/pull/14),
+  [`1251e00`](https://github.com/after2400/pyqmd/commit/1251e008a00936051c4b27e7fc53d0cb79b44e25))
+
+### 🏗 Chores
+
+- **config**: Add a review commit type for PR review follow-ups
+  ([#14](https://github.com/after2400/pyqmd/pull/14),
+  [`1251e00`](https://github.com/after2400/pyqmd/commit/1251e008a00936051c4b27e7fc53d0cb79b44e25))
+
+Changes a reviewer asks for on an open PR get their own type, review, which like doh never bumps the version or reaches the changelog: a squash merge keeps each branch commit as a separate changelog entry. doh stays for fixing your own silly mistakes.
+
+
 ## v0.6.6 (2026-09-29)
 
 ### ⚡️ Performance Improvements
