@@ -923,28 +923,33 @@ class Store:
         retain the stale boundaries. When the boundaries are identical
         under both strategies there is genuinely nothing to re-embed, so
         position comparison also avoids useless re-embedding -- no schema
-        change to track the producing strategy is needed.
+        change to track the producing strategy is needed. It also re-embeds
+        when any stored row lacks the current embedding fingerprint (a
+        change to the embedding input format since those vectors were
+        written).
 
         Raises ValueError for any chunk_strategy other than "regex"/"auto"."""
         import sqlite_vec
 
         from ._chunking import embedding_chunks, validate_chunk_strategy
+        from ._fingerprint import embedding_fingerprint
         from ._title import extract_title
 
         validate_chunk_strategy(chunk_strategy)
         model = model or self._embed_model
         if filepath is None:
             filepath = self._representative_path(content_hash)
-        existing_positions = [
-            row["pos"]
-            for row in self.conn.execute(
-                "SELECT pos FROM content_vectors WHERE hash = ? AND model = ? ORDER BY seq",
-                (content_hash, model),
-            ).fetchall()
-        ]
+        fingerprint = embedding_fingerprint(model)
+        existing = self.conn.execute(
+            "SELECT pos, embed_fingerprint FROM content_vectors "
+            "WHERE hash = ? AND model = ? ORDER BY seq",
+            (content_hash, model),
+        ).fetchall()
         chunks = embedding_chunks(content, filepath, chunk_strategy)
-        if existing_positions == [pos for _text, pos in chunks]:
-            return len(chunks)  # already embedded with this model and chunking
+        if [row["pos"] for row in existing] == [pos for _text, pos in chunks] and all(
+            row["embed_fingerprint"] == fingerprint for row in existing
+        ):
+            return len(chunks)  # already embedded with this model, chunking and format
 
         # A model or content change: drop stale vectors for this hash first.
         self.conn.execute("DELETE FROM content_vectors WHERE hash = ?", (content_hash,))
@@ -969,10 +974,11 @@ class Store:
         for seq, ((text, pos), vector) in enumerate(zip(chunks, embeddings)):
             self.conn.execute(
                 """
-                INSERT INTO content_vectors (hash, seq, pos, model, total_chunks, embedded_at)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO content_vectors
+                    (hash, seq, pos, model, embed_fingerprint, total_chunks, embedded_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
                 """,
-                (content_hash, seq, pos, model, len(chunks), embedded_at),
+                (content_hash, seq, pos, model, fingerprint, len(chunks), embedded_at),
             )
             self.conn.execute(
                 "INSERT INTO vectors_vec (hash_seq, embedding) VALUES (?, ?)",
@@ -1051,15 +1057,45 @@ class Store:
             ).fetchall()
         return [dict(row) for row in rows]
 
+    def _count_hashes_needing_embedding(self, model: str, collection: str | None = None) -> int:
+        """Distinct active-document hashes with no complete set of vectors
+        for `model` at the current fingerprint: none at all, only rows from
+        an older fingerprint, or fewer rows than total_chunks. Ported from
+        store.ts's getHashesNeedingEmbedding."""
+        from ._fingerprint import embedding_fingerprint
+
+        collection_filter = "AND d.collection = ?" if collection else ""
+        params: list = [model, embedding_fingerprint(model)]
+        if collection:
+            params.append(collection)
+        row = self.conn.execute(
+            f"""
+            SELECT COUNT(DISTINCT d.hash) AS n
+            FROM documents d
+            LEFT JOIN (
+                SELECT hash, COUNT(*) AS chunk_count, MAX(total_chunks) AS expected_chunks
+                FROM content_vectors
+                WHERE model = ? AND embed_fingerprint = ?
+                GROUP BY hash
+            ) v ON d.hash = v.hash
+            WHERE d.active = 1
+              AND (v.hash IS NULL OR v.chunk_count < v.expected_chunks)
+              {collection_filter}
+            """,
+            params,
+        ).fetchone()
+        return row["n"]
+
     def count_pending_embed(
         self,
         collection: str | None = None,
         model: str | None = None,
         chunk_strategy: str = "regex",
     ) -> int:
-        """Count of distinct active-document hashes with no content_vectors
-        row for `model` (or the Store's default), optionally scoped to one
-        collection. Used by the CLI's `embed` command to detect a genuine
+        """Count of distinct active-document hashes needing embedding for
+        `model` (or the Store's default; see _count_hashes_needing_embedding:
+        missing, stale-fingerprint or partial vector sets), optionally
+        scoped to one collection. Used by the CLI's `embed` command to detect a genuine
         no-op -- everything already embedded -- before doing any chunking/
         embedding work, matching Node's getHashesNeedingEmbedding check.
         Unlike get_status_counts's own "pending_embed" (always global),
@@ -1076,29 +1112,7 @@ class Store:
 
         validate_chunk_strategy(chunk_strategy)
         model = model or self._embed_model
-        if collection:
-            row = self.conn.execute(
-                """
-                SELECT COUNT(DISTINCT d.hash) AS n FROM documents d
-                WHERE d.active = 1 AND d.collection = ?
-                AND NOT EXISTS (
-                    SELECT 1 FROM content_vectors cv WHERE cv.hash = d.hash AND cv.model = ?
-                )
-                """,
-                (collection, model),
-            ).fetchone()
-        else:
-            row = self.conn.execute(
-                """
-                SELECT COUNT(DISTINCT d.hash) AS n FROM documents d
-                WHERE d.active = 1
-                AND NOT EXISTS (
-                    SELECT 1 FROM content_vectors cv WHERE cv.hash = d.hash AND cv.model = ?
-                )
-                """,
-                (model,),
-            ).fetchone()
-        pending = row["n"]
+        pending = self._count_hashes_needing_embedding(model, collection)
         if chunk_strategy == "regex" or pending > 0:
             return pending
         # Auto strategy with nothing missing: detect stale chunk
@@ -1131,16 +1145,7 @@ class Store:
         vector_count = self.conn.execute("SELECT COUNT(*) AS n FROM content_vectors").fetchone()[
             "n"
         ]
-        pending = self.conn.execute(
-            """
-            SELECT COUNT(DISTINCT d.hash) AS n FROM documents d
-            WHERE d.active = 1
-            AND NOT EXISTS (
-                SELECT 1 FROM content_vectors cv WHERE cv.hash = d.hash AND cv.model = ?
-            )
-            """,
-            (model,),
-        ).fetchone()["n"]
+        pending = self._count_hashes_needing_embedding(model)
         most_recent = self.conn.execute(
             "SELECT MAX(modified_at) AS latest FROM documents WHERE active = 1"
         ).fetchone()["latest"]
