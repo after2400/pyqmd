@@ -34,6 +34,40 @@ def test_rerank_scores_relevant_document_higher():
 
 
 @pytest.mark.slow
+def test_rerank_scores_equal_full_sequence_logits_scores():
+    # rerank() applies the output layer to the last position only; the
+    # reference below is the original all-positions computation. Scores
+    # must match exactly, not approximately.
+    import importlib
+
+    import mlx.core as mx
+
+    from pyqmd_mlx.llm._prompts import build_rerank_prompt, score_from_logits
+
+    rerank_module = importlib.import_module("pyqmd_mlx.llm.rerank")
+    query = "How do I rotate the API keys?"
+    documents = [
+        "Rotate API keys from the settings page, then restart the service.",
+        "The office is closed on public holidays.",
+        "Key rotation checklist. " + "Revoke the old key after the new one is live. " * 150,
+    ]
+
+    scores = rerank(query, documents)
+
+    model, tokenizer = rerank_module._rerank_cache[rerank_module.DEFAULT_RERANK_MODEL]
+    yes = tokenizer.convert_tokens_to_ids("yes")
+    no = tokenizer.convert_tokens_to_ids("no")
+    reference = []
+    for document in documents:
+        token_ids = tokenizer.encode(build_rerank_prompt(query, document), add_special_tokens=False)
+        last_logits = model(mx.array([token_ids]))[0, -1, :]
+        reference.append(
+            score_from_logits(float(last_logits[yes].item()), float(last_logits[no].item()))
+        )
+    assert scores == reference
+
+
+@pytest.mark.slow
 @pytest.mark.requires_expansion_weights
 def test_expand_query_returns_nonempty_lines():
     lines = expand_query("authentication configuration", model=resolve_expand_model())
