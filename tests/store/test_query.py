@@ -384,3 +384,22 @@ def test_query_auto_chunk_strategy_picks_best_chunk_at_function_boundary():
     # The whole needle function survives in one chunk -- no split between
     # its def line and its body.
     assert "def target_function():\n    return 'needle value'" in results[0].best_chunk
+
+
+def test_query_best_chunk_uses_the_query_time_chunk_size():
+    # ~2950 chars: two chunks at embed time (2700), one at query time
+    # (3600), as in Node, so the best chunk starts at 0.
+    store = _make_store()
+    store.add_collection("notes", "/notes")
+    body = (
+        "## Garden\n"
+        + "Plain filler sentence about the weather today. " * 60
+        + "\n## Zebra\nzebra crossing notes\n"
+    )
+    assert 2700 < len(body) <= 3600
+    _seed_doc(store, "notes", "long.md", "Long", body)
+
+    results = store.query("zebra", skip_rerank=True)
+
+    assert results[0].best_chunk_pos == 0
+    store.close()

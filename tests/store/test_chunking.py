@@ -220,3 +220,27 @@ def test_dedup_break_points_keeps_highest_score_and_sorts():
     ]
     deduped = dedup_break_points(points)
     assert [(p.pos, p.score) for p in deduped] == [(5, 20), (50, 100)]
+
+
+def test_embed_time_chunk_constants_match_node():
+    from pyqmd_mlx.store._chunking import (
+        EMBED_CHUNK_OVERLAP_CHARS,
+        EMBED_CHUNK_SIZE_CHARS,
+        EMBED_CHUNK_WINDOW_CHARS,
+    )
+
+    assert (EMBED_CHUNK_SIZE_CHARS, EMBED_CHUNK_OVERLAP_CHARS, EMBED_CHUNK_WINDOW_CHARS) == (
+        2700,
+        405,
+        600,
+    )
+
+
+def test_embedding_chunks_use_the_embed_time_size():
+    from pyqmd_mlx.store._chunking import embedding_chunks
+
+    text = "A sentence of plain filler text for chunking.\n\n" * 130  # ~6100 chars
+    assert embedding_chunks(text, "a.md") == chunk_document(
+        text, max_chars=2700, overlap_chars=405, window_chars=600, filepath="a.md"
+    )
+    assert len(embedding_chunks(text, "a.md")) > len(chunk_document(text))

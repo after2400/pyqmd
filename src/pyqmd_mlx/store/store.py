@@ -928,7 +928,7 @@ class Store:
         Raises ValueError for any chunk_strategy other than "regex"/"auto"."""
         import sqlite_vec
 
-        from ._chunking import chunk_document, validate_chunk_strategy
+        from ._chunking import embedding_chunks, validate_chunk_strategy
         from ._title import extract_title
 
         validate_chunk_strategy(chunk_strategy)
@@ -942,7 +942,7 @@ class Store:
                 (content_hash, model),
             ).fetchall()
         ]
-        chunks = chunk_document(content, filepath=filepath, chunk_strategy=chunk_strategy)
+        chunks = embedding_chunks(content, filepath, chunk_strategy)
         if existing_positions == [pos for _text, pos in chunks]:
             return len(chunks)  # already embedded with this model and chunking
 
@@ -1072,7 +1072,7 @@ class Store:
         candidate's content (CPU/tree-sitter only, no embedding work), so
         the SQL fast path still runs first and the scan only happens when
         it reports zero."""
-        from ._chunking import chunk_document, validate_chunk_strategy
+        from ._chunking import embedding_chunks, validate_chunk_strategy
 
         validate_chunk_strategy(chunk_strategy)
         model = model or self._embed_model
@@ -1114,7 +1114,7 @@ class Store:
                     (item["hash"], model),
                 ).fetchall()
             ]
-            fresh = chunk_document(item["doc"], filepath=item["path"], chunk_strategy="auto")
+            fresh = embedding_chunks(item["doc"], item["path"], "auto")
             if stored != [pos for _text, pos in fresh]:
                 stale += 1
         return stale
