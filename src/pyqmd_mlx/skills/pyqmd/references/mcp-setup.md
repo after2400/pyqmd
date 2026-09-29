@@ -3,7 +3,7 @@
 ## Install
 
 ```bash
-uv tool install git+https://github.com/after2400/pyqmd  # not on PyPI yet; PyPI `pyqmd` is an unrelated package
+uv tool install pyqmd-mlx  # the command is `pyqmd`; PyPI's `pyqmd` is an unrelated package
 pyqmd collection add ~/path/to/markdown --name myknowledge
 pyqmd embed
 ```

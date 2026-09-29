@@ -90,7 +90,7 @@ prerelease = false
 [tool.semantic_release.commit_parser_options]
 allowed_tags = ["feat", "fix", "docs", "style", "refactor", "perf", "test", "build", "ci", "chore", "revert", "doh"]
 minor_tags = ["feat"]
-patch_tags = ["fix", "perf", "docs", "chore"]
+patch_tags = ["fix", "perf", "chore"]
 
 [tool.semantic_release.changelog]
 mode = "init"

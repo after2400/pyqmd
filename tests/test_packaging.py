@@ -18,3 +18,11 @@ def test_command_is_pyqmd_and_targets_pyqmd_mlx():
 
 def test_wheel_ships_only_pyqmd_mlx():
     assert PYPROJECT["tool"]["hatch"]["build"]["targets"]["wheel"]["packages"] == ["src/pyqmd_mlx"]
+
+
+def test_docs_commits_do_not_release():
+    # docs/ changes never ship in the wheel; see the 2026-09-28 PyPI
+    # publishing spec. Anything under src/ (incl. SKILL.md) is fix/feat.
+    options = PYPROJECT["tool"]["semantic_release"]["commit_parser_options"]
+    assert options["patch_tags"] == ["fix", "perf", "chore"]
+    assert "docs" in options["allowed_tags"]
