@@ -100,6 +100,19 @@ def test_missing_corpus_dir_error_hints_at_prepare_script_for_the_builtin_profil
         load_dataset_profile(config)
 
 
+def test_missing_corpus_dir_error_hints_at_prepare_script_for_conditionalqa(monkeypatch, tmp_path):
+    (tmp_path / "queries.yaml").write_text("- q\n")
+    config = _write_yaml(
+        tmp_path,
+        "conditionalqa.yaml",
+        "name: conditionalqa\ncorpus_dir: ./nope\nqueries_file: ./queries.yaml\n",
+    )
+    monkeypatch.setattr("parity.dataset_profile._BUILTIN_DEFAULT", (tmp_path / "scifact.yaml"))
+
+    with pytest.raises(ValueError, match="prepare_conditionalqa_corpus.py"):
+        load_dataset_profile(config)
+
+
 def test_resolve_active_profile_path_prefers_explicit_arg(monkeypatch, tmp_path):
     monkeypatch.setenv("PARITY_DATASET_CONFIG", str(tmp_path / "env.yaml"))
     explicit = tmp_path / "explicit.yaml"

@@ -1,0 +1,4 @@
+name: conditionalqa
+corpus_dir: ../../data/conditionalqa/corpus
+queries_file: ../../data/conditionalqa/queries.json
+qrels_file: ../../data/conditionalqa/qrels.tsv

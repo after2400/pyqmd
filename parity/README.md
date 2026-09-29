@@ -98,6 +98,30 @@ categories: Node-only machinery, deliberate pyqmd supersets, and
 unavoidable output differences (see the 2026-09-24 output-text parity
 design spec).
 
+## The built-in ConditionalQA profile
+
+A second built-in profile, for what scifact can't exercise: long,
+sectioned documents. [ConditionalQA](https://github.com/haitian-sun/ConditionalQA)
+(Sun et al., 2021) is 652 UK government guidance pages from gov.uk
+(median ~6.5 KB, 2–3 embedding chunks, real `##`/`###` sections) with
+questions that each come with a short personal scenario. The profile uses
+one question per dev-set page (59 queries), the question as the query and
+the scenario as `--intent`, and page-level qrels.
+
+```sh
+uv run scripts/prepare_conditionalqa_corpus.py   # writes data/conditionalqa/ (gitignored)
+uv run pytest parity/ --dataset-config parity/datasets/conditionalqa.yaml
+```
+
+Credits: page text © Crown copyright, from gov.uk, used under the
+[Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/);
+questions and scenarios from the ConditionalQA dataset, whose README
+restricts it to research use. Neither is committed here; the captured
+Node snapshots in `parity/node_ref/conditionalqa/` quote short excerpts.
+
+Capture its Node baseline like scifact's, with
+`--dataset-config parity/datasets/conditionalqa.yaml`.
+
 ## Known gaps
 
 `just test-parity` should show a clean, all-green suite -- any scenario
