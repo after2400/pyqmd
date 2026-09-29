@@ -40,9 +40,26 @@ uv run python -m parity.capture_node_snapshots --qmd-repo-root /path/to/qmd --da
 ```
 
 This writes into `parity/node_ref/<your-profile-name>/`, which is
-gitignored for every profile except the built-in `scifact` one — your
-captured baseline never gets committed, regardless of where your profile
-YAML itself lives.
+gitignored for every profile except the built-in `scifact` and
+`conditionalqa` ones — your captured baseline never gets committed,
+regardless of where your profile YAML itself lives.
+
+## The built-in SciFact profile
+
+[SciFact](https://github.com/allenai/scifact) (Wadden et al., 2020), as
+packaged by BEIR: 5,183 scientific abstracts, with claims as queries and
+abstract-level qrels.
+
+```sh
+uv run scripts/prepare_scifact_corpus.py   # writes data/scifact/ (gitignored)
+```
+
+Credits: abstracts from Semantic Scholar's S2ORC, used under the
+[ODC-By 1.0](https://opendatacommons.org/licenses/by/1-0/) licence;
+claims from the SciFact dataset, used under
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Neither is
+committed here; the captured Node snapshots in `parity/node_ref/scifact/`
+quote excerpts.
 
 ## Re-capturing the built-in scifact profile
 
