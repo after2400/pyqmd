@@ -53,3 +53,8 @@ jobs:
       # absent, so requires_scifact_corpus / requires_expansion_weights
       # tests skip with a clear reason (see tests/conftest.py).
       - run: uv run pytest -m "not slow" -q
+
+  build:
+    uses: ./.github/workflows/build.yml
+    with:
+      ref: ${{ github.event.pull_request.head.sha || github.sha }}

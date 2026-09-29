@@ -3,14 +3,17 @@
 Python/MLX rewrite of [qmd](https://github.com/tobi/qmd) — hybrid search over your markdown
 collections. Apple Silicon + MLX only (no GGUF, no cross-platform support).
 
-> **Beta: feedback wanted.** pyqmd is in public beta ahead of a PyPI release. Please report
-> problems or surprises in [Issues](https://github.com/after2400/pyqmd/issues).
+> **Beta: feedback wanted.** pyqmd is in public beta. Please report problems or surprises in
+> [Issues](https://github.com/after2400/pyqmd/issues).
 
 ## Install
 
 ```sh
-uv tool install git+https://github.com/after2400/pyqmd@v0.6.3
+uv tool install pyqmd-mlx
 ```
+
+(or `pipx install pyqmd-mlx`). The package is `pyqmd-mlx`; the command it installs is
+`pyqmd` — PyPI's `pyqmd` is an unrelated project. Upgrade with `uv tool upgrade pyqmd-mlx`.
 
 Or build it yourself from a clone:
 
@@ -43,13 +46,15 @@ Index lives at `~/.cache/pyqmd/index.sqlite`, distinct from the live Node `qmd`'
 ## Performance note: prefer `pyqmd mcp` for repeated queries
 
 Every one-shot CLI call (`search`/`vsearch`/`query`) that touches embeddings pays a real,
-per-process MLX model-load cost — measured at several seconds cold, and it doesn't get
-cheaper on repeat launches the way Node's mmap-backed GGUF loading does (see
-`parity/README.md`'s "Performance benchmark" section for why). If you're issuing more than
-one embedding-backed query, run `pyqmd mcp` (or `pyqmd mcp --http`) instead of shelling out
-per query — it loads models once and serves unlimited calls from the same process, which is
-the actual equivalent of Node's cheap repeated invocations here, not a faster load path.
-Pure-BM25 `search` doesn't touch MLX at all and stays cheap either way.
+per-process MLX model-load cost, and it doesn't get cheaper on repeat launches the way
+Node's mmap-backed GGUF loading does (see `parity/README.md`'s "Performance benchmark"
+section for why). Measured on an Apple Silicon Mac with a warm disk: `search` 0.4–0.5 s,
+`vsearch` about 2.5 s, `query --no-rerank` 3.5–4.5 s, full `query` 9–11 s (a cold disk adds
+more on the first run). If you're issuing more than one embedding-backed query, run
+`pyqmd mcp` (or `pyqmd mcp --http`) instead of shelling out per query — it loads models once
+and serves unlimited calls from the same process, which is the actual equivalent of Node's
+cheap repeated invocations here, not a faster load path. Pure-BM25 `search` doesn't touch MLX
+at all and stays cheap either way.
 
 ## Development
 

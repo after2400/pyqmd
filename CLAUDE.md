@@ -164,8 +164,28 @@ scope even if it seems descriptive.** As of this writing the valid scopes are
 `store`, `cli`, `mcp`, `llm`, `bench`, `skills`, `parity`, `scripts`,
 `config`, `docs`, `specs`, `tests` — but treat `.commitlintrc.mjs` itself as the source of
 truth, not this list, since it can change. Types are conventional-commit
-standard (`feat`/`fix`/`docs`/`test`/etc.) plus a `doh` escape hatch that
-never bumps version or appears in a changelog.
+standard (`feat`/`fix`/`docs`/`test`/etc.) plus two types that never bump
+the version or appear in a changelog: `doh`, an escape hatch for fixing
+your own silly mistake, and `review`, for changes a reviewer asked for on
+an open PR (`review(llm): …`, with the usual scopes). A squash merge keeps
+each branch commit as its own changelog entry, so review follow-ups would
+otherwise get one. `review` only covers code the PR itself adds: a real bug
+the review turns up in already-released code is its own `fix`.
+
+**What releases.** PSR (`.github/workflows/release.yml`) releases on `feat`
+(minor) and `fix`/`perf`/`chore` (patch), and every release is published
+to PyPI as `pyqmd-mlx`. `docs` commits never release: use them for
+`docs/`, `README.md`, `CLAUDE.md` and `COMMAND_STATUS.md` (a README change
+reaches the PyPI project page with the next release). Anything under
+`src/pyqmd_mlx/` ships in the wheel — including the bundled skills'
+`SKILL.md` and `references/` — so changes there are `fix`/`feat`, never
+`docs`.
+
+**Every branch commit is a changelog entry.** PRs are squash-merged, and
+PSR splits the squash body back into its commits, one changelog entry
+each. So every commit on a PR branch must be a meaningful conventional
+commit — fold "wip"/"fix typo" commits into the commit they belong to
+before opening the PR.
 
 **Every commit an agent makes must end with a `Co-Authored-By: <Model Name>
 <email>` trailer identifying the acting model** — e.g. `Co-Authored-By:
@@ -198,14 +218,12 @@ model from git metadata — don't assume a name for it.
 ## Status
 
 Sub-projects #1 (MLX LLM layer), #2 (storage layer), #3 (CLI), #4 (MCP+HTTP
-server), #6 (local install, no PyPI yet), #7 (metadata filtering), #8 (the
-`update` command), #9 (the `cleanup` command), #10 (CLI output
-formatting/parity polish), #11 (`skill` agent-discoverability commands),
-and #12 (the `bench` user-facing search-quality command) are complete.
-#5 (AST-aware chunking) is complete too — every numbered sub-project is
-done. Released as 0.x Beta on GitHub (install from a tag); PyPI
-publishing is the next milestone.
-Full status, known limitations, and the
-roadmap live in the main checkout's private `docs/superpowers/` tree and
-this project's memory — see the roadmap doc linked above for the
-authoritative list.
+server), #6 (packaging, published to PyPI as `pyqmd-mlx`), #7 (metadata
+filtering), #8 (the `update` command), #9 (the `cleanup` command), #10 (CLI
+output formatting/parity polish), #11 (`skill` agent-discoverability
+commands), and #12 (the `bench` user-facing search-quality command) are
+complete. #5 (AST-aware chunking) is complete too — every numbered
+sub-project is done. Released as 0.x Beta; every release is published to
+PyPI as `pyqmd-mlx`. Full status, known limitations, and the roadmap live
+in the main checkout's private `docs/superpowers/` tree and this project's
+memory — see the roadmap doc linked above for the authoritative list.

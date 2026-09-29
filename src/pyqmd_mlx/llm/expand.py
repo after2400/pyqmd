@@ -12,6 +12,7 @@ import re
 from ._cache import get_or_load
 from ._constants import DEFAULT_EXPAND_MODEL, EXPAND_MODEL_ENV_VAR
 from ._expand_grammar import DEAD, START0, GrammarTables, build_tables, vocab_token_bytes
+from ._hub import load_quietly_if_cached
 
 _expand_cache: dict = {}
 # Used only by scripts/replay_query.py's unconstrained greedy mode: the
@@ -99,7 +100,7 @@ def _load(model_id: str):
     from mlx_lm import load as _load_lm_model
 
     try:
-        model, tokenizer = _load_lm_model(model_id)
+        model, tokenizer = load_quietly_if_cached(model_id, _load_lm_model)
         tables = _build_grammar_tables(tokenizer)
     except Exception as exc:
         raise ExpansionModelError(

@@ -6,20 +6,28 @@ on:
     types: [completed]
     branches: [main]
 
-permissions:
-  contents: write
+# Each job declares its own permissions.
+permissions: {}
 
 jobs:
   release:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     concurrency: release
+    permissions:
+      contents: write
+    outputs:
+      released: ${{ steps.result.outputs.released }}
+      tag: ${{ steps.result.outputs.tag }}
+      version: ${{ steps.result.outputs.version }}
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           fetch-tags: true
           token: ${{ secrets.RELEASE_PAT }}
+      - id: before
+        run: echo "head=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - uses: astral-sh/setup-uv@v8.2.0
         with:
           python-version: "3.12"
@@ -33,3 +41,47 @@ jobs:
       - run: semantic-release version
         env:
           GH_TOKEN: ${{ secrets.RELEASE_PAT }}
+      # A release moves HEAD to PSR's release commit; no release leaves it.
+      - id: result
+        env:
+          BEFORE: ${{ steps.before.outputs.head }}
+        run: |
+          if [ "$(git rev-parse HEAD)" != "$BEFORE" ]; then
+            tag=$(git tag --points-at HEAD --list 'v*' | head -1)
+            {
+              echo "released=true"
+              echo "tag=$tag"
+              echo "version=${tag#v}"
+            } >> "$GITHUB_OUTPUT"
+          else
+            echo "released=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  build:
+    needs: release
+    if: ${{ needs.release.outputs.released == 'true' }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/build.yml
+    with:
+      # The tag, not main: another merge may land after `release` checked out.
+      ref: ${{ needs.release.outputs.tag }}
+      expected-version: ${{ needs.release.outputs.version }}
+
+  publish:
+    needs: [release, build]
+    runs-on: ubuntu-latest # the PyPA action is a Docker action
+    # PyPI's trusted publisher matches workflow release.yml + environment pypi,
+    # so only this job can get a PyPI token. No checkout, no repo code.
+    environment:
+      name: pypi
+      url: https://pypi.org/project/pyqmd-mlx/${{ needs.release.outputs.version }}/
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@v1.14.2

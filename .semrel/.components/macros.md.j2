@@ -117,6 +117,7 @@
               or paragraph.lower().startswith("co-authored-by")
               or paragraph.lower().startswith("signed-off-by")
               or paragraph.startswith("Generated")
+              or (paragraph | trim | length >= 3 and paragraph | trim | replace("-", "") == "")
             )
 %}{#
 #}{%          set _ = ns.parts.append(paragraph)

@@ -2,6 +2,7 @@
 
 from ._cache import get_or_load
 from ._constants import DEFAULT_EMBED_MODEL
+from ._hub import load_quietly_if_cached
 from ._prompts import format_doc_for_embedding, format_query_for_embedding
 
 _embed_cache: dict = {}
@@ -14,7 +15,7 @@ def _load(model_id: str):
     # search/status/ls, which never call embed() at all.
     from mlx_embeddings import load as _load_embed_model
 
-    return _load_embed_model(model_id)
+    return load_quietly_if_cached(model_id, _load_embed_model)
 
 
 def embed(
