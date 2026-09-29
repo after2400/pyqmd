@@ -66,6 +66,16 @@ A single-phase capture refuses to run unless the Node checkout's `HEAD`
 matches `COMMIT.txt`, and leaves `COMMIT.txt` untouched, so one profile
 directory never mixes snapshots from two Node commits.
 
+`--phase inputs` records Node's exact embedding inputs (title, embed-time
+chunks, formatted strings, fingerprint) for the small fixture documents in
+`parity/fixtures/embedding_inputs/`, into `node_expected.json` there. It
+needs no index or model, takes seconds, and isn't part of `all`. Run it
+with the default profile (its commit check uses scifact's `COMMIT.txt`):
+
+```sh
+uv run python -m parity.capture_node_snapshots --qmd-repo-root <path-to-qmd-checkout> --phase inputs
+```
+
 The quality phase runs the full query set `--quality-runs` times
 (default 30) against a single indexed corpus, clearing Node's `llm_cache` with
 `qmd cleanup` between passes, and records the per-metric mean plus the

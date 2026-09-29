@@ -671,3 +671,58 @@ def test_quality_capture_passes_intent_and_saves_pass_one_rankings(tmp_path, mon
     assert query_calls[0] == ["query", "alpha?", "--format", "json", "--intent", "I need alpha"]
     ranked = json.loads((tmp_path / "out" / "quality" / "node_query_ranked.json").read_text())
     assert ranked == {"dev-0": ["a"]}
+
+
+def test_capture_embedding_inputs_writes_node_expected_with_commit(tmp_path, monkeypatch):
+    import parity.capture_node_snapshots as capture_module
+
+    fixtures = tmp_path / "fixtures"
+    fixtures.mkdir()
+    seen = {}
+
+    def fake_bun(qmd_repo_root, fixtures_dir):
+        seen["args"] = (qmd_repo_root, fixtures_dir)
+        return json.dumps(
+            {"model": "m", "fingerprint": "abc123", "documents": {"a.md": {}}, "queries": {}}
+        )
+
+    monkeypatch.setattr(capture_module, "_run_bun_inputs_script", fake_bun)
+    monkeypatch.setattr(capture_module, "get_node_commit", lambda root: "8262698")
+
+    capture_module.capture_embedding_inputs(tmp_path / "qmd", fixtures)
+
+    assert seen["args"] == (tmp_path / "qmd", fixtures)
+    written = json.loads((fixtures / "node_expected.json").read_text())
+    assert written == {
+        "node_commit": "8262698",
+        "model": "m",
+        "fingerprint": "abc123",
+        "documents": {"a.md": {}},
+        "queries": {},
+    }
+
+
+def test_inputs_phase_is_not_part_of_all(tmp_path, monkeypatch):
+    import parity.capture_node_snapshots as capture_module
+
+    calls = []
+    for name in (
+        "capture_structural_snapshots",
+        "capture_cli_flow_snapshots",
+        "capture_mcp_snapshots",
+        "capture_quality_baseline",
+        "write_commit_file",
+    ):
+        monkeypatch.setattr(capture_module, name, lambda *a, _n=name, **k: calls.append(_n))
+    monkeypatch.setattr(
+        capture_module, "capture_embedding_inputs", lambda *a, **k: calls.append("inputs")
+    )
+
+    profile = _fake_profile(tmp_path)
+    capture_module.run_capture(profile, tmp_path, tmp_path / "out", "all")
+    assert "inputs" not in calls
+
+    calls.clear()
+    monkeypatch.setattr(capture_module, "_check_commit_matches", lambda *a: None)
+    capture_module.run_capture(profile, tmp_path, tmp_path / "out", "inputs")
+    assert calls == ["inputs"]

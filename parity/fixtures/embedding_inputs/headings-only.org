@@ -1,0 +1,3 @@
+* Project Plan
+** Tasks
+Write the outline.
