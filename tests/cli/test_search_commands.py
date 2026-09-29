@@ -233,6 +233,10 @@ def test_query_accepts_repeated_collection_flag(monkeypatch):
     captured = {}
 
     class FakeStore:
+        def get_status_counts(self):
+            # A current, fresh index: no index-health lines.
+            return {"pending_embed": 0, "active_documents": 0, "most_recent_modified_at": None}
+
         def query(
             self,
             query,
@@ -534,3 +538,52 @@ def test_query_command_reports_expansion_model_error_cleanly(monkeypatch):
     assert result.exit_code == 1
     assert "Error: Could not load query-expansion model 'bad/model'" in result.output
     assert "Traceback" not in result.output
+
+
+def test_vsearch_and_query_warn_on_stderr_when_embeddings_are_pending(monkeypatch):
+    store = Store(
+        ":memory:",
+        embed_fn=_fake_embed,
+        rerank_fn=_fake_rerank,
+        expand_fn=lambda query, model: [f"lex: {query}"],
+    )
+    store.add_collection("notes", "/notes")
+    _seed_doc(store, "auth.md", "Auth", "authentication setup guide")  # embedded as fake-model
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None: store)
+
+    for command in ("vsearch", "query"):
+        result = runner.invoke(app, [command, "authentication", "--format", "json"])
+        assert result.exit_code == 0
+        assert "Warning: 1 documents (100%) need embeddings." in result.stderr
+        assert "Tip: Index last updated" in result.stderr
+        json.loads(result.stdout)
+
+
+def test_search_never_warns(monkeypatch):
+    store = Store(":memory:", embed_fn=_fake_embed)
+    store.add_collection("notes", "/notes")
+    _seed_doc(store, "auth.md", "Auth", "authentication setup guide")
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None: store)
+
+    result = runner.invoke(app, ["search", "authentication", "--format", "json"])
+
+    assert result.stderr == ""
+
+
+def test_vsearch_is_silent_when_current_and_fresh(monkeypatch):
+    from datetime import UTC, datetime
+
+    store = Store(":memory:", embed_fn=_fake_embed)
+    store.add_collection("notes", "/notes")
+    body = "authentication setup guide"
+    h = store.hash_content(body)
+    now = datetime.now(UTC).isoformat()
+    store.insert_content(h, body, now)
+    store.insert_document("notes", "auth.md", "Auth", h, now, now)
+    store.index_content(h, body)  # the store's own model: nothing pending
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None: store)
+
+    result = runner.invoke(app, ["vsearch", "authentication", "--format", "json"])
+
+    assert result.exit_code == 0
+    assert result.stderr == ""

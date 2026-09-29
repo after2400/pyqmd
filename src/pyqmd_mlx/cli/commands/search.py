@@ -5,6 +5,7 @@ import typer
 from pyqmd_mlx.cli._db import get_store
 from pyqmd_mlx.cli._errors import run_or_exit
 from pyqmd_mlx.cli._fullpath import apply_full_path, format_fullpath_warning
+from pyqmd_mlx.cli._index_health import check_index_health
 from pyqmd_mlx.cli._metadata_filter import parse_cli_metadata_filter
 from pyqmd_mlx.cli._output_search import format_search_results
 from pyqmd_mlx.cli._types import ChunkStrategy, DisplayResult, OutputFormat
@@ -94,6 +95,7 @@ def vsearch(
     """Vector similarity search (no reranking)."""
     parsed_filter = parse_cli_metadata_filter(filter)
     store = get_store()
+    check_index_health(store)
     results = store.search_vec(query, limit=limit, collection=collection, filter=parsed_filter)
     results = [r for r in results if r.score >= min_score]
     display = [_search_result_to_display(r) for r in results]
@@ -130,6 +132,7 @@ def query(
     """Search with query expansion and reranking (recommended)."""
     parsed_filter = parse_cli_metadata_filter(filter)
     store = get_store()
+    check_index_health(store)
     results = run_or_exit(
         lambda: store.query(
             query,
