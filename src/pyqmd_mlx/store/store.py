@@ -594,6 +594,20 @@ class Store:
         ).fetchone()
         self._sync_document_fts(document_id, title, row["path"])
 
+    def update_document_title(self, document_id: int, title: str, modified_at: str) -> None:
+        """Set a document's title and modified_at when only its extracted
+        title changed (same content), and re-sync its FTS row. Ported from
+        store.ts's updateDocumentTitle; the scan counts it as updated."""
+        self.conn.execute(
+            "UPDATE documents SET title = ?, modified_at = ? WHERE id = ?",
+            (title, modified_at, document_id),
+        )
+        self.conn.commit()
+        row = self.conn.execute(
+            "SELECT path FROM documents WHERE id = ?", (document_id,)
+        ).fetchone()
+        self._sync_document_fts(document_id, title, row["path"])
+
     def sync_document_metadata(
         self, document_id: int, content: str, path: str, *, only_if_stale: bool = False
     ) -> "MetadataExtractionResult | None":

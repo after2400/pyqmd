@@ -133,8 +133,15 @@ def scan_and_register_collection(
         if existing:
             document_id = existing["id"]
             if existing["hash"] == content_hash:
-                result.unchanged += 1
                 content_changed = False
+                if existing["title"] != title:
+                    # Same content, new title (a changed extraction rule):
+                    # Node's reindexCollection updates it and counts it as
+                    # updated, with modified_at set to the scan time.
+                    store.update_document_title(existing["id"], title, now)
+                    result.updated += 1
+                else:
+                    result.unchanged += 1
             else:
                 store.insert_content(content_hash, content, now)
                 store.update_document(existing["id"], title, content_hash, modified_at)
