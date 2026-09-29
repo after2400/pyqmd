@@ -18,6 +18,41 @@ def _load(model_id: str):
     return load_quietly_if_cached(model_id, _load_embed_model)
 
 
+def _activation_dtype(embed_tokens):
+    """The dtype a model's activations run in. A quantized embedding packs
+    its weight into uint32; its scales carry the activation dtype."""
+    scales = getattr(embed_tokens, "scales", None)
+    return scales.dtype if scales is not None else embed_tokens.weight.dtype
+
+
+def _additive_padding_mask(attention_mask, dtype):
+    """(batch, 1, query, key) additive mask: 0 where the key is a real
+    token, -inf where it is padding. Every query sees every real token
+    (embeddinggemma attends bidirectionally)."""
+    import mlx.core as mx
+
+    batch, length = attention_mask.shape
+    keys = attention_mask[:, None, None, :].astype(mx.bool_)
+    mask = mx.where(keys, mx.array(0.0, dtype), mx.array(-mx.inf, dtype))
+    return mx.broadcast_to(mask, (batch, 1, length, length))
+
+
+def _gemma3_text_embeds(embed_model, input_ids, attention_mask):
+    """mlx_embeddings' gemma3_text Model.__call__, but with the padding mask
+    built in the activation dtype. mlx-embeddings 0.1.0 casts it to
+    embed_tokens.weight.dtype, the packed uint32 of a quantized model, so
+    -inf became 0 and padding was never masked: in a padded batch, every
+    text but the longest attended to padding tokens."""
+    from mlx_embeddings.models.base import mean_pooling, normalize_embeddings
+
+    dtype = _activation_dtype(embed_model.model.embed_tokens)
+    hidden = embed_model.model(input_ids, _additive_padding_mask(attention_mask, dtype))
+    pooled = mean_pooling(hidden, attention_mask)
+    for dense in embed_model.dense:
+        pooled = dense(pooled)
+    return normalize_embeddings(pooled)
+
+
 def embed(
     texts: list[str],
     model: str = DEFAULT_EMBED_MODEL,
@@ -40,5 +75,10 @@ def embed(
     inputs = tokenizer.batch_encode_plus(
         formatted, return_tensors="mlx", padding=True, truncation=True, max_length=max_length
     )
-    outputs = embed_model(inputs["input_ids"], attention_mask=inputs["attention_mask"])
-    return outputs.text_embeds.tolist()
+    if getattr(embed_model, "model_type", None) == "gemma3_text":
+        vectors = _gemma3_text_embeds(embed_model, inputs["input_ids"], inputs["attention_mask"])
+    else:
+        vectors = embed_model(
+            inputs["input_ids"], attention_mask=inputs["attention_mask"]
+        ).text_embeds
+    return vectors.tolist()
