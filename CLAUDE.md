@@ -164,8 +164,13 @@ scope even if it seems descriptive.** As of this writing the valid scopes are
 `store`, `cli`, `mcp`, `llm`, `bench`, `skills`, `parity`, `scripts`,
 `config`, `docs`, `specs`, `tests` — but treat `.commitlintrc.mjs` itself as the source of
 truth, not this list, since it can change. Types are conventional-commit
-standard (`feat`/`fix`/`docs`/`test`/etc.) plus a `doh` escape hatch that
-never bumps version or appears in a changelog.
+standard (`feat`/`fix`/`docs`/`test`/etc.) plus two types that never bump
+the version or appear in a changelog: `doh`, an escape hatch for fixing
+your own silly mistake, and `review`, for changes a reviewer asked for on
+an open PR (`review(llm): …`, with the usual scopes). A squash merge keeps
+each branch commit as its own changelog entry, so review follow-ups would
+otherwise get one. `review` only covers code the PR itself adds: a real bug
+the review turns up in already-released code is its own `fix`.
 
 **What releases.** PSR (`.github/workflows/release.yml`) releases on `feat`
 (minor) and `fix`/`perf`/`chore` (patch), and every release is published

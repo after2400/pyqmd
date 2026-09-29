@@ -39,6 +39,8 @@ export default {
         "revert",
         // escape hatch — never bumps version, never appears in changelog
         "doh",
+        // changes a reviewer asked for on an open PR — like doh, never released or logged
+        "review",
       ],
     ],
   },

@@ -26,3 +26,16 @@ def test_docs_commits_do_not_release():
     options = PYPROJECT["tool"]["semantic_release"]["commit_parser_options"]
     assert options["patch_tags"] == ["fix", "perf", "chore"]
     assert "docs" in options["allowed_tags"]
+
+
+def test_doh_and_review_commits_never_release_or_reach_the_changelog():
+    import re
+
+    release = PYPROJECT["tool"]["semantic_release"]
+    options = release["commit_parser_options"]
+    excludes = release["changelog"]["exclude_commit_patterns"]
+    for tag in ("doh", "review"):
+        assert tag in options["allowed_tags"]
+        assert tag not in options["patch_tags"] + options["minor_tags"]
+        for subject in (f"{tag}: x", f"{tag}(llm): x"):
+            assert any(re.match(p, subject) for p in excludes), subject

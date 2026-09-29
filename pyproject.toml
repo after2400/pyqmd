@@ -88,7 +88,7 @@ match = "main"
 prerelease = false
 
 [tool.semantic_release.commit_parser_options]
-allowed_tags = ["feat", "fix", "docs", "style", "refactor", "perf", "test", "build", "ci", "chore", "revert", "doh"]
+allowed_tags = ["feat", "fix", "docs", "style", "refactor", "perf", "test", "build", "ci", "chore", "revert", "doh", "review"]
 minor_tags = ["feat"]
 patch_tags = ["fix", "perf", "chore"]
 
@@ -97,5 +97,6 @@ mode = "init"
 template_dir = ".semrel"
 exclude_commit_patterns = [
   "^doh(\\([^)]*\\))?!?:",
+  "^review(\\([^)]*\\))?!?:",
   "^chore\\(release\\):",
 ]
