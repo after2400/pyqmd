@@ -1,6 +1,119 @@
 # CHANGELOG
 
 
+## v0.7.1 (2026-09-30)
+
+### 🐞 Bug Fixes
+
+- **cli**: Warn on vsearch/query when embeddings are pending or stale
+  ([#16](https://github.com/after2400/pyqmd/pull/16),
+  [`6d9e622`](https://github.com/after2400/pyqmd/commit/6d9e62259c7db4ecccb2bdd50d0e6646a01cdf34))
+
+Like Node, vsearch and query now print a warning on stderr when 10% or more of documents need embeddings (a tip below that), and a tip when the index hasn't been updated for 14 days or more. After upgrading, this is how an existing index reports that it needs 'pyqmd embed'.
+
+- **config**: Pin mlx-embeddings to exactly 0.1.0
+  ([#16](https://github.com/after2400/pyqmd/pull/16),
+  [`6d9e622`](https://github.com/after2400/pyqmd/commit/6d9e62259c7db4ecccb2bdd50d0e6646a01cdf34))
+
+pyqmd's embed() now runs embeddinggemma through its own copy of mlx-embeddings 0.1.0's forward pass, to fix that release's padding mask. A newer release could change what that copy relies on, so the version is pinned until a new release has been checked against it.
+
+- **llm**: Embed chunks with their document title and up to 2048 tokens
+  ([#16](https://github.com/after2400/pyqmd/pull/16),
+  [`6d9e622`](https://github.com/after2400/pyqmd/commit/6d9e62259c7db4ecccb2bdd50d0e6646a01cdf34))
+
+Every chunk was embedded as 'title: none | text: ...' and cut at 512 tokens, so vector search never saw the rest of a full chunk. Chunks now carry their document's title and are cut at 2048 tokens, as in Node. Existing vectors are re-embedded by 'pyqmd embed' after upgrading.
+
+- **llm**: Embed the same input Node does ([#16](https://github.com/after2400/pyqmd/pull/16),
+  [`6d9e622`](https://github.com/after2400/pyqmd/commit/6d9e62259c7db4ecccb2bdd50d0e6646a01cdf34))
+
+- **llm**: Mask padding when embedding a batch of chunks
+  ([#16](https://github.com/after2400/pyqmd/pull/16),
+  [`6d9e622`](https://github.com/after2400/pyqmd/commit/6d9e62259c7db4ecccb2bdd50d0e6646a01cdf34))
+
+mlx-embeddings 0.1.0 casts embeddinggemma's padding mask to the dtype of its embedding weight, which in the 8-bit model is packed uint32, so the mask's -inf became 0 and padding was never masked. Every chunk of a multi-chunk document except the longest was embedded while attending to padding (cosine 0.92 against the same chunk embedded alone). pyqmd now builds the mask in the model's activation dtype. Queries, embedded one at a time, were unaffected.
+
+- **store**: Chunk for embedding at Node's embed-time size
+  ([#16](https://github.com/after2400/pyqmd/pull/16),
+  [`6d9e622`](https://github.com/after2400/pyqmd/commit/6d9e62259c7db4ecccb2bdd50d0e6646a01cdf34))
+
+Node embeds 2700-character chunks (it estimates 3 characters per token when chunking for embedding) and uses 3600-character chunks only to pick each result's best chunk at query time. pyqmd used 3600 for both, so different text landed in each vector. Code-fence rules stay pyqmd's and are now listed as deliberate differences.
+
+- **store**: Extract titles by file type, as Node does
+  ([#16](https://github.com/after2400/pyqmd/pull/16),
+  [`6d9e622`](https://github.com/after2400/pyqmd/commit/6d9e62259c7db4ecccb2bdd50d0e6646a01cdf34))
+
+The markdown heading rule ran on every file, so a Python file starting with '# setup helpers' was titled 'setup helpers'. Titles now follow Node's per-extension rules: markdown headings for .md, #+TITLE or the first heading for .org, else the file name (stripped from the last dot in the path, as Node does). The patterns use JS's line-break classes, so \r and U+2028 end a line as they do in Node. Run 'pyqmd update' after upgrading to correct stored titles.
+
+- **store**: Fingerprint embeddings so format changes re-embed
+  ([#16](https://github.com/after2400/pyqmd/pull/16),
+  [`6d9e622`](https://github.com/after2400/pyqmd/commit/6d9e62259c7db4ecccb2bdd50d0e6646a01cdf34))
+
+Each stored vector now records a fingerprint of the embedding input format (Node's getEmbeddingFingerprint). Vectors from an older format, including every vector in an existing pyqmd index, count as pending: status reports them, and 'pyqmd embed' re-embeds them without --force. After upgrading, run 'pyqmd update' and then 'pyqmd embed'.
+
+- **store**: Refresh stored titles when only the title changes
+  ([#16](https://github.com/after2400/pyqmd/pull/16),
+  [`6d9e622`](https://github.com/after2400/pyqmd/commit/6d9e62259c7db4ecccb2bdd50d0e6646a01cdf34))
+
+update left a document's old title in place when its content was unchanged, so a changed title rule never reached existing documents. It now updates the title, as Node does, and counts the file as updated.
+
+### ✅ Testing
+
+- **parity**: Add ConditionalQA as a second parity corpus
+  ([#16](https://github.com/after2400/pyqmd/pull/16),
+  [`6d9e622`](https://github.com/after2400/pyqmd/commit/6d9e62259c7db4ecccb2bdd50d0e6646a01cdf34))
+
+A prep script converts ConditionalQA's gov.uk pages to markdown with real section headings, and picks one question per dev page (59), with its scenario as the query's intent. Scifact documents are one short abstract each, so it barely sees long-document or chunking behaviour.
+
+- **parity**: Capture Node's embedding inputs for fixture documents
+  ([#16](https://github.com/after2400/pyqmd/pull/16),
+  [`6d9e622`](https://github.com/after2400/pyqmd/commit/6d9e62259c7db4ecccb2bdd50d0e6646a01cdf34))
+
+A new --phase inputs runs a small bun script against the pinned Node checkout and records, for each fixture, the title, the embed-time chunks and the exact strings Node embeds, plus Node's embedding fingerprint. The fixtures each hit one title or chunking rule. No pre-commit hook or ruff run touches them, so they reach both sides byte for byte.
+
+- **parity**: Compare embedding inputs with Node's, string for string
+  ([#16](https://github.com/after2400/pyqmd/pull/16),
+  [`6d9e622`](https://github.com/after2400/pyqmd/commit/6d9e62259c7db4ecccb2bdd50d0e6646a01cdf34))
+
+Checks pyqmd's per-chunk embedding inputs (title, text, and chunk boundaries), query inputs and fingerprint against the inputs Node produced for the same fixture documents.
+
+- **parity**: Pass query intents through the quality test and Node capture
+  ([#16](https://github.com/after2400/pyqmd/pull/16),
+  [`6d9e622`](https://github.com/after2400/pyqmd/commit/6d9e62259c7db4ecccb2bdd50d0e6646a01cdf34))
+
+Queries may carry an intent; both sides pass it to query. The Node capture also keeps one pass's rankings so the quality test can report how far pyqmd's top 10 overlaps Node's.
+
+- **parity**: Pin Node's ConditionalQA and embedding-input snapshots
+  ([#16](https://github.com/after2400/pyqmd/pull/16),
+  [`6d9e622`](https://github.com/after2400/pyqmd/commit/6d9e62259c7db4ecccb2bdd50d0e6646a01cdf34))
+
+Node's structural, CLI flow, MCP and 30-pass quality snapshots for the ConditionalQA profile, captured at the same pinned qmd commit as SciFact's, plus Node's exact embedding inputs for the fixture documents. Local repo paths in the reference-only raw outputs are replaced with <pyqmd-repo>, as in SciFact's.
+
+- **tests**: Find the Node qmd checkout from git worktrees
+  ([#15](https://github.com/after2400/pyqmd/pull/15),
+  [`24e658f`](https://github.com/after2400/pyqmd/commit/24e658f91ab82f556bfc8aa85fe07d102928226c))
+
+The qmd_repo_root fixture looked for qmd as a sibling of this checkout's own root (parents[3]), which from a worktree under .claude/worktrees/ is .claude/worktrees/qmd, so all five Node CLI tests skipped on every worktree run. Resolve the main checkout via `git rev-parse
+--git-common-dir` and look for qmd next to that instead; the main checkout and CI (no qmd checkout) behave as before.
+
+### 📖 Documentation
+
+- Record embedding input parity in COMMAND_STATUS
+  ([#16](https://github.com/after2400/pyqmd/pull/16),
+  [`6d9e622`](https://github.com/after2400/pyqmd/commit/6d9e62259c7db4ecccb2bdd50d0e6646a01cdf34))
+
+Also corrects CLAUDE.md's query -n default, which is 20, like search and vsearch.
+
+- **parity**: Credit SciFact's sources and licences
+  ([#16](https://github.com/after2400/pyqmd/pull/16),
+  [`6d9e622`](https://github.com/after2400/pyqmd/commit/6d9e62259c7db4ecccb2bdd50d0e6646a01cdf34))
+
+The committed SciFact snapshots quote abstracts and claims, as the ConditionalQA ones quote gov.uk pages, but only ConditionalQA was credited. Also note both built-in profiles' snapshots are committed.
+
+- **specs**: Publish the embedding input parity spec
+  ([#16](https://github.com/after2400/pyqmd/pull/16),
+  [`6d9e622`](https://github.com/after2400/pyqmd/commit/6d9e62259c7db4ecccb2bdd50d0e6646a01cdf34))
+
+
 ## v0.7.0 (2026-09-29)
 
 ### ✨ Features
