@@ -303,6 +303,152 @@ def test_capture_mcp_snapshots_uses_its_own_isolated_index(tmp_path, monkeypatch
     assert mcp_parents != {output_dir / "_quality_capture"}
 
 
+def _repo_layout(tmp_path, monkeypatch):
+    """A pyqmd main checkout holding the gitignored data/ corpus, a git
+    worktree of it (where the script and node_ref/ live), and a sibling Node
+    checkout -- the layout a real capture from a worktree runs in."""
+    import parity.capture_node_snapshots as capture_module
+
+    main_root = tmp_path / "pyqmd"
+    worktree_root = main_root / ".claude" / "worktrees" / "wt"
+    qmd_root = tmp_path / "qmd"
+    corpus_dir = main_root / "data" / "fake" / "corpus"
+    corpus_dir.mkdir(parents=True)
+    (corpus_dir / "doc1.md").write_text("# Doc 1\nbiomaterials content")
+    queries_file = main_root / "data" / "fake" / "queries.json"
+    queries_file.write_text("[]")
+    profile = DatasetProfile(
+        name="fake", corpus_dir=corpus_dir, queries_file=queries_file, qrels_file=None
+    )
+    monkeypatch.setattr(capture_module, "_pyqmd_repo_roots", lambda: [worktree_root, main_root])
+    output_dir = worktree_root / "parity" / "node_ref" / "fake"
+    return profile, qmd_root, output_dir
+
+
+def _echo_repo_paths(qmd_root, index_path, corpus_dir) -> str:
+    return f"Index: {index_path}\nCorpus: {corpus_dir}/doc1.md\nNode: {qmd_root}/src/store.ts"
+
+
+def test_capture_structural_snapshots_scrubs_repo_paths_from_raw_output(tmp_path, monkeypatch):
+    import parity.capture_node_snapshots as capture_module
+    from parity._node_cli import NodeCliResult
+
+    profile, qmd_root, output_dir = _repo_layout(tmp_path, monkeypatch)
+
+    def fake_run_node_cli(qmd_repo_root, args, index_path, extra_env=None):
+        text = _echo_repo_paths(qmd_repo_root, index_path, profile.corpus_dir)
+        return NodeCliResult(exit_code=0, stdout=text, stderr=text)
+
+    monkeypatch.setattr(capture_module, "run_node_cli", fake_run_node_cli)
+
+    capture_structural_snapshots(profile, qmd_root, output_dir)
+
+    raw_files = list((output_dir / "cli_raw").glob("*.json"))
+    assert raw_files
+    for raw_path in raw_files:
+        text = raw_path.read_text()
+        assert str(tmp_path) not in text, raw_path.name
+        raw = json.loads(text)
+        for stream in ("stdout", "stderr"):
+            assert raw[stream] == (
+                "Index: <pyqmd-repo>/parity/node_ref/fake/_structural_capture/index.sqlite\n"
+                "Corpus: <pyqmd-repo>/data/fake/corpus/doc1.md\n"
+                "Node: <qmd-repo>/src/store.ts"
+            )
+
+
+def test_capture_mcp_snapshots_scrubs_repo_paths_from_raw_output(tmp_path, monkeypatch):
+    import parity.capture_node_snapshots as capture_module
+    from parity._node_cli import NodeCliResult
+
+    profile, qmd_root, output_dir = _repo_layout(tmp_path, monkeypatch)
+
+    def fake_run_node_cli(qmd_repo_root, args, index_path, extra_env=None):
+        return NodeCliResult(exit_code=0, stdout="", stderr="")
+
+    async def fake_capture_mcp_scenarios_async(qmd_repo_root, index_path, scenarios):
+        text = _echo_repo_paths(qmd_repo_root, index_path, profile.corpus_dir)
+        extracted = {s.name: {"fake": True} for s in scenarios}
+        raw = {
+            s.name: {
+                "content": [{"type": "text", "text": text}],
+                "structuredContent": {"paths": [text], "count": 1},
+                "isError": False,
+            }
+            for s in scenarios
+        }
+        return extracted, raw
+
+    monkeypatch.setattr(capture_module, "run_node_cli", fake_run_node_cli)
+    monkeypatch.setattr(
+        capture_module, "capture_mcp_scenarios_async", fake_capture_mcp_scenarios_async
+    )
+
+    capture_module.capture_mcp_snapshots(profile, qmd_root, output_dir)
+
+    expected = (
+        "Index: <pyqmd-repo>/parity/node_ref/fake/_mcp_capture/index.sqlite\n"
+        "Corpus: <pyqmd-repo>/data/fake/corpus/doc1.md\n"
+        "Node: <qmd-repo>/src/store.ts"
+    )
+    raw_files = list((output_dir / "mcp_raw").glob("*.json"))
+    assert raw_files
+    for raw_path in raw_files:
+        text = raw_path.read_text()
+        assert str(tmp_path) not in text, raw_path.name
+        assert json.loads(text) == {
+            "content": [{"type": "text", "text": expected}],
+            "structuredContent": {"paths": [expected], "count": 1},
+            "isError": False,
+        }
+
+
+def test_repo_placeholders_nested_pyqmd_checkout_wins_over_node_checkout(tmp_path, monkeypatch):
+    """An older layout nested pyqmd inside the Node checkout (<qmd>/python);
+    longest-first replacement must still attribute its paths to pyqmd."""
+    import parity.capture_node_snapshots as capture_module
+    from parity._text_normalize import replace_paths
+
+    qmd_root = tmp_path / "qmd"
+    monkeypatch.setattr(capture_module, "_pyqmd_repo_roots", lambda: [qmd_root / "python"])
+
+    placeholders = capture_module._repo_placeholders(qmd_root)
+
+    text = f"{qmd_root}/python/data/x.md {qmd_root}/src/cli.ts"
+    assert replace_paths(text, placeholders) == "<pyqmd-repo>/data/x.md <qmd-repo>/src/cli.ts"
+
+
+def _git(cwd, *args):
+    import subprocess
+
+    subprocess.run(
+        ["git", "-c", "user.name=t", "-c", "user.email=t@example.com", *args],
+        cwd=cwd,
+        check=True,
+        capture_output=True,
+    )
+
+
+def test_pyqmd_repo_roots_includes_main_checkout_from_a_worktree(tmp_path):
+    from parity.capture_node_snapshots import _pyqmd_repo_roots
+
+    main_root = tmp_path / "main"
+    main_root.mkdir()
+    _git(main_root, "init", "-q")
+    _git(main_root, "commit", "-q", "--allow-empty", "-m", "init")
+    worktree_root = tmp_path / "wt"
+    _git(main_root, "worktree", "add", "-q", str(worktree_root))
+
+    assert _pyqmd_repo_roots(worktree_root) == [worktree_root.resolve(), main_root.resolve()]
+    assert _pyqmd_repo_roots(main_root) == [main_root.resolve()]
+
+
+def test_pyqmd_repo_roots_outside_git_is_just_the_checkout(tmp_path):
+    from parity.capture_node_snapshots import _pyqmd_repo_roots
+
+    assert _pyqmd_repo_roots(tmp_path) == [tmp_path.resolve()]
+
+
 def _fake_flow_node_cli(qmd_repo_root, args, index_path, extra_env=None):
     from parity._node_cli import NodeCliResult
 
