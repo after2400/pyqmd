@@ -7,7 +7,7 @@ from pyqmd_mlx.store._indexing import scan_and_register_collection
 runner = CliRunner()
 
 
-def _fake_embed(texts, model, kind="query"):
+def _fake_embed(texts, model, kind="query", title=None):
     return [[1.0, 0.0] for _ in texts]
 
 
@@ -48,9 +48,9 @@ def test_embed_scoped_to_collection(monkeypatch):
 def test_embed_is_idempotent_without_force(monkeypatch):
     calls = []
 
-    def counting_embed(texts, model, kind="query"):
+    def counting_embed(texts, model, kind="query", title=None):
         calls.append(texts)
-        return _fake_embed(texts, model, kind)
+        return _fake_embed(texts, model, kind, title)
 
     store = Store(":memory:", embed_fn=counting_embed)
     store.add_collection("notes", "/notes")
@@ -66,9 +66,9 @@ def test_embed_is_idempotent_without_force(monkeypatch):
 def test_embed_force_re_embeds(monkeypatch):
     calls = []
 
-    def counting_embed(texts, model, kind="query"):
+    def counting_embed(texts, model, kind="query", title=None):
         calls.append(texts)
-        return _fake_embed(texts, model, kind)
+        return _fake_embed(texts, model, kind, title)
 
     store = Store(":memory:", embed_fn=counting_embed)
     store.add_collection("notes", "/notes")
@@ -179,9 +179,9 @@ def test_embed_auto_after_regex_reembeds_stale_boundaries(monkeypatch):
     # print "All content hashes already have embeddings."
     calls = []
 
-    def counting_embed(texts, model, kind="query"):
+    def counting_embed(texts, model, kind="query", title=None):
         calls.append(texts)
-        return _fake_embed(texts, model, kind)
+        return _fake_embed(texts, model, kind, title)
 
     store = Store(":memory:", embed_fn=counting_embed)
     store.add_collection("code", "/code")

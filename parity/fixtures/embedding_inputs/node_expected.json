@@ -1,0 +1,111 @@
+{
+  "node_commit": "8262698206328711cf4a63b516d636fcb972319c",
+  "model": "hf:ggml-org/embeddinggemma-300M-GGUF/embeddinggemma-300M-Q8_0.gguf",
+  "fingerprint": "c37385",
+  "documents": {
+    "archive.v2/README": {
+      "title": "archive",
+      "chunks": [
+        {
+          "pos": 0,
+          "text": "Plain readme text inside a dotted directory.\n",
+          "formatted": "title: archive | text: Plain readme text inside a dotted directory.\n"
+        }
+      ]
+    },
+    "emoji-notes.md": {
+      "title": "Garden Log",
+      "chunks": [
+        {
+          "pos": 0,
+          "text": "# 📝 Notes\n\n## Garden Log\n\nTomatoes planted today.\n",
+          "formatted": "title: Garden Log | text: # 📝 Notes\n\n## Garden Log\n\nTomatoes planted today.\n"
+        }
+      ]
+    },
+    "headings-only.org": {
+      "title": "Project Plan",
+      "chunks": [
+        {
+          "pos": 0,
+          "text": "* Project Plan\n** Tasks\nWrite the outline.\n",
+          "formatted": "title: Project Plan | text: * Project Plan\n** Tasks\nWrite the outline.\n"
+        }
+      ]
+    },
+    "helpers.py": {
+      "title": "helpers",
+      "chunks": [
+        {
+          "pos": 0,
+          "text": "# setup helpers\n\ndef setup():\n    return True\n",
+          "formatted": "title: helpers | text: # setup helpers\n\ndef setup():\n    return True\n"
+        }
+      ]
+    },
+    "long-sections.md": {
+      "title": "Field Notes on Rivers",
+      "chunks": [
+        {
+          "pos": 0,
+          "text": "# Field Notes on Rivers\n\nAn introduction to rivers in general.\n\n## 1. Sources\n\nSection 1 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Section 1 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Section 1 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. \n\n### Sources details\n\nRivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears.\n\n## 2. Channels\n\nSection 2 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Section 2 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Section 2 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. \n\n### Channels details\n\nRivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears.\n\n## 3. Floods\n\nSection 3 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Section 3 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Section 3 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. \n",
+          "formatted": "title: Field Notes on Rivers | text: # Field Notes on Rivers\n\nAn introduction to rivers in general.\n\n## 1. Sources\n\nSection 1 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Section 1 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Section 1 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. \n\n### Sources details\n\nRivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears.\n\n## 2. Channels\n\nSection 2 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Section 2 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Section 2 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. \n\n### Channels details\n\nRivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears.\n\n## 3. Floods\n\nSection 3 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Section 3 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Section 3 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. \n"
+        },
+        {
+          "pos": 2173,
+          "text": " it slows and clears. Section 3 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Section 3 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. \n\n### Floods details\n\nRivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears.\n\n## 4. Deltas\n\nSection 4 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Section 4 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Section 4 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. \n\n### Deltas details\n\nRivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears.\n\n## 5. Wildlife\n\nSection 5 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Section 5 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Section 5 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. \n\n### Wildlife details\n\nRivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears.\n",
+          "formatted": "title: Field Notes on Rivers | text:  it slows and clears. Section 3 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Section 3 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. \n\n### Floods details\n\nRivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears.\n\n## 4. Deltas\n\nSection 4 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Section 4 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Section 4 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. \n\n### Deltas details\n\nRivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears.\n\n## 5. Wildlife\n\nSection 5 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Section 5 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Section 5 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. \n\n### Wildlife details\n\nRivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears.\n"
+        },
+        {
+          "pos": 4468,
+          "text": "te summer it slows and clears. \n\n### Wildlife details\n\nRivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears.\n\n## 6. Management\n\nSection 6 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Section 6 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Section 6 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. \n\n### Management details\n\nRivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears.\n",
+          "formatted": "title: Field Notes on Rivers | text: te summer it slows and clears. \n\n### Wildlife details\n\nRivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears.\n\n## 6. Management\n\nSection 6 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Section 6 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Section 6 note. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. \n\n### Management details\n\nRivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears. Rivers carry sediment from the hills to the sea, and the load they carry changes with the season. In spring the water runs fast and brown; by late summer it slows and clears.\n"
+        }
+      ]
+    },
+    "no-heading.md": {
+      "title": "no-heading",
+      "chunks": [
+        {
+          "pos": 0,
+          "text": "Just a paragraph of plain text with no heading at all.\n",
+          "formatted": "title: no-heading | text: Just a paragraph of plain text with no heading at all.\n"
+        }
+      ]
+    },
+    "notes-first.md": {
+      "title": "Weekly Planning",
+      "chunks": [
+        {
+          "pos": 0,
+          "text": "# Notes\n\nA short introduction.\n\n## Weekly Planning\n\nPlan the week on Monday.\n",
+          "formatted": "title: Weekly Planning | text: # Notes\n\nA short introduction.\n\n## Weekly Planning\n\nPlan the week on Monday.\n"
+        }
+      ]
+    },
+    "shouting.MD": {
+      "title": "Loud Title",
+      "chunks": [
+        {
+          "pos": 0,
+          "text": "# Loud Title\n\nUpper-case extension, still markdown.\n",
+          "formatted": "title: Loud Title | text: # Loud Title\n\nUpper-case extension, still markdown.\n"
+        }
+      ]
+    },
+    "titled.org": {
+      "title": "Reading List",
+      "chunks": [
+        {
+          "pos": 0,
+          "text": "#+TITLE: Reading List\n\n* Fiction\nA few novels.\n",
+          "formatted": "title: Reading List | text: #+TITLE: Reading List\n\n* Fiction\nA few novels.\n"
+        }
+      ]
+    }
+  },
+  "queries": {
+    "how do river deltas form": "task: search result | query: how do river deltas form",
+    "Weekly planning": "task: search result | query: Weekly planning"
+  }
+}

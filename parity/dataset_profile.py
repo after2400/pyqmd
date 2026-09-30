@@ -16,6 +16,21 @@ import yaml
 _BUILTIN_DEFAULT = Path(__file__).resolve().parent / "datasets" / "scifact.yaml"
 _ENV_VAR = "PARITY_DATASET_CONFIG"
 
+# Missing-corpus hints for the built-in profiles (keyed by file name, and
+# only given for a profile next to the built-in default).
+_PREPARE_HINTS = {
+    "scifact.yaml": (
+        " Run 'uv run scripts/prepare_scifact_corpus.py' to generate it "
+        "-- it downloads BEIR SciFact (~33MB) and isn't tracked in git, "
+        "so a fresh clone starts without it."
+    ),
+    "conditionalqa.yaml": (
+        " Run 'uv run scripts/prepare_conditionalqa_corpus.py' to generate it "
+        "-- it downloads ConditionalQA (~6MB) and isn't tracked in git, "
+        "so a fresh clone starts without it."
+    ),
+}
+
 
 @dataclass
 class DatasetProfile:
@@ -46,13 +61,8 @@ def load_dataset_profile(config_path: str | Path) -> DatasetProfile:
 
     corpus_dir = (base_dir / raw["corpus_dir"]).resolve()
     if not corpus_dir.is_dir():
-        hint = (
-            " Run 'uv run scripts/prepare_scifact_corpus.py' to generate it "
-            "-- it downloads BEIR SciFact (~33MB) and isn't tracked in git, "
-            "so a fresh clone starts without it."
-            if config_path == _BUILTIN_DEFAULT
-            else ""
-        )
+        is_builtin = config_path.parent == _BUILTIN_DEFAULT.parent
+        hint = _PREPARE_HINTS.get(config_path.name, "") if is_builtin else ""
         raise ValueError(
             f"dataset profile {config_path}: corpus_dir '{corpus_dir}' is not a directory.{hint}"
         )

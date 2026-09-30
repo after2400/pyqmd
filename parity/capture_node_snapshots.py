@@ -5,7 +5,7 @@ Node qmd checkout for the active dataset profile. NEVER run automatically
 
 Usage: uv run python -m parity.capture_node_snapshots \\
     --qmd-repo-root <path-to-qmd-checkout> [--dataset-config path/to/profile.yaml] \\
-    [--phase all|structural|cli-flow|mcp|quality] [--quality-runs N]
+    [--phase all|structural|cli-flow|mcp|quality|inputs] [--quality-runs N]
 """
 
 from __future__ import annotations
@@ -16,6 +16,7 @@ import csv
 import json
 import os
 import shutil
+import subprocess
 import time
 from datetime import UTC, datetime
 from pathlib import Path
@@ -214,6 +215,36 @@ def write_commit_file(qmd_repo_root: Path, output_dir: Path) -> None:
     )
 
 
+EMBEDDING_INPUTS_DIR = Path(__file__).resolve().parent / "fixtures" / "embedding_inputs"
+_NODE_INPUTS_SCRIPT = Path(__file__).resolve().parent / "node_embedding_inputs.ts"
+
+
+def _run_bun_inputs_script(qmd_repo_root: Path, fixtures_dir: Path) -> str:
+    result = subprocess.run(
+        ["bun", str(_NODE_INPUTS_SCRIPT), str(qmd_repo_root), str(fixtures_dir)],
+        cwd=qmd_repo_root,
+        capture_output=True,
+        text=True,
+        timeout=300,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"Node embedding-inputs script failed: {result.stderr}")
+    return result.stdout
+
+
+def capture_embedding_inputs(
+    qmd_repo_root: Path, fixtures_dir: Path = EMBEDDING_INPUTS_DIR
+) -> None:
+    """Record Node's exact embedding inputs for the fixture documents into
+    fixtures_dir/node_expected.json. Profile-independent (needs no index or
+    model), so it's its own phase and not part of `all`."""
+    captured = json.loads(_run_bun_inputs_script(qmd_repo_root, fixtures_dir))
+    record = {"node_commit": get_node_commit(qmd_repo_root), **captured}
+    (fixtures_dir / "node_expected.json").write_text(
+        json.dumps(record, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
+
+
 def _load_qrels(qrels_file: Path) -> dict[str, set[str]]:
     relevance: dict[str, set[str]] = {}
     with qrels_file.open(newline="") as f:
@@ -243,9 +274,10 @@ def _run_query_pass(
 ) -> dict[str, list[str]]:
     per_query_ranked: dict[str, list[str]] = {}
     for entry in queries:
-        result = run_node_cli(
-            qmd_repo_root, ["query", entry["query"], "--format", "json"], index_path
-        )
+        args = ["query", entry["query"], "--format", "json"]
+        if entry.get("intent"):
+            args += ["--intent", entry["intent"]]
+        result = run_node_cli(qmd_repo_root, args, index_path)
         rows = json.loads(result.stdout) if result.exit_code == 0 else []
         if has_qrels:
             per_query_ranked[entry["query_id"]] = [
@@ -298,6 +330,12 @@ def capture_quality_baseline(
                 raise RuntimeError(f"Node `cleanup` failed: {cleanup_result.stderr}")
         started = time.monotonic()
         per_query_ranked = _run_query_pass(qmd_repo_root, index_path, queries, has_qrels=True)
+        if i == 0:
+            # One pass's rankings, for comparing pyqmd's top 10 with Node's
+            # (test_quality prints the overlap; it doesn't assert on it).
+            (quality_dir / "node_query_ranked.json").write_text(
+                json.dumps(per_query_ranked, indent=2)
+            )
         metrics = compute_metrics([per_query_ranked[q["query_id"]] for q in queries], relevant_sets)
         per_run.append(metrics)
         summary = ", ".join(f"{name}={value:.4f}" for name, value in metrics.items())
@@ -307,7 +345,7 @@ def capture_quality_baseline(
     (quality_dir / "node_query_baseline.json").write_text(json.dumps(baseline, indent=2))
 
 
-PHASES = ("all", "structural", "cli-flow", "mcp", "quality")
+PHASES = ("all", "structural", "cli-flow", "mcp", "quality", "inputs")
 
 
 def _check_commit_matches(qmd_repo_root: Path, output_dir: Path) -> None:
@@ -337,6 +375,11 @@ def run_capture(
 ) -> None:
     if phase != "all":
         _check_commit_matches(qmd_repo_root, output_dir)
+    if phase == "inputs":
+        print("Capturing embedding inputs for parity/fixtures/embedding_inputs/...")
+        capture_embedding_inputs(qmd_repo_root)
+        print(f"Done. Written to {EMBEDDING_INPUTS_DIR / 'node_expected.json'}")
+        return
     if phase in ("all", "structural"):
         print(f"Capturing structural snapshots for profile '{profile.name}'...")
         capture_structural_snapshots(profile, qmd_repo_root, output_dir)
@@ -376,7 +419,11 @@ def build_arg_parser() -> argparse.ArgumentParser:
         "--phase",
         choices=PHASES,
         default="all",
-        help="Capture only one phase (requires the checkout to match COMMIT.txt). Default: all.",
+        help=(
+            "Capture only one phase (requires the checkout to match COMMIT.txt). Default: all. "
+            "'inputs' (Node's embedding inputs for parity/fixtures/embedding_inputs/) is "
+            "never part of 'all'."
+        ),
     )
     parser.add_argument(
         "--quality-runs",

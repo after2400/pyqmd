@@ -1,7 +1,7 @@
 from pyqmd_mlx.store import Store
 
 
-def _fake_embed(texts, model, kind="query"):
+def _fake_embed(texts, model, kind="query", title=None):
     # deterministic, distinguishable fake vectors: encode text length so
     # tests can assert on which vectors got inserted.
     return [[float(len(t)), 0.0, 0.0, 0.0] for t in texts]
@@ -54,9 +54,9 @@ def test_index_content_inserts_into_vectors_vec():
 def test_index_content_is_a_noop_when_already_embedded_with_same_model():
     calls = []
 
-    def counting_embed(texts, model, kind="query"):
+    def counting_embed(texts, model, kind="query", title=None):
         calls.append(texts)
-        return _fake_embed(texts, model, kind)
+        return _fake_embed(texts, model, kind, title)
 
     store = Store(":memory:", embed_fn=counting_embed)
     content_hash = store.hash_content("doc")
@@ -143,16 +143,16 @@ def test_index_content_auto_chunk_strategy_uses_filepath():
 def test_index_content_regex_strategy_ignores_filepath():
     # filepath is only consulted when chunk_strategy="auto" -- passing one
     # under the default "regex" strategy must produce the same chunk count
-    # chunk_document() itself produces without a filepath. (Comparing
+    # embedding_chunks() itself produces without a filepath. (Comparing
     # against a second index_content() call would risk hitting its
     # already-embedded no-op branch instead of re-chunking -- comparing
-    # against chunk_document() directly avoids that pitfall.)
-    from pyqmd_mlx.store._chunking import chunk_document
+    # against embedding_chunks() directly avoids that pitfall.)
+    from pyqmd_mlx.store._chunking import embedding_chunks
 
     store = Store(":memory:", embed_fn=_fake_embed)
     body = "\n".join(f"def func_{i}():\n    return {i}\n" for i in range(400))
     h = store.hash_content(body)
-    expected_chunk_count = len(chunk_document(body))
+    expected_chunk_count = len(embedding_chunks(body, None))
     assert expected_chunk_count > 1  # sanity: body forces a real split
 
     chunk_count = store.index_content(h, body, filepath="sample.py")
@@ -186,7 +186,7 @@ def test_index_content_updates_positions_on_strategy_switch():
     # Finding #2: same chunk *count* under both strategies must not keep
     # stale regex boundaries -- stored positions must move to the fresh
     # AST-derived ones.
-    from pyqmd_mlx.store._chunking import chunk_document
+    from pyqmd_mlx.store._chunking import embedding_chunks
 
     store = Store(":memory:", embed_fn=_fake_embed)
     store.add_collection("code", "/code")
@@ -201,9 +201,7 @@ def test_index_content_updates_positions_on_strategy_switch():
             "SELECT pos FROM content_vectors WHERE hash = ? ORDER BY seq", (h,)
         ).fetchall()
     ]
-    expected = [
-        pos for _text, pos in chunk_document(body, filepath="sample.py", chunk_strategy="auto")
-    ]
+    expected = [pos for _text, pos in embedding_chunks(body, "sample.py", "auto")]
     assert stored == expected
     assert store.count_pending_embed("code", chunk_strategy="auto") == 0
     store.close()
@@ -214,9 +212,9 @@ def test_index_content_skips_reembed_when_boundaries_identical():
     # identically, switching strategy must NOT burn embedding work.
     calls = []
 
-    def counting_embed(texts, model, kind="query"):
+    def counting_embed(texts, model, kind="query", title=None):
         calls.append(texts)
-        return _fake_embed(texts, model, kind)
+        return _fake_embed(texts, model, kind, title)
 
     store = Store(":memory:", embed_fn=counting_embed)
     body = "short markdown doc"
@@ -242,4 +240,62 @@ def test_store_rejects_invalid_chunk_strategy():
             pass
         else:
             raise AssertionError("expected ValueError")
+    store.close()
+
+
+def _recording_store(calls):
+    def recording_embed(texts, model, kind="query", title=None):
+        calls.append({"texts": list(texts), "kind": kind, "title": title})
+        return [[1.0, 0.0, 0.0, 0.0] for _ in texts]
+
+    return Store(":memory:", embed_fn=recording_embed)
+
+
+def test_index_content_passes_the_title_from_the_filepath():
+    calls = []
+    store = _recording_store(calls)
+    body = "# setup helpers\n\ndef setup():\n    pass\n"
+    store.index_content(store.hash_content(body), body, filepath="src/helpers.py")
+    assert calls == [{"texts": [body], "kind": "document", "title": "helpers"}]
+    store.close()
+
+
+def test_index_content_without_filepath_uses_the_documents_min_path():
+    calls = []
+    store = _recording_store(calls)
+    store.add_collection("notes", "/notes")
+    body = "# Rivers\nwater"
+    h = store.hash_content(body)
+    store.insert_content(h, body, "2026-01-01T00:00:00Z")
+    # Inserted MAX-first, so neither "first inserted" nor MAX(path) passes.
+    for path in ("b/copy.md", "a/rivers.txt"):
+        store.insert_document("notes", path, "t", h, "2026-01-01T00:00:00Z", "2026-01-01T00:00:00Z")
+    store.index_content(h, body)
+    # MIN(path) is a/rivers.txt: no .txt extractor, so the file name wins.
+    assert calls[0]["title"] == "rivers"
+    store.close()
+
+
+def test_index_content_with_no_document_and_no_filepath_embeds_untitled():
+    calls = []
+    store = _recording_store(calls)
+    store.index_content(store.hash_content("bare"), "bare")
+    assert calls[0]["title"] is None
+    store.close()
+
+
+def test_index_content_stores_embed_time_chunk_positions():
+    from pyqmd_mlx.store._chunking import embedding_chunks
+
+    store = Store(":memory:", embed_fn=_fake_embed)
+    body = "A sentence of plain filler text for chunking.\n\n" * 130
+    h = store.hash_content(body)
+    store.index_content(h, body, filepath="a.md")
+    stored = [
+        r["pos"]
+        for r in store.conn.execute(
+            "SELECT pos FROM content_vectors WHERE hash = ? ORDER BY seq", (h,)
+        ).fetchall()
+    ]
+    assert stored == [pos for _text, pos in embedding_chunks(body, "a.md")]
     store.close()

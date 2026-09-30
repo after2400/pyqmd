@@ -1,0 +1,49 @@
+{
+  "add_collection": {
+    "exit_code": 0,
+    "indexed": 4,
+    "updated": 0,
+    "unchanged": 0,
+    "removed": 0
+  },
+  "context_add_root": {
+    "exit_code": 0
+  },
+  "context_add_sub": {
+    "exit_code": 0
+  },
+  "context_list_after_adds": {
+    "exit_code": 0,
+    "entries": [
+      {
+        "collection": "flow-ctx",
+        "path": "/ (root)",
+        "context": "root context"
+      },
+      {
+        "collection": "flow-ctx",
+        "path": "sub.md",
+        "context": "file context"
+      }
+    ]
+  },
+  "context_add_bad_path": {
+    "exit_code": 1
+  },
+  "context_remove_root": {
+    "exit_code": 0
+  },
+  "context_remove_root_again": {
+    "exit_code": 1
+  },
+  "context_list_final": {
+    "exit_code": 0,
+    "entries": [
+      {
+        "collection": "flow-ctx",
+        "path": "sub.md",
+        "context": "file context"
+      }
+    ]
+  }
+}

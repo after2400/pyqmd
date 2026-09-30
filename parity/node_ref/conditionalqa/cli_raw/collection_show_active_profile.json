@@ -1,0 +1,6 @@
+{
+  "args": ["collection", "show", "conditionalqa"],
+  "stdout": "Collection: conditionalqa\n  Path:     <pyqmd-repo>/data/conditionalqa/corpus\n  Pattern:  **/*.md\n  Include:  yes (default)\n",
+  "stderr": "",
+  "exit_code": 0
+}

@@ -34,6 +34,19 @@ def format_doc_for_embedding(text: str, model_id: str, title: str | None = None)
     return f"title: {title or 'none'} | text: {text}"
 
 
+def format_embedding_inputs(
+    texts: list[str], model_id: str, kind: str, title: str | None = None
+) -> list[str]:
+    """The exact strings embed() tokenizes. Shared with the model-input
+    parity test (tests/parity/test_embedding_inputs.py), so what's compared
+    against Node is what the model sees. `title` applies to documents only."""
+    if kind == "document":
+        return [format_doc_for_embedding(text, model_id, title) for text in texts]
+    if kind == "query":
+        return [format_query_for_embedding(text, model_id) for text in texts]
+    raise ValueError(f"kind must be 'query' or 'document', got {kind!r}")
+
+
 RERANK_SYSTEM_PROMPT = (
     "Judge whether the Document meets the requirements based on the Query "
     'and the Instruct provided. Note that the answer can only be "yes" or "no".'

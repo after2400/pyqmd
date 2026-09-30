@@ -6,7 +6,7 @@ from pyqmd_mlx.mcp.server import _query_impl, build_server
 from pyqmd_mlx.store import Store
 
 
-def _fake_embed(texts, model, kind="query"):
+def _fake_embed(texts, model, kind="query", title=None):
     return [[1.0, 0.0] for _ in texts]
 
 

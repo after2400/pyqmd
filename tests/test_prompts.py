@@ -1,6 +1,7 @@
 from pyqmd_mlx.llm._prompts import (
     build_rerank_prompt,
     format_doc_for_embedding,
+    format_embedding_inputs,
     format_query_for_embedding,
     is_qwen3_embedding_model,
     score_from_logits,
@@ -64,3 +65,15 @@ def test_score_from_logits_favors_higher_true_logit():
 
 def test_score_from_logits_equal_logits_is_half():
     assert abs(score_from_logits(1.0, 1.0) - 0.5) < 1e-9
+
+
+def test_format_embedding_inputs_documents_get_the_title():
+    assert format_embedding_inputs(
+        ["a", "b"], "mlx-community/embeddinggemma-300m-8bit", "document", "T"
+    ) == ["title: T | text: a", "title: T | text: b"]
+
+
+def test_format_embedding_inputs_queries():
+    assert format_embedding_inputs(["q"], "mlx-community/embeddinggemma-300m-8bit", "query") == [
+        "task: search result | query: q"
+    ]

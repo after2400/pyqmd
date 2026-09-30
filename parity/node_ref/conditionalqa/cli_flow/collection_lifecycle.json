@@ -1,0 +1,56 @@
+{
+  "add_flow_a": {
+    "exit_code": 0,
+    "indexed": 4,
+    "updated": 0,
+    "unchanged": 0,
+    "removed": 0
+  },
+  "add_flow_a_duplicate": {
+    "exit_code": 1
+  },
+  "add_flow_dummy": {
+    "exit_code": 0,
+    "indexed": 4,
+    "updated": 0,
+    "unchanged": 0,
+    "removed": 0
+  },
+  "list_after_adds": {
+    "exit_code": 0,
+    "names": ["flow-a", "flow-dummy"]
+  },
+  "set_update_cmd": {
+    "exit_code": 0
+  },
+  "rename_collision": {
+    "exit_code": 1
+  },
+  "rename_real": {
+    "exit_code": 0
+  },
+  "show_flow_b": {
+    "exit_code": 0,
+    "mentions_profile_name": true
+  },
+  "exclude_flow_b": {
+    "exit_code": 0
+  },
+  "list_shows_excluded_tag": {
+    "exit_code": 0,
+    "names": ["flow-b", "flow-dummy"]
+  },
+  "include_flow_b": {
+    "exit_code": 0
+  },
+  "remove_flow_b": {
+    "exit_code": 0
+  },
+  "remove_flow_b_again": {
+    "exit_code": 1
+  },
+  "list_final": {
+    "exit_code": 0,
+    "names": ["flow-dummy"]
+  }
+}

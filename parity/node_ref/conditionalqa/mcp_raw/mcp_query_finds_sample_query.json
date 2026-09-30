@@ -1,0 +1,104 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "Found 10 results for \"How long will it be before I hear back from the court?\":\n\n#3085f3 75% conditionalqa/complain-about-school.md - Complain about a school\n#920326 38% conditionalqa/being-taken-to-employment-tribunal-by-employee.md - Being taken to an employment tribunal\n#ef86b8 34% conditionalqa/employment-tribunals.md - Make a claim to an employment tribunal\n#12c271 27% conditionalqa/make-court-claim-for-money.md - Make a court claim for money\n#dae411 15% conditionalqa/planning-permission-england-wales.md - Planning permission\n#d9dcbc 12% conditionalqa/apply-land-registration-tribunal.md - Apply to the land registration tribunal\n#aab9c8 10% conditionalqa/traffic-commissioner.md - Traffic commissioner public inquiries\n#0c9d02 9% conditionalqa/respond-to-court-claim-for-money.md - Respond to a court claim for money\n#a2afb5 9% conditionalqa/private-renting-evictions.md - Private renting for tenants: evictions\n#bf43cf 8% conditionalqa/appeal-magistrates-court-decision.md - Appeal a magistrates\u2019 court decision"
+    }
+  ],
+  "structuredContent": {
+    "results": [
+      {
+        "docid": "#3085f3",
+        "file": "conditionalqa/complain-about-school.md",
+        "title": "Complain about a school",
+        "score": 0.75,
+        "context": null,
+        "line": 178,
+        "snippet": "178: @@ -177,4 @@ (176 before, 70 after)\n179: \n180: Once the tribunal has registered your complaint, it will ask you and the school you\u2019re complaining about if you agree to the complaint being decided without a hearing.\n181: \n182: If you both agree, the tribunal will make a decision about your complaint."
+      },
+      {
+        "docid": "#920326",
+        "file": "conditionalqa/being-taken-to-employment-tribunal-by-employee.md",
+        "title": "Being taken to an employment tribunal",
+        "score": 0.38,
+        "context": null,
+        "line": 53,
+        "snippet": "53: @@ -52,4 @@ (51 before, 116 after)\n54: \n55: You\u2019ll be given at least 14 days\u2019 notice before the hearing - you\u2019ll get a letter confirming this. You must prepare documents and arrange for witnesses to attend in advance.\n56: \n57: ### \u2018Preliminary hearing\u2019"
+      },
+      {
+        "docid": "#ef86b8",
+        "file": "conditionalqa/employment-tribunals.md",
+        "title": "Make a claim to an employment tribunal",
+        "score": 0.34,
+        "context": null,
+        "line": 124,
+        "snippet": "124: @@ -123,4 @@ (122 before, 154 after)\n125: - the name and address of the witness\n126: - details of what the witness may be able to say and how it will help your case\n127: - the reason the witness has refused to attend (if they gave you one)\n128: "
+      },
+      {
+        "docid": "#12c271",
+        "file": "conditionalqa/make-court-claim-for-money.md",
+        "title": "Make a court claim for money",
+        "score": 0.27,
+        "context": null,
+        "line": 79,
+        "snippet": "79: @@ -78,4 @@ (77 before, 163 after)\n80: \n81: You may be able to claim the fees back if you win the case.\n82: \n83: Find out more about court fees."
+      },
+      {
+        "docid": "#dae411",
+        "file": "conditionalqa/planning-permission-england-wales.md",
+        "title": "Planning permission",
+        "score": 0.15,
+        "context": null,
+        "line": 31,
+        "snippet": "31: @@ -30,4 @@ (29 before, 41 after)\n32: - some outdoor signs and advertisements - though there are special rules around adverts\n33: - demolition - but before you begin you must get approval to demolish from your local planning authority (LPA) through your local council\n34: \n35: There are other projects that might not need planning permission - for..."
+      },
+      {
+        "docid": "#d9dcbc",
+        "file": "conditionalqa/apply-land-registration-tribunal.md",
+        "title": "Apply to the land registration tribunal",
+        "score": 0.12,
+        "context": null,
+        "line": 11,
+        "snippet": "11: @@ -10,4 @@ (9 before, 143 after)\n12: \n13: The tribunal is independent of government. A judge will listen to both sides of the argument before making a decision.\n14: \n15: ### Help you can get"
+      },
+      {
+        "docid": "#aab9c8",
+        "file": "conditionalqa/traffic-commissioner.md",
+        "title": "Traffic commissioner public inquiries",
+        "score": 0.1,
+        "context": null,
+        "line": 71,
+        "snippet": "71: @@ -70,4 @@ (69 before, 51 after)\n72: \n73: You cannot ask for the hearing to be changed to another date, unless you have a good reason that can be backed up. For example, if you\u2019re going on holiday, you may need to send evidence to show it was pre-booked.\n74: \n75: ## At the public inquiry"
+      },
+      {
+        "docid": "#0c9d02",
+        "file": "conditionalqa/respond-to-court-claim-for-money.md",
+        "title": "Respond to a court claim for money",
+        "score": 0.09,
+        "context": null,
+        "line": 27,
+        "snippet": "27: @@ -26,4 @@ (25 before, 113 after)\n28: \n29: Send a cheque or postal order made payable to the person or business you owe money to (the \u2018claimant\u2019). Their name and address will be on the claim form.\n30: \n31: You can also pay the claimant in person."
+      },
+      {
+        "docid": "#a2afb5",
+        "file": "conditionalqa/private-renting-evictions.md",
+        "title": "Private renting for tenants: evictions",
+        "score": 0.09,
+        "context": null,
+        "line": 75,
+        "snippet": "75: @@ -74,4 @@ (73 before, 287 after)\n76: \n77: From 1 June 2021 bailiffs can carry out evictions if you live in England. In Wales, currently you will not be evicted unless there\u2019s a serious reason, such as if you\u2019re living there illegally or committing anti-social behaviour.\n78: \n79: ### Rules for excluded tenancies or licences"
+      },
+      {
+        "docid": "#bf43cf",
+        "file": "conditionalqa/appeal-magistrates-court-decision.md",
+        "title": "Appeal a magistrates\u2019 court decision",
+        "score": 0.08,
+        "context": null,
+        "line": 16,
+        "snippet": "16: @@ -15,4 @@ (14 before, 136 after)\n17: \n18: If you disagree with the decision but there has been no mistake you will normally need to appeal to the Crown Court.\n19: \n20: ### If you did not know about your court case"
+      }
+    ]
+  },
+  "isError": false,
+  "resultType": "complete"
+}

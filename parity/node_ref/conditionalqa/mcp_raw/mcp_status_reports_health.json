@@ -1,0 +1,25 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "QMD Index Status:\n  Total documents: 652\n  Needs embedding: 0\n  Vector index: yes\n  Collections: 1\n    - conditionalqa: <pyqmd-repo>/data/conditionalqa/corpus (652 docs)"
+    }
+  ],
+  "structuredContent": {
+    "totalDocuments": 652,
+    "needsEmbedding": 0,
+    "hasVectorIndex": true,
+    "pendingMetadata": 0,
+    "collections": [
+      {
+        "name": "conditionalqa",
+        "path": "<pyqmd-repo>/data/conditionalqa/corpus",
+        "pattern": "**/*.md",
+        "documents": 652,
+        "lastUpdated": "2026-09-29T15:08:20.094Z"
+      }
+    ]
+  },
+  "isError": false,
+  "resultType": "complete"
+}

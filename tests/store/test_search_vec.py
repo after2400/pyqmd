@@ -2,7 +2,7 @@ from pyqmd_mlx.store import Store
 from pyqmd_mlx.store._metadata_filter import parse_metadata_filter
 
 
-def _fake_embed_similarity(texts, model, kind="query"):
+def _fake_embed_similarity(texts, model, kind="query", title=None):
     # Encode "closeness to a target concept" as a 2D vector so cosine
     # distance produces a predictable ranking in tests: texts containing
     # "auth" point toward (1, 0), everything else toward (0, 1).
@@ -99,7 +99,7 @@ def test_search_vec_dedupes_multi_chunk_document_by_filepath():
     store.close()
 
 
-def _fake_embed_starvation(texts, model, kind="query"):
+def _fake_embed_starvation(texts, model, kind="query", title=None):
     # Direction-only 2D vectors (cosine distance ignores magnitude): the
     # "small" collection's one relevant document embeds a bit further from
     # the query direction than every "big" collection document, so a global

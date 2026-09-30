@@ -21,7 +21,10 @@ classifiers = [
   "Topic :: Text Processing :: Indexing",
 ]
 dependencies = [
-  "mlx-embeddings>=0.1.0",
+  # Exact: pyqmd_mlx.llm.embed carries its own copy of this release's
+  # gemma3_text forward pass (to fix its padding mask), so a new release
+  # must be checked against it before the pin moves.
+  "mlx-embeddings==0.1.0",
   "mlx-lm>=0.31.3",
   "sqlite-vec>=0.1.9",
   "typer>=0.15",
@@ -54,8 +57,9 @@ target-version = "py312"
 # markdown-code-block formatting treats each fenced block as a
 # standalone module and re-indents it accordingly, which changes what
 # the snippet visually communicates, not just its whitespace. Excluding
-# docs/ keeps `ruff format` scoped to real source/test code.
-extend-exclude = ["docs/"]
+# docs/ keeps `ruff format` scoped to real source/test code. The
+# model-input fixtures are compared byte for byte with Node's capture.
+extend-exclude = ["docs/", "parity/fixtures/embedding_inputs/"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I"]

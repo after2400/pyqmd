@@ -615,3 +615,114 @@ def test_quality_runs_flag_rejects_non_positive_or_non_integer_counts(bad):
 
     with pytest.raises(SystemExit):
         build_arg_parser().parse_args(["--qmd-repo-root", "x", "--quality-runs", bad])
+
+
+def test_load_queries_keeps_an_intent_when_present(tmp_path):
+    from parity._queries import load_queries
+
+    queries_file = tmp_path / "queries.json"
+    queries_file.write_text(
+        json.dumps(
+            [
+                {"query_id": "dev-0", "query": "q0", "intent": "scenario 0"},
+                {"query_id": "dev-1", "query": "q1"},
+            ]
+        )
+    )
+    profile = DatasetProfile(
+        name="fake", corpus_dir=tmp_path, queries_file=queries_file, qrels_file=None
+    )
+
+    assert load_queries(profile) == [
+        {"query_id": "dev-0", "query": "q0", "intent": "scenario 0"},
+        {"query_id": "dev-1", "query": "q1"},
+    ]
+
+
+def test_quality_capture_passes_intent_and_saves_pass_one_rankings(tmp_path, monkeypatch):
+    import parity.capture_node_snapshots as capture_module
+
+    corpus_dir = tmp_path / "corpus"
+    corpus_dir.mkdir()
+    (corpus_dir / "a.md").write_text("# A\nalpha")
+    queries_file = tmp_path / "queries.json"
+    queries_file.write_text(
+        json.dumps([{"query_id": "dev-0", "query": "alpha?", "intent": "I need alpha"}])
+    )
+    qrels_file = tmp_path / "qrels.tsv"
+    qrels_file.write_text("query-id\tcorpus-id\tscore\ndev-0\ta\t1\n")
+    profile = DatasetProfile(
+        name="fake", corpus_dir=corpus_dir, queries_file=queries_file, qrels_file=qrels_file
+    )
+    query_calls = []
+
+    def fake_run_node_cli(qmd_repo_root, args, index_path, extra_env=None):
+        from parity._node_cli import NodeCliResult
+
+        if args[0] == "query":
+            query_calls.append(args)
+            return NodeCliResult(0, json.dumps([{"file": "qmd://fake/a.md"}]), "")
+        return NodeCliResult(0, "", "")
+
+    monkeypatch.setattr(capture_module, "run_node_cli", fake_run_node_cli)
+
+    capture_module.capture_quality_baseline(profile, tmp_path, tmp_path / "out", runs=2)
+
+    assert query_calls[0] == ["query", "alpha?", "--format", "json", "--intent", "I need alpha"]
+    ranked = json.loads((tmp_path / "out" / "quality" / "node_query_ranked.json").read_text())
+    assert ranked == {"dev-0": ["a"]}
+
+
+def test_capture_embedding_inputs_writes_node_expected_with_commit(tmp_path, monkeypatch):
+    import parity.capture_node_snapshots as capture_module
+
+    fixtures = tmp_path / "fixtures"
+    fixtures.mkdir()
+    seen = {}
+
+    def fake_bun(qmd_repo_root, fixtures_dir):
+        seen["args"] = (qmd_repo_root, fixtures_dir)
+        return json.dumps(
+            {"model": "m", "fingerprint": "abc123", "documents": {"a.md": {}}, "queries": {}}
+        )
+
+    monkeypatch.setattr(capture_module, "_run_bun_inputs_script", fake_bun)
+    monkeypatch.setattr(capture_module, "get_node_commit", lambda root: "8262698")
+
+    capture_module.capture_embedding_inputs(tmp_path / "qmd", fixtures)
+
+    assert seen["args"] == (tmp_path / "qmd", fixtures)
+    written = json.loads((fixtures / "node_expected.json").read_text())
+    assert written == {
+        "node_commit": "8262698",
+        "model": "m",
+        "fingerprint": "abc123",
+        "documents": {"a.md": {}},
+        "queries": {},
+    }
+
+
+def test_inputs_phase_is_not_part_of_all(tmp_path, monkeypatch):
+    import parity.capture_node_snapshots as capture_module
+
+    calls = []
+    for name in (
+        "capture_structural_snapshots",
+        "capture_cli_flow_snapshots",
+        "capture_mcp_snapshots",
+        "capture_quality_baseline",
+        "write_commit_file",
+    ):
+        monkeypatch.setattr(capture_module, name, lambda *a, _n=name, **k: calls.append(_n))
+    monkeypatch.setattr(
+        capture_module, "capture_embedding_inputs", lambda *a, **k: calls.append("inputs")
+    )
+
+    profile = _fake_profile(tmp_path)
+    capture_module.run_capture(profile, tmp_path, tmp_path / "out", "all")
+    assert "inputs" not in calls
+
+    calls.clear()
+    monkeypatch.setattr(capture_module, "_check_commit_matches", lambda *a: None)
+    capture_module.run_capture(profile, tmp_path, tmp_path / "out", "inputs")
+    assert calls == ["inputs"]

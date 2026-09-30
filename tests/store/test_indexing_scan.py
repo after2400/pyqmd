@@ -317,3 +317,36 @@ def test_scan_falls_back_to_index_time_when_birthtime_missing(tmp_path, monkeypa
     assert doc is not None
     assert doc["created_at"]  # fell back to index time, not a crash
     store.close()
+
+
+def test_rescan_refreshes_a_title_that_changed_without_a_content_change(tmp_path):
+    (tmp_path / "helpers.py").write_text("# setup helpers\n\ndef setup():\n    pass\n")
+    store = Store(":memory:")
+    store.add_collection("code", str(tmp_path), pattern="**/*.py")
+    scan_and_register_collection(store, str(tmp_path), "**/*.py", "code")
+    doc = store.find_active_document("code", "helpers.py")
+    # An index written before the title fix stored a different title.
+    store.update_document(doc["id"], "Stale Zebra Title", doc["hash"], doc["modified_at"])
+
+    result = scan_and_register_collection(store, str(tmp_path), "**/*.py", "code")
+
+    assert (result.indexed, result.updated, result.unchanged) == (0, 1, 0)
+    refreshed = store.find_active_document("code", "helpers.py")
+    assert refreshed["title"] == "helpers"
+    assert refreshed["hash"] == doc["hash"]
+    assert refreshed["modified_at"] != doc["modified_at"]
+    assert store.search_fts("zebra") == []
+    assert [r.title for r in store.search_fts("helpers")] == ["helpers"]
+    store.close()
+
+
+def test_rescan_leaves_a_current_title_unchanged(tmp_path):
+    (tmp_path / "a.md").write_text("# Hello\nworld")
+    store = Store(":memory:")
+    store.add_collection("notes", str(tmp_path))
+    scan_and_register_collection(store, str(tmp_path), "**/*.md", "notes")
+
+    result = scan_and_register_collection(store, str(tmp_path), "**/*.md", "notes")
+
+    assert (result.updated, result.unchanged) == (0, 1)
+    store.close()

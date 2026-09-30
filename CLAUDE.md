@@ -90,7 +90,7 @@ pyqmd [command...] -h, --help         # Help for pyqmd or any (sub)command
 
 ```sh
 -c, --collection <name>   # Restrict to collection(s), repeatable
--n <num>                  # Result limit (default 20 for search/vsearch, 10 for query)
+-n <num>                  # Result limit (default 20)
 --min-score <num>         # Minimum score threshold
 --filter <json>           # Metadata filter (recursive and/or/not, eq/ne/gt/lt, in/nin/all, exists)
 --full                    # Show full document content, not just a snippet

@@ -7,25 +7,21 @@ dropping metadata-extraction sync (syncDocumentMetadata) -- a feature
 pyqmd_mlx.store deliberately does not implement. Orphaned-content cleanup
 (cleanupOrphanedContent) IS ported -- see the call to
 store.cleanup_orphaned_content() at the end of
-scan_and_register_collection. Title extraction covers Markdown (# or ##
-heading) only for v1; store.ts also has an .org extractor, out of scope
-here -- other file types fall back to the filename stem.
+scan_and_register_collection. Titles come from pyqmd_mlx.store._title, a
+port of store.ts's per-extension extractors.
 """
 
 from __future__ import annotations
 
-import re
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from fnmatch import fnmatch
 from pathlib import Path
 
+from ._title import extract_title
 from .store import Store
 
 _EXCLUDE_DIRS = {"node_modules", ".git", ".cache", "vendor", "dist", "build"}
-
-_MD_HEADING_RE = re.compile(r"^##?\s+(.+)$", re.MULTILINE)
-_MD_H2_RE = re.compile(r"^##\s+(.+)$", re.MULTILINE)
 
 
 @dataclass
@@ -69,18 +65,6 @@ def split_glob_mask(mask: str) -> list[str]:
     if current.strip():
         parts.append(current.strip())
     return parts
-
-
-def _extract_title(content: str, relative_path: str) -> str:
-    match = _MD_HEADING_RE.search(content)
-    if match:
-        title = match.group(1).strip()
-        if title in ("\U0001f4dd Notes", "Notes"):
-            next_match = _MD_H2_RE.search(content)
-            if next_match:
-                return next_match.group(1).strip()
-        return title
-    return Path(relative_path).stem
 
 
 def scan_and_register_collection(
@@ -141,7 +125,7 @@ def scan_and_register_collection(
 
         seen_relative.add(relative_posix)
         content_hash = store.hash_content(content)
-        title = _extract_title(content, relative_posix)
+        title = extract_title(content, relative_posix)
         stat = filepath.stat()
         modified_at = datetime.fromtimestamp(stat.st_mtime, tz=UTC).isoformat()
 
@@ -149,8 +133,15 @@ def scan_and_register_collection(
         if existing:
             document_id = existing["id"]
             if existing["hash"] == content_hash:
-                result.unchanged += 1
                 content_changed = False
+                if existing["title"] != title:
+                    # Same content, new title (a changed extraction rule):
+                    # Node's reindexCollection updates it and counts it as
+                    # updated, with modified_at set to the scan time.
+                    store.update_document_title(existing["id"], title, now)
+                    result.updated += 1
+                else:
+                    result.unchanged += 1
             else:
                 store.insert_content(content_hash, content, now)
                 store.update_document(existing["id"], title, content_hash, modified_at)

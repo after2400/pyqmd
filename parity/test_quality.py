@@ -48,6 +48,7 @@ def test_pyqmd_meets_qrels_mode_quality_bar(active_profile, indexed_pyqmd_store)
 
     ranked_lists = []
     relevant_sets = []
+    pyqmd_ranked: dict[str, list[str]] = {}
     for entry in queries:
         # Node's baseline was captured with `-n` omitted -> its real CLI
         # default (DEFAULT_SEARCH_LIMIT, 20) -- querying at a shallower
@@ -55,9 +56,14 @@ def test_pyqmd_meets_qrels_mode_quality_bar(active_profile, indexed_pyqmd_store)
         # @10 cutoff regardless of retrieval depth) compare a 20-deep list
         # against a 10-deep one (a 2026-09-13 parity-suite review finding).
         results = indexed_pyqmd_store.query(
-            entry["query"], limit=DEFAULT_SEARCH_LIMIT, collection=active_profile.name
+            entry["query"],
+            limit=DEFAULT_SEARCH_LIMIT,
+            collection=active_profile.name,
+            intent=entry.get("intent"),
         )
-        ranked_lists.append([_doc_id_from_file(r.file) for r in results])
+        ranked = [_doc_id_from_file(r.file) for r in results]
+        pyqmd_ranked[entry["query_id"]] = ranked
+        ranked_lists.append(ranked)
         relevant_sets.append(qrels.get(entry["query_id"], set()))
 
     pyqmd_metrics = compute_metrics(ranked_lists, relevant_sets)
@@ -84,6 +90,20 @@ def test_pyqmd_meets_qrels_mode_quality_bar(active_profile, indexed_pyqmd_store)
         if pyqmd_value < node_value - margin:
             failures.append(line)
 
+    try:
+        node_ranked = load_quality_file(active_profile.name, "node_query_ranked.json")
+    except FileNotFoundError:
+        node_ranked = None
+    if node_ranked is not None:
+        overlaps = [
+            top_k_overlap(pyqmd_ranked[qid], node_ranked.get(qid, []), k=10) for qid in pyqmd_ranked
+        ]
+        print(
+            f"Mean top-10 overlap with Node's pass-1 rankings: "
+            f"{sum(overlaps) / len(overlaps):.3f} over {len(overlaps)} queries "
+            f"(informational; OVERLAP_THRESHOLD={OVERLAP_THRESHOLD} applies to agreement mode)"
+        )
+
     assert not failures, "pyqmd fell more than the margin below Node on:\n" + "\n".join(failures)
 
 
@@ -101,7 +121,10 @@ def test_pyqmd_agrees_with_node_when_no_qrels(active_profile, indexed_pyqmd_stor
     correlations = []
     for entry in queries:
         results = indexed_pyqmd_store.query(
-            entry["query"], limit=10, collection=active_profile.name
+            entry["query"],
+            limit=10,
+            collection=active_profile.name,
+            intent=entry.get("intent"),
         )
         # Compare full qmd://collection/path strings, not stems: the capture
         # script stores node_query_results.json values in that same

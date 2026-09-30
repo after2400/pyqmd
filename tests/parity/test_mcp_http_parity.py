@@ -24,7 +24,7 @@ _ORIGIN = f"http://127.0.0.1:{_PORT}"
 _APP_HEADERS = {"Accept": "application/json, text/event-stream", "Content-Type": "application/json"}
 
 
-def _fake_embed(texts, model, kind="query"):
+def _fake_embed(texts, model, kind="query", title=None):
     return [[1.0, 0.0] for _ in texts]
 
 

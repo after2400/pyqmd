@@ -1,0 +1,24 @@
+{
+  "steps": {
+    "add_collection": {
+      "args": [
+        "collection",
+        "add",
+        "<CORPUS_1>",
+        "--name",
+        "flow-ast-chunking",
+        "--mask",
+        "*.py"
+      ],
+      "stdout": "Creating collection 'flow-ast-chunking'...\nCollection: <CORPUS_1> (*.py)\n\nIndexed: 1 new, 0 updated, 0 unchanged, 0 removed\n\nRun 'qmd embed' to update embeddings (1 unique hashes need vectors)\n\u2713 Collection 'flow-ast-chunking' created successfully\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    "embed_auto": {
+      "args": ["embed", "--chunk-strategy", "auto"],
+      "stdout": "Model: embeddinggemma-300M-Q8_0.gguf\n\n\r\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 100%                                    \n\n\u2713 Done! Embedded 2 chunks from 1 documents in 1s\n",
+      "stderr": "\u001b[?25l\u001b[?25h",
+      "exit_code": 0
+    }
+  }
+}

@@ -2,6 +2,22 @@
 functions. AST-aware chunking (tree-sitter, roadmap #5) adds
 function/class-boundary break points via pyqmd_mlx.store._ast when
 chunk_document() is called with chunk_strategy="auto".
+
+Two sizes, as in Node: embedding_chunks() (what gets embedded, 2700-char
+chunks) and chunk_document()'s defaults (query-time best-chunk selection,
+3600-char chunks).
+
+Differences from Node, deliberate (docs/specs/2026-09-29-embedding-input-
+parity-design.md, section 8):
+- a cut or an overlap start that lands inside a code fence moves forward
+  to the fence's end (Node can cut inside a fence);
+- a trailing unmatched ``` is ignored (Node treats it as a fence to end of
+  file);
+- when the overlap would stall, the next chunk starts halfway through the
+  previous one (Node starts it at the previous end, with no overlap).
+And one not yet ported: Node re-splits an embed-time chunk that turns out
+longer than 900 real tokens (chunkDocumentByTokensWithLlm); pyqmd keeps
+the character estimate.
 """
 
 import re
@@ -17,6 +33,14 @@ CHUNK_SIZE_CHARS = CHUNK_SIZE_TOKENS * 4  # 3600
 CHUNK_OVERLAP_CHARS = CHUNK_OVERLAP_TOKENS * 4  # 540
 CHUNK_WINDOW_TOKENS = 200
 CHUNK_WINDOW_CHARS = CHUNK_WINDOW_TOKENS * 4  # 800
+
+# Embed-time chunking (store.ts's chunkDocumentByTokensWithLlm) estimates 3
+# chars per token (prose ~4, code ~2), so embedding chunks are smaller than
+# query-time ones.
+EMBED_CHARS_PER_TOKEN = 3
+EMBED_CHUNK_SIZE_CHARS = CHUNK_SIZE_TOKENS * EMBED_CHARS_PER_TOKEN  # 2700
+EMBED_CHUNK_OVERLAP_CHARS = CHUNK_OVERLAP_TOKENS * EMBED_CHARS_PER_TOKEN  # 405
+EMBED_CHUNK_WINDOW_CHARS = CHUNK_WINDOW_TOKENS * EMBED_CHARS_PER_TOKEN  # 600
 
 VALID_CHUNK_STRATEGIES = ("regex", "auto")
 
@@ -232,3 +256,19 @@ def chunk_document(
         char_pos = next_pos
 
     return chunks
+
+
+def embedding_chunks(
+    content: str, filepath: str | None, chunk_strategy: Literal["regex", "auto"] = "regex"
+) -> list[tuple[str, int]]:
+    """The chunks Store.index_content embeds: chunk_document() at Node's
+    embed-time size. Every embed-side caller goes through here, so the
+    stored positions and the already-embedded check always agree."""
+    return chunk_document(
+        content,
+        max_chars=EMBED_CHUNK_SIZE_CHARS,
+        overlap_chars=EMBED_CHUNK_OVERLAP_CHARS,
+        window_chars=EMBED_CHUNK_WINDOW_CHARS,
+        filepath=filepath,
+        chunk_strategy=chunk_strategy,
+    )

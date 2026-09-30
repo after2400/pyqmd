@@ -31,12 +31,13 @@ parity/datasets/local/*
 
 # A user's own captured Node baseline lands in parity/node_ref/<profile>/
 # regardless of where their profile YAML lives -- ignore every profile's
-# captured data there except the built-in scifact one (the project's own
-# tracked golden-reference data). Without this, README's "your data and
-# captured baseline never get committed" claim was false for anything
-# outside parity/datasets/local/ itself.
+# captured data there except the built-in ones (scifact, conditionalqa;
+# the project's own tracked golden-reference data). Without this, README's
+# "your data and captured baseline never get committed" claim was false
+# for anything outside parity/datasets/local/ itself.
 parity/node_ref/*
 !parity/node_ref/scifact/
+!parity/node_ref/conditionalqa/
 
 # Scratch Node collection-registry/index-DB state the capture script
 # creates as isolation artifacts, not intended captured output --

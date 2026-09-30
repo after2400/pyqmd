@@ -40,9 +40,26 @@ uv run python -m parity.capture_node_snapshots --qmd-repo-root /path/to/qmd --da
 ```
 
 This writes into `parity/node_ref/<your-profile-name>/`, which is
-gitignored for every profile except the built-in `scifact` one — your
-captured baseline never gets committed, regardless of where your profile
-YAML itself lives.
+gitignored for every profile except the built-in `scifact` and
+`conditionalqa` ones — your captured baseline never gets committed,
+regardless of where your profile YAML itself lives.
+
+## The built-in SciFact profile
+
+[SciFact](https://github.com/allenai/scifact) (Wadden et al., 2020), as
+packaged by BEIR: 5,183 scientific abstracts, with claims as queries and
+abstract-level qrels.
+
+```sh
+uv run scripts/prepare_scifact_corpus.py   # writes data/scifact/ (gitignored)
+```
+
+Credits: abstracts from Semantic Scholar's S2ORC, used under the
+[ODC-By 1.0](https://opendatacommons.org/licenses/by/1-0/) licence;
+claims from the SciFact dataset, used under
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Neither is
+committed here; the captured Node snapshots in `parity/node_ref/scifact/`
+quote excerpts.
 
 ## Re-capturing the built-in scifact profile
 
@@ -65,6 +82,16 @@ uv run python -m parity.capture_node_snapshots --qmd-repo-root <path-to-qmd-chec
 A single-phase capture refuses to run unless the Node checkout's `HEAD`
 matches `COMMIT.txt`, and leaves `COMMIT.txt` untouched, so one profile
 directory never mixes snapshots from two Node commits.
+
+`--phase inputs` records Node's exact embedding inputs (title, embed-time
+chunks, formatted strings, fingerprint) for the small fixture documents in
+`parity/fixtures/embedding_inputs/`, into `node_expected.json` there. It
+needs no index or model, takes seconds, and isn't part of `all`. Run it
+with the default profile (its commit check uses scifact's `COMMIT.txt`):
+
+```sh
+uv run python -m parity.capture_node_snapshots --qmd-repo-root <path-to-qmd-checkout> --phase inputs
+```
 
 The quality phase runs the full query set `--quality-runs` times
 (default 30) against a single indexed corpus, clearing Node's `llm_cache` with
@@ -97,6 +124,30 @@ the step's text check entirely. Both require a reason. Allowed
 categories: Node-only machinery, deliberate pyqmd supersets, and
 unavoidable output differences (see the 2026-09-24 output-text parity
 design spec).
+
+## The built-in ConditionalQA profile
+
+A second built-in profile, for what scifact can't exercise: long,
+sectioned documents. [ConditionalQA](https://github.com/haitian-sun/ConditionalQA)
+(Sun et al., 2021) is 652 UK government guidance pages from gov.uk
+(median ~6.5 KB, 2–3 embedding chunks, real `##`/`###` sections) with
+questions that each come with a short personal scenario. The profile uses
+one question per dev-set page (59 queries), the question as the query and
+the scenario as `--intent`, and page-level qrels.
+
+```sh
+uv run scripts/prepare_conditionalqa_corpus.py   # writes data/conditionalqa/ (gitignored)
+uv run pytest parity/ --dataset-config parity/datasets/conditionalqa.yaml
+```
+
+Credits: page text © Crown copyright, from gov.uk, used under the
+[Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/);
+questions and scenarios from the ConditionalQA dataset, whose README
+restricts it to research use. Neither is committed here; the captured
+Node snapshots in `parity/node_ref/conditionalqa/` quote short excerpts.
+
+Capture its Node baseline like scifact's, with
+`--dataset-config parity/datasets/conditionalqa.yaml`.
 
 ## Known gaps
 
