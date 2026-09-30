@@ -53,6 +53,54 @@ def _fresh_isolated_index(output_dir: Path, phase_name: str) -> Path:
     return index_path
 
 
+_PYQMD_REPO_ROOT = Path(__file__).resolve().parent.parent
+
+
+def _pyqmd_repo_roots(repo_root: Path = _PYQMD_REPO_ROOT) -> list[Path]:
+    """The pyqmd checkout this script runs from plus, when that's a git
+    worktree, the main checkout: data/ is gitignored, so every profile's
+    corpus_dir lives under the main checkout even when node_ref/ (and thus
+    each phase's isolated index) is under the worktree."""
+    repo_root = repo_root.resolve()
+    roots = [repo_root]
+    try:
+        common_dir = subprocess.run(
+            ["git", "rev-parse", "--path-format=absolute", "--git-common-dir"],
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        return roots
+    common_path = Path(common_dir).resolve()
+    if common_path.name == ".git" and common_path.parent != repo_root:
+        roots.append(common_path.parent)
+    return roots
+
+
+def _repo_placeholders(qmd_repo_root: Path) -> dict[str, str]:
+    """Placeholders for the structural and MCP phases' raw output, whose
+    paths (corpus_dir, the isolated index) sit under a repo root rather
+    than a per-run temp dir. replace_paths goes longest first, so a pyqmd
+    checkout nested inside the Node one still becomes <pyqmd-repo>."""
+    placeholders = {str(qmd_repo_root.resolve()): "<qmd-repo>"}
+    for root in _pyqmd_repo_roots():
+        placeholders[str(root)] = "<pyqmd-repo>"
+    return placeholders
+
+
+def _scrub_paths(value: object, placeholders: dict[str, str]) -> object:
+    """replace_paths over every string in a JSON-shaped value."""
+    if isinstance(value, str):
+        return replace_paths(value, placeholders)
+    if isinstance(value, list):
+        return [_scrub_paths(item, placeholders) for item in value]
+    if isinstance(value, dict):
+        return {key: _scrub_paths(item, placeholders) for key, item in value.items()}
+    return value
+
+
 def capture_structural_snapshots(
     profile: DatasetProfile, qmd_repo_root: Path, output_dir: Path
 ) -> None:
@@ -85,6 +133,7 @@ def capture_structural_snapshots(
             stale.unlink()
     cli_raw_dir.mkdir(parents=True, exist_ok=True)
 
+    placeholders = _repo_placeholders(qmd_repo_root)
     for scenario in build_cli_scenarios(profile):
         result = run_node_cli(qmd_repo_root, scenario.args, index_path)
         extracted = scenario.extract(result.stdout, result.exit_code)
@@ -92,17 +141,16 @@ def capture_structural_snapshots(
         # Raw output alongside the extracted summary -- a future
         # extract-function fix (like the ones landed in this fix round) can
         # reprocess these directly instead of forcing a full multi-hour
-        # re-capture just to pick up the new extraction logic.
+        # re-capture just to pick up the new extraction logic. Repo paths
+        # are scrubbed so the committed files never hold a personal path.
+        raw = {
+            "args": scenario.args,
+            "stdout": result.stdout,
+            "stderr": result.stderr,
+            "exit_code": result.exit_code,
+        }
         (cli_raw_dir / f"{scenario.name}.json").write_text(
-            json.dumps(
-                {
-                    "args": scenario.args,
-                    "stdout": result.stdout,
-                    "stderr": result.stderr,
-                    "exit_code": result.exit_code,
-                },
-                indent=2,
-            )
+            json.dumps(_scrub_paths(raw, placeholders), indent=2)
         )
 
 
@@ -200,11 +248,14 @@ def capture_mcp_snapshots(profile: DatasetProfile, qmd_repo_root: Path, output_d
 
     scenarios = build_mcp_scenarios(profile)
     extracted, raw = asyncio.run(capture_mcp_scenarios_async(qmd_repo_root, index_path, scenarios))
+    placeholders = _repo_placeholders(qmd_repo_root)
     for scenario in scenarios:
         (mcp_dir / f"{scenario.name}.json").write_text(
             json.dumps(extracted[scenario.name], indent=2)
         )
-        (mcp_raw_dir / f"{scenario.name}.json").write_text(json.dumps(raw[scenario.name], indent=2))
+        (mcp_raw_dir / f"{scenario.name}.json").write_text(
+            json.dumps(_scrub_paths(raw[scenario.name], placeholders), indent=2)
+        )
 
 
 def write_commit_file(qmd_repo_root: Path, output_dir: Path) -> None:

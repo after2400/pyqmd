@@ -102,6 +102,13 @@ run-to-run standard deviation. See the qrels-mode margin note below for why.
 uv run python -m parity.capture_node_snapshots --qmd-repo-root <path-to-qmd-checkout> --phase quality --quality-runs 30
 ```
 
+The structural and MCP phases also keep Node's raw output (`cli_raw/`,
+`mcp_raw/`) for reprocessing. Before writing it, the capture replaces the
+pyqmd checkout root with `<pyqmd-repo>` and the Node checkout root with
+`<qmd-repo>`. The pyqmd root covers both the checkout the script runs from
+and, from a git worktree, the main checkout, which holds the gitignored
+`data/` corpora. That way no local path is committed.
+
 ### Output-text parity for CLI flows
 
 Besides the extracted shapes in `cli_flow/`, the flow capture writes
