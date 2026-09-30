@@ -1,0 +1,6 @@
+{
+  "args": ["collection", "list"],
+  "stdout": "Collections (1):\n\nconditionalqa (qmd://conditionalqa/)\n  Pattern:  **/*.md\n  Files:    652\n  Updated:  9m ago\n\n",
+  "stderr": "",
+  "exit_code": 0
+}

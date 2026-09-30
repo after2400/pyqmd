@@ -1,0 +1,88 @@
+{
+  "steps": {
+    "add_flow_a": {
+      "args": ["collection", "add", "<CORPUS_1>", "--name", "flow-a"],
+      "stdout": "Creating collection 'flow-a'...\nCollection: <CORPUS_1> (**/*.md)\n\nIndexed: 4 new, 0 updated, 0 unchanged, 0 removed\n\nRun 'qmd embed' to update embeddings (4 unique hashes need vectors)\n\u2713 Collection 'flow-a' created successfully\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    "add_flow_a_duplicate": {
+      "args": ["collection", "add", "<CORPUS_1>", "--name", "flow-a"],
+      "stdout": "",
+      "stderr": "Collection 'flow-a' already exists.\nUse a different name with --name <name>\n",
+      "exit_code": 1
+    },
+    "add_flow_dummy": {
+      "args": ["collection", "add", "<CORPUS_2>", "--name", "flow-dummy"],
+      "stdout": "Creating collection 'flow-dummy'...\nCollection: <CORPUS_2> (**/*.md)\n\nIndexed: 4 new, 0 updated, 0 unchanged, 0 removed\n\nRun 'qmd embed' to update embeddings (4 unique hashes need vectors)\n\u2713 Collection 'flow-dummy' created successfully\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    "list_after_adds": {
+      "args": ["collection", "list"],
+      "stdout": "Collections (2):\n\nflow-a (qmd://flow-a/)\n  Pattern:  **/*.md\n  Files:    4\n  Updated:  0s ago\n\nflow-dummy (qmd://flow-dummy/)\n  Pattern:  **/*.md\n  Files:    4\n  Updated:  0s ago\n\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    "set_update_cmd": {
+      "args": ["collection", "update-cmd", "flow-a", "echo", "hi"],
+      "stdout": "\u2713 Set update command for 'flow-a': echo hi\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    "rename_collision": {
+      "args": ["collection", "rename", "flow-a", "flow-dummy"],
+      "stdout": "",
+      "stderr": "Collection name already exists: flow-dummy\nChoose a different name or remove the existing collection first.\n",
+      "exit_code": 1
+    },
+    "rename_real": {
+      "args": ["collection", "rename", "flow-a", "flow-b"],
+      "stdout": "\u2713 Renamed collection 'flow-a' to 'flow-b'\n  Virtual paths updated: qmd://flow-a/ \u2192 qmd://flow-b/\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    "show_flow_b": {
+      "args": ["collection", "show", "flow-b"],
+      "stdout": "Collection: flow-b\n  Path:     <CORPUS_1>\n  Pattern:  **/*.md\n  Include:  yes (default)\n  Update:   echo hi\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    "exclude_flow_b": {
+      "args": ["collection", "exclude", "flow-b"],
+      "stdout": "\u2713 Collection 'flow-b' excluded from default queries\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    "list_shows_excluded_tag": {
+      "args": ["collection", "list"],
+      "stdout": "Collections (2):\n\nflow-b (qmd://flow-b/) [excluded]\n  Pattern:  **/*.md\n  Files:    4\n  Updated:  0s ago\n\nflow-dummy (qmd://flow-dummy/)\n  Pattern:  **/*.md\n  Files:    4\n  Updated:  0s ago\n\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    "include_flow_b": {
+      "args": ["collection", "include", "flow-b"],
+      "stdout": "\u2713 Collection 'flow-b' included in default queries\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    "remove_flow_b": {
+      "args": ["collection", "remove", "flow-b"],
+      "stdout": "\u2713 Removed collection 'flow-b'\n  Deleted 24 documents\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    "remove_flow_b_again": {
+      "args": ["collection", "remove", "flow-b"],
+      "stdout": "",
+      "stderr": "Collection not found: flow-b\nRun 'qmd collection list' to see available collections.\n",
+      "exit_code": 1
+    },
+    "list_final": {
+      "args": ["collection", "list"],
+      "stdout": "Collections (1):\n\nflow-dummy (qmd://flow-dummy/)\n  Pattern:  **/*.md\n  Files:    4\n  Updated:  0s ago\n\n",
+      "stderr": "",
+      "exit_code": 0
+    }
+  }
+}

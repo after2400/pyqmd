@@ -1,0 +1,104 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "Found 10 results for \"zzqqxx_no_such_term_zzqqxx\":\n\n#5c062d 75% conditionalqa/tenancy-agreements-a-guide-for-landlords.md - Tenancy agreements: a guide for landlords (England and Wales)\n#3b5a65 38% conditionalqa/payroll-annual-reporting.md - Payroll: annual reporting and tasks\n#b2f73a 25% conditionalqa/employers-parental-bereavement-pay-leave.md - Statutory Parental Bereavement Pay and Leave: employer guide\n#69c78f 15% conditionalqa/hand-luggage-restrictions.md - Hand luggage restrictions at UK airports\n#2af64e 12% conditionalqa/tax-codes.md - Tax codes\n#01cafe 10% conditionalqa/payroll-errors.md - Fix problems with running payroll\n#74f34b 9% conditionalqa/schools-admissions.md - School admissions\n#ba4d6d 8% conditionalqa/settled-status-eu-citizens-families.md - Apply to the EU Settlement Scheme (settled and pre-settled status)\n#342ea6 7% conditionalqa/paye-for-employers.md - PAYE and payroll for employers\n#cceb36 6% conditionalqa/lasting-power-attorney-duties.md - Lasting power of attorney: acting as an attorney"
+    }
+  ],
+  "structuredContent": {
+    "results": [
+      {
+        "docid": "#5c062d",
+        "file": "conditionalqa/tenancy-agreements-a-guide-for-landlords.md",
+        "title": "Tenancy agreements: a guide for landlords (England and Wales)",
+        "score": 0.75,
+        "context": null,
+        "line": 1,
+        "snippet": "1: @@ -1,3 @@ (0 before, 236 after)\n2: # Tenancy agreements: a guide for landlords (England and Wales)\n3: \n4: ## Overview"
+      },
+      {
+        "docid": "#3b5a65",
+        "file": "conditionalqa/payroll-annual-reporting.md",
+        "title": "Payroll: annual reporting and tasks",
+        "score": 0.38,
+        "context": null,
+        "line": 1,
+        "snippet": "1: @@ -1,3 @@ (0 before, 122 after)\n2: # Payroll: annual reporting and tasks\n3: \n4: ## Overview"
+      },
+      {
+        "docid": "#b2f73a",
+        "file": "conditionalqa/employers-parental-bereavement-pay-leave.md",
+        "title": "Statutory Parental Bereavement Pay and Leave: employer guide",
+        "score": 0.25,
+        "context": null,
+        "line": 1,
+        "snippet": "1: @@ -1,3 @@ (0 before, 267 after)\n2: # Statutory Parental Bereavement Pay and Leave: employer guide\n3: \n4: ## Overview"
+      },
+      {
+        "docid": "#69c78f",
+        "file": "conditionalqa/hand-luggage-restrictions.md",
+        "title": "Hand luggage restrictions at UK airports",
+        "score": 0.15,
+        "context": null,
+        "line": 1,
+        "snippet": "1: @@ -1,3 @@ (0 before, 247 after)\n2: # Hand luggage restrictions at UK airports\n3: \n4: ## Overview"
+      },
+      {
+        "docid": "#2af64e",
+        "file": "conditionalqa/tax-codes.md",
+        "title": "Tax codes",
+        "score": 0.12,
+        "context": null,
+        "line": 1,
+        "snippet": "1: @@ -1,3 @@ (0 before, 166 after)\n2: # Tax codes\n3: \n4: ## Overview"
+      },
+      {
+        "docid": "#01cafe",
+        "file": "conditionalqa/payroll-errors.md",
+        "title": "Fix problems with running payroll",
+        "score": 0.1,
+        "context": null,
+        "line": 1,
+        "snippet": "1: @@ -1,3 @@ (0 before, 345 after)\n2: # Fix problems with running payroll\n3: \n4: ## Your PAYE bill is not what you expected"
+      },
+      {
+        "docid": "#74f34b",
+        "file": "conditionalqa/schools-admissions.md",
+        "title": "School admissions",
+        "score": 0.09,
+        "context": null,
+        "line": 1,
+        "snippet": "1: @@ -1,3 @@ (0 before, 270 after)\n2: # School admissions\n3: \n4: ## Choosing schools"
+      },
+      {
+        "docid": "#ba4d6d",
+        "file": "conditionalqa/settled-status-eu-citizens-families.md",
+        "title": "Apply to the EU Settlement Scheme (settled and pre-settled status)",
+        "score": 0.08,
+        "context": null,
+        "line": 1,
+        "snippet": "1: @@ -1,3 @@ (0 before, 962 after)\n2: # Apply to the EU Settlement Scheme (settled and pre-settled status)\n3: \n4: ## Overview"
+      },
+      {
+        "docid": "#342ea6",
+        "file": "conditionalqa/paye-for-employers.md",
+        "title": "PAYE and payroll for employers",
+        "score": 0.07,
+        "context": null,
+        "line": 1,
+        "snippet": "1: @@ -1,3 @@ (0 before, 118 after)\n2: # PAYE and payroll for employers\n3: \n4: ## Introduction to PAYE"
+      },
+      {
+        "docid": "#cceb36",
+        "file": "conditionalqa/lasting-power-attorney-duties.md",
+        "title": "Lasting power of attorney: acting as an attorney",
+        "score": 0.06,
+        "context": null,
+        "line": 1,
+        "snippet": "1: @@ -1,3 @@ (0 before, 258 after)\n2: # Lasting power of attorney: acting as an attorney\n3: \n4: ## Overview"
+      }
+    ]
+  },
+  "isError": false,
+  "resultType": "complete"
+}

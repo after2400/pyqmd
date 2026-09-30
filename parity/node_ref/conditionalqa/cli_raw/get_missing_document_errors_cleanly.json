@@ -1,0 +1,6 @@
+{
+  "args": ["get", "not-a-real-doc-id.md"],
+  "stdout": "",
+  "stderr": "Document not found: not-a-real-doc-id.md\n",
+  "exit_code": 1
+}

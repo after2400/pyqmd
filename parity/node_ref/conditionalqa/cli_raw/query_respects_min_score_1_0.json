@@ -1,0 +1,13 @@
+{
+  "args": [
+    "query",
+    "How long will it be before I hear back from the court?",
+    "--min-score",
+    "1.0",
+    "--format",
+    "json"
+  ],
+  "stdout": "[]\n",
+  "stderr": "Expanding query... (0ms)\n\u251c\u2500 How long will it be before I hear back from the court?\n\u251c\u2500 lex: What is the expected\n\u251c\u2500 lex: How long will\n\u251c\u2500 vec: What is the expected duration of the court process?\n\u251c\u2500 vec: How long will the court proceedings take?\n\u2514\u2500 hyde: The topic of how long will it be before I hear back from the court? c...\nSearching 6 queries...\nEmbedding 4 queries... (997ms)\nReranking 40 chunks... (1ms)\n",
+  "exit_code": 0
+}

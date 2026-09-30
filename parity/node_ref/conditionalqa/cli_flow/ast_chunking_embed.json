@@ -1,0 +1,14 @@
+{
+  "add_collection": {
+    "exit_code": 0,
+    "indexed": 1,
+    "updated": 0,
+    "unchanged": 0,
+    "removed": 0
+  },
+  "embed_auto": {
+    "exit_code": 0,
+    "chunks_embedded": 2,
+    "docs_processed": 1
+  }
+}

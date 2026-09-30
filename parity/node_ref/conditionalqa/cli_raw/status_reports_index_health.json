@@ -1,0 +1,6 @@
+{
+  "args": ["status"],
+  "stdout": "QMD Status\n\nIndex: <pyqmd-repo>/parity/node_ref/conditionalqa/_structural_capture/index.sqlite\nSize:  23.9 MB\n\nDocuments\n  Total:    652 files indexed\n  Vectors:  2575 embedded\n  Updated:  9m ago\n\nAST Chunking\n  Status:   active\n  Languages: typescript, tsx, javascript, python, go, rust\n\nCollections\n  conditionalqa (qmd://conditionalqa/)\n    Pattern:  **/*.md\n    Files:    652 (updated 9m ago)\n\nExamples\n  # List files in a collection\n  qmd ls conditionalqa\n  # Get a document\n  qmd get qmd://conditionalqa/path/to/file.md\n  # Search within a collection\n  qmd search \"query\" -c conditionalqa\n\nModels\n  Embedding:   https://huggingface.co/ggml-org/embeddinggemma-300M-GGUF\n  Reranking:   https://huggingface.co/ggml-org/Qwen3-Reranker-0.6B-Q8_0-GGUF\n  Generation:  https://huggingface.co/tobil/qmd-query-expansion-1.7B-gguf\n\nTips\n  Add context to collections for better search results: conditionalqa\n    qmd context add qmd://<name>/ \"What this collection contains\"\n    qmd context add qmd://<name>/meeting-notes \"Weekly team meeting notes\"\n",
+  "stderr": "",
+  "exit_code": 0
+}

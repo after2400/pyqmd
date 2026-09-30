@@ -1,0 +1,6 @@
+{
+  "args": ["ls"],
+  "stdout": "Collections:\n\n  qmd://conditionalqa/  (652 files)\n",
+  "stderr": "",
+  "exit_code": 0
+}

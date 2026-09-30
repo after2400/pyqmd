@@ -1,0 +1,27 @@
+{
+  "add_collection": {
+    "exit_code": 0,
+    "indexed": 4,
+    "updated": 0,
+    "unchanged": 0,
+    "removed": 0
+  },
+  "embed_first": {
+    "exit_code": 0,
+    "chunks_embedded": 4,
+    "docs_processed": 4
+  },
+  "embed_noop": {
+    "exit_code": 0,
+    "chunks_embedded": null,
+    "docs_processed": null
+  },
+  "embed_force": {
+    "exit_code": 0,
+    "chunks_embedded": 4,
+    "docs_processed": 4
+  },
+  "embed_bad_collection": {
+    "exit_code": 1
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "steps": {
+    "add_collection": {
+      "args": ["collection", "add", "<CORPUS_1>", "--name", "flow-ctx"],
+      "stdout": "Creating collection 'flow-ctx'...\nCollection: <CORPUS_1> (**/*.md)\n\nIndexed: 4 new, 0 updated, 0 unchanged, 0 removed\n\nRun 'qmd embed' to update embeddings (4 unique hashes need vectors)\n\u2713 Collection 'flow-ctx' created successfully\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    "context_add_root": {
+      "args": ["context", "add", "qmd://flow-ctx/", "root context"],
+      "stdout": "\u2713 Added context for: qmd://flow-ctx/ (collection root)\nContext: root context\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    "context_add_sub": {
+      "args": ["context", "add", "qmd://flow-ctx/sub.md", "file context"],
+      "stdout": "\u2713 Added context for: qmd://flow-ctx/sub.md\nContext: file context\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    "context_list_after_adds": {
+      "args": ["context", "list"],
+      "stdout": "\nConfigured Contexts\n\nflow-ctx\n  / (root)\n    root context\n  sub.md\n    file context\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    "context_add_bad_path": {
+      "args": ["context", "add", "./not-a-real-path", "x"],
+      "stdout": "",
+      "stderr": "Path is not in any indexed collection: <CWD>/not-a-real-path\nRun 'qmd status' to see indexed collections\n",
+      "exit_code": 1
+    },
+    "context_remove_root": {
+      "args": ["context", "remove", "qmd://flow-ctx/"],
+      "stdout": "\u2713 Removed context for: qmd://flow-ctx/\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    "context_remove_root_again": {
+      "args": ["context", "remove", "qmd://flow-ctx/"],
+      "stdout": "",
+      "stderr": "No context found for: qmd://flow-ctx/\n",
+      "exit_code": 1
+    },
+    "context_list_final": {
+      "args": ["context", "list"],
+      "stdout": "\nConfigured Contexts\n\nflow-ctx\n  sub.md\n    file context\n",
+      "stderr": "",
+      "exit_code": 0
+    }
+  }
+}

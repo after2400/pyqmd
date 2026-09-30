@@ -1,0 +1,16 @@
+{
+  "add_collection": {
+    "exit_code": 0,
+    "indexed": 4,
+    "updated": 0,
+    "unchanged": 0,
+    "removed": 0
+  },
+  "update_after_mutation": {
+    "exit_code": 0,
+    "indexed": 1,
+    "updated": 1,
+    "unchanged": 2,
+    "removed": 1
+  }
+}

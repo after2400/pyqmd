@@ -1,0 +1,104 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "Found 10 results for \"You could get a bursary to help with education-related costs if you\u2019re aged 16 to 19 and:\":\n\n#b7def9 100% conditionalqa/1619-bursary-fund.md - 16 to 19 Bursary Fund\n#7b1e80 62% conditionalqa/residential-support-scheme.md - Get funding for college accommodation\n#e75abc 61% conditionalqa/support-military-bereaved-children.md - Scholarships for children whose parent died in service\n#95745d 54% conditionalqa/advanced-learner-loan.md - Advanced Learner Loan\n#16916f 54% conditionalqa/learner-support.md - Learner Support\n#071f80 49% conditionalqa/further-education-courses.md - Further education courses and funding\n#be24ae 37% conditionalqa/nhs-bursaries.md - NHS bursaries\n#c91401 15% conditionalqa/social-work-bursaries.md - Social work bursaries\n#393ca8 12% conditionalqa/parents-learning-allowance.md - Parents' Learning Allowance\n#44ba49 9% conditionalqa/apply-for-student-finance.md - Student finance: how to apply"
+    }
+  ],
+  "structuredContent": {
+    "results": [
+      {
+        "docid": "#b7def9",
+        "file": "conditionalqa/1619-bursary-fund.md",
+        "title": "16 to 19 Bursary Fund",
+        "score": 1,
+        "context": null,
+        "line": 5,
+        "snippet": "5: @@ -4,4 @@ (3 before, 100 after)\n6: \n7: You could get a bursary to help with education-related costs if you\u2019re aged 16 to 19 and:\n8: \n9: - studying at a publicly funded school or college in England - not a university"
+      },
+      {
+        "docid": "#7b1e80",
+        "file": "conditionalqa/residential-support-scheme.md",
+        "title": "Get funding for college accommodation",
+        "score": 0.62,
+        "context": null,
+        "line": 5,
+        "snippet": "5: @@ -4,4 @@ (3 before, 86 after)\n6: \n7: You may be able to get help with the cost of term-time accommodation if you\u2019re studying a further education course that\u2019s far from your home.\n8: \n9: How much you get depends on your household income."
+      },
+      {
+        "docid": "#e75abc",
+        "file": "conditionalqa/support-military-bereaved-children.md",
+        "title": "Scholarships for children whose parent died in service",
+        "score": 0.61,
+        "context": null,
+        "line": 72,
+        "snippet": "72: @@ -71,4 @@ (70 before, 11 after)\n73: \n74: How long it takes to find out if you\u2019re eligible depends on the evidence you provide with your application.\n75: \n76: #### If you\u2019re applying for a university or higher education scholarship"
+      },
+      {
+        "docid": "#95745d",
+        "file": "conditionalqa/advanced-learner-loan.md",
+        "title": "Advanced Learner Loan",
+        "score": 0.54,
+        "context": null,
+        "line": 27,
+        "snippet": "27: @@ -26,4 @@ (25 before, 158 after)\n28: \n29: You may also be eligible for money from the Advanced Learner Loan Bursary Fund if you need help with some costs while studying, for example childcare, travel or trips related to your course.\n30: \n31: Use the Money Advice Service to work out the cost of borrowing."
+      },
+      {
+        "docid": "#16916f",
+        "file": "conditionalqa/learner-support.md",
+        "title": "Learner Support",
+        "score": 0.54,
+        "context": null,
+        "line": 38,
+        "snippet": "38: @@ -37,4 @@ (36 before, 25 after)\n39: \n40: You must be 20 or over to get help with childcare costs. If you\u2019re 19, apply for Care to Learn instead.\n41: \n42: You can apply even if you get other types of funding, for example:"
+      },
+      {
+        "docid": "#071f80",
+        "file": "conditionalqa/further-education-courses.md",
+        "title": "Further education courses and funding",
+        "score": 0.49,
+        "context": null,
+        "line": 65,
+        "snippet": "65: @@ -64,4 @@ (63 before, 23 after)\n66: - 16 to 19 Bursary Fund\n67: - a loan to help with the costs of a college or training course if you\u2019re 19 or older - called an Advanced Learning Loan\n68: \n69: ### Funding for essential skills"
+      },
+      {
+        "docid": "#be24ae",
+        "file": "conditionalqa/nhs-bursaries.md",
+        "title": "NHS bursaries",
+        "score": 0.37,
+        "context": null,
+        "line": 11,
+        "snippet": "11: @@ -10,4 @@ (9 before, 269 after)\n12: \n13: You can get an annual payment from the NHS to help with your study and living costs (known as a \u2018bursary\u2019) if you\u2019re studying to be a doctor or dentist.\n14: \n15: If you\u2019re studying a pre-registration postgraduate healthcare course, you may still be eligible for student finance."
+      },
+      {
+        "docid": "#c91401",
+        "file": "conditionalqa/social-work-bursaries.md",
+        "title": "Social work bursaries",
+        "score": 0.15,
+        "context": null,
+        "line": 31,
+        "snippet": "31: @@ -30,4 @@ (29 before, 30 after)\n32: \n33: You may be able to get extra help if you\u2019re disabled and a postgraduate student.\n34: \n35: ## Eligibility"
+      },
+      {
+        "docid": "#393ca8",
+        "file": "conditionalqa/parents-learning-allowance.md",
+        "title": "Parents' Learning Allowance",
+        "score": 0.12,
+        "context": null,
+        "line": 5,
+        "snippet": "5: @@ -4,4 @@ (3 before, 36 after)\n6: \n7: You may be eligible for help with your learning costs if you\u2019re a full-time student with children. This is called Parents\u2019 Learning Allowance.\n8: \n9: How much you get depends on your household income."
+      },
+      {
+        "docid": "#44ba49",
+        "file": "conditionalqa/apply-for-student-finance.md",
+        "title": "Student finance: how to apply",
+        "score": 0.09,
+        "context": null,
+        "line": 16,
+        "snippet": "16: @@ -15,4 @@ (14 before, 208 after)\n17: \n18: If you cannot apply online, use the form finder to get the forms you need. You can call Student Finance England if you want to apply online but you cannot use a computer without help.\n19: \n20: ### Continuing students from England"
+      }
+    ]
+  },
+  "isError": false,
+  "resultType": "complete"
+}
