@@ -1,4 +1,6 @@
 import shutil
+import subprocess
+from pathlib import Path
 
 import pytest
 
@@ -7,14 +9,32 @@ from parity._node_cli import get_node_commit, run_node_cli
 QMD_REPO_ROOT = None  # resolved in a fixture below, since it's outside this repo
 
 
+def _main_checkout_root() -> Path:
+    """This repo's main checkout root, even when running from a git worktree
+    (e.g. .claude/worktrees/<name>/), whose own root is nested inside it.
+    The common git dir is the main checkout's .git in both cases (git prints
+    it relative to cwd in the main checkout, absolute in a worktree). Falls
+    back to this checkout's own root if git can't answer."""
+    repo_root = Path(__file__).resolve().parents[2]
+    try:
+        out = subprocess.run(
+            ["git", "rev-parse", "--git-common-dir"],
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        return repo_root
+    return (repo_root / out).resolve().parent
+
+
 @pytest.fixture
 def qmd_repo_root():
     # The qmd (Node) repo is expected as a sibling of this (pyqmd) repo's
-    # root, e.g. .../AI/qmd next to .../AI/pyqmd -- not a parent directory.
-    # parents[2] is this repo's own root; parents[3] is their common parent.
-    from pathlib import Path
-
-    root = Path(__file__).resolve().parents[3] / "qmd"
+    # main checkout, e.g. .../AI/qmd next to .../AI/pyqmd -- not a parent
+    # directory, and not a sibling of a worktree under .claude/worktrees/.
+    root = _main_checkout_root().parent / "qmd"
     if not (root / "src" / "cli" / "qmd.ts").is_file():
         pytest.skip(f"qmd repo not found at expected location {root}")
     return root
