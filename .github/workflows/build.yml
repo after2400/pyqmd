@@ -38,15 +38,42 @@ jobs:
         run: echo "UV_PYTHON_PREFERENCE=only-managed" >> "$GITHUB_ENV"
       - run: uv build
       - run: uvx twine check --strict dist/*
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error
+
+  smoke:
+    # The wheel is py3-none-any, so one build is installed on every
+    # supported Python. release.yml's publish job needs this whole
+    # workflow, so a failure on any version blocks a release.
+    needs: build
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.12", "3.13", "3.14"]
+    steps:
+      - uses: astral-sh/setup-uv@v8.2.0
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Force managed Python
+        run: echo "UV_PYTHON_PREFERENCE=only-managed" >> "$GITHUB_ENV"
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist/
       # Installs the wheel with the *latest* dependencies (no uv.lock), like
       # a user's `uv tool install pyqmd-mlx` -- the one check that catches a
-      # new dependency release breaking pyqmd.
+      # new dependency release breaking pyqmd, or dropping a Python version.
       - name: Smoke-test the wheel
         env:
           EXPECTED_VERSION: ${{ inputs.expected-version }}
+          PYTHON_VERSION: ${{ matrix.python }}
         run: |
           export UV_TOOL_DIR="$RUNNER_TEMP/uv-tools" UV_TOOL_BIN_DIR="$RUNNER_TEMP/uv-bin"
-          uv tool install dist/*.whl
+          uv tool install --python "$PYTHON_VERSION" dist/*.whl
           "$UV_TOOL_BIN_DIR/pyqmd" --help > /dev/null
           version=$("$UV_TOOL_BIN_DIR/pyqmd" --version)
           echo "pyqmd --version: $version"
@@ -54,8 +81,3 @@ jobs:
             echo "::error::expected pyqmd --version $EXPECTED_VERSION, got $version"
             exit 1
           fi
-      - uses: actions/upload-artifact@v7
-        with:
-          name: dist
-          path: dist/
-          if-no-files-found: error

@@ -23,18 +23,23 @@ jobs:
   test:
     needs: [lint]
     strategy:
+      # One version's failure shouldn't cancel the others' results.
+      fail-fast: false
       # Pinned, not floating: mlx ships manylinux_2_35+ wheels only, so
       # ubuntu-24.04 (glibc 2.39) is the floor -- an older ubuntu image
       # cannot even resolve uv.lock. macos-latest is ARM, covering the
       # Apple Silicon import path.
       matrix:
         os: [ubuntu-24.04, macos-latest]
+        # Every version pyproject.toml's classifiers list.
+        python: ["3.11", "3.12", "3.13", "3.14"]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
+      # setup-uv exports UV_PYTHON, which overrides .python-version.
       - uses: astral-sh/setup-uv@v8.2.0
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python }}
       # macOS only: uv's discovery prefers the runner-preinstalled
       # python-build-standalone (higher patch version wins), whose macOS
       # builds lack sqlite3 loadable extension support -- every Store()
