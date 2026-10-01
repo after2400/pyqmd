@@ -1,6 +1,38 @@
 # CHANGELOG
 
 
+## v0.8.0 (2026-10-01)
+
+### ✨ Features
+
+- **config**: Support Python 3.11 through 3.14 ([#18](https://github.com/after2400/pyqmd/pull/18),
+  [`db2a2a8`](https://github.com/after2400/pyqmd/commit/db2a2a8f571c3b5e2ca71ab90332f0072354662b))
+
+Lower requires-python to 3.11 and list 3.11-3.14 as supported. The only 3.12-only code was an f-string in update that reused its outer quote; ruff now targets py311 so lint catches the next one. On 3.11 the lock resolves numpy 2.4 and scipy 1.17, whose newer releases dropped 3.11.
+
+### ✅ Testing
+
+- **parity**: Scrub repo paths from structural and MCP raw captures
+  ([#17](https://github.com/after2400/pyqmd/pull/17),
+  [`87c9243`](https://github.com/after2400/pyqmd/commit/87c9243690fdec03bf4f0954d7d06a7f2918fb0f))
+
+The structural (cli_raw/) and MCP (mcp_raw/) phases wrote Node's raw output as-is, so a capture committed absolute local paths (the corpus under data/, the isolated index under node_ref/) that had to be hand-scrubbed afterwards. Both now replace the pyqmd checkout root with <pyqmd-repo> and the Node checkout root with <qmd-repo> before writing, longest first. From a git worktree, the main checkout (which holds the gitignored data/) also maps to <pyqmd-repo>.
+
+### 🔁 Continuous Integration
+
+- Test and smoke-test the wheel on Python 3.11 through 3.14
+  ([#18](https://github.com/after2400/pyqmd/pull/18),
+  [`db2a2a8`](https://github.com/after2400/pyqmd/commit/db2a2a8f571c3b5e2ca71ab90332f0072354662b))
+
+The test job runs every supported Python on Ubuntu and macOS. build.yml splits into one build job, which uploads dist once, and a per-version smoke job that installs the wheel with the newest dependencies.
+
+### 📖 Documentation
+
+- **specs**: Publish the Python 3.11–3.14 support spec
+  ([#18](https://github.com/after2400/pyqmd/pull/18),
+  [`db2a2a8`](https://github.com/after2400/pyqmd/commit/db2a2a8f571c3b5e2ca71ab90332f0072354662b))
+
+
 ## v0.7.1 (2026-09-30)
 
 ### 🐞 Bug Fixes
