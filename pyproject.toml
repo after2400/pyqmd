@@ -4,7 +4,7 @@ dynamic = ["version"]
 description = "Local hybrid search (BM25 + vectors + reranking) over markdown collections, running on MLX on Apple Silicon — a Python rewrite of qmd."
 readme = "README.md"
 license = "MIT"
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 # No trove classifier exists for Apple Silicon/MLX specifically -- keywords
 # carry that for PyPI search. No `License ::` classifier: PEP 639 forbids
 # combining one with the SPDX `license` expression above.
@@ -16,7 +16,10 @@ classifiers = [
   "Operating System :: MacOS",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Topic :: Scientific/Engineering :: Artificial Intelligence",
   "Topic :: Text Processing :: Indexing",
 ]
@@ -50,7 +53,7 @@ dev = ["pytest>=8.0.0", "ruff>=0.15"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py312"
+target-version = "py311"
 # docs/ holds plan/spec markdown with fenced ```python blocks that are
 # often deliberate partial snippets (e.g. class-method bodies shown
 # without their class wrapper, to match surrounding prose) -- ruff's

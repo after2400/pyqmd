@@ -149,7 +149,8 @@ def update(
 
     for i, coll in enumerate(targets, start=1):
         position = cyan(f"[{i}/{len(targets)}]")
-        typer.echo(f"{position} {bold(coll['name'])} {dim(f'({coll["pattern"]})')}")
+        pattern = coll["pattern"]
+        typer.echo(f"{position} {bold(coll['name'])} {dim(f'({pattern})')}")
 
         if pull and not _pull_collection(coll):
             skipped += 1
