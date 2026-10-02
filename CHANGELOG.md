@@ -1,6 +1,17 @@
 # CHANGELOG
 
 
+## v0.8.1 (2026-10-02)
+
+### 🐞 Bug Fixes
+
+- **store**: Correct stale _indexing docstring on metadata sync
+  ([#19](https://github.com/after2400/pyqmd/pull/19),
+  [`e8fba6d`](https://github.com/after2400/pyqmd/commit/e8fba6d65a6de97a169409bbca5dab43e5f85520))
+
+The module docstring claimed syncDocumentMetadata was deliberately not ported, but scan_and_register_collection syncs frontmatter qmd.metadata for every scanned document on both `collection add` and `update`, re-extracting when content changed or the stored extraction is stale.
+
+
 ## v0.8.0 (2026-10-01)
 
 ### ✨ Features
