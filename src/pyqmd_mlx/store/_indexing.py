@@ -2,13 +2,15 @@
 `update`. A free function (not a Store method), mirroring store.ts's own
 boundary: reindexCollection is a free function there too, not a method on
 Store -- this keeps filesystem I/O out of Store itself. Ported from
-store.ts:1635-1764 (reindexCollection) and store.ts:70-... (splitGlobMask),
-dropping metadata-extraction sync (syncDocumentMetadata) -- a feature
-pyqmd_mlx.store deliberately does not implement. Orphaned-content cleanup
-(cleanupOrphanedContent) IS ported -- see the call to
-store.cleanup_orphaned_content() at the end of
-scan_and_register_collection. Titles come from pyqmd_mlx.store._title, a
-port of store.ts's per-extension extractors.
+store.ts:1635-1764 (reindexCollection) and store.ts:70-... (splitGlobMask).
+Metadata sync (syncDocumentMetadata) is ported too: every scanned document's
+frontmatter `qmd.metadata` is synced via store.sync_document_metadata(), on
+both `collection add` and `update` -- re-extracted whenever the content
+changed, and otherwise only when the stored extraction is missing or from an
+older extraction version. Orphaned-content cleanup (cleanupOrphanedContent)
+is ported as well -- see the call to store.cleanup_orphaned_content() at the
+end of scan_and_register_collection. Titles come from pyqmd_mlx.store._title,
+a port of store.ts's per-extension extractors.
 """
 
 from __future__ import annotations
