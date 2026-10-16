@@ -66,6 +66,10 @@ pyqmd --help
 Index lives at `~/.cache/pyqmd/index.sqlite`, distinct from the live Node `qmd`'s
 `~/.cache/qmd/index.sqlite` — both can coexist during the transition.
 
+## Optional: heading breadcrumbs
+
+Set `PYQMD_EMBED_BREADCRUMBS=1` to embed markdown chunks together with their section-heading path (`Doc > Section > Subsection`). In a vector-search benchmark on structured documents this found the right passage a few points more often, but after full-text fusion the gain was small and not statistically clear, and we have not measured it through the reranker, so it is off by default. Turning it on (or off again) changes what gets embedded, so run `pyqmd embed` afterwards; `pyqmd status` says so until you do. The setting must be the same everywhere pyqmd runs, including an MCP client's server config, or the server will report documents as pending.
+
 ## Performance note: prefer `pyqmd mcp` for repeated queries
 
 Every one-shot CLI call (`search`/`vsearch`/`query`) that touches embeddings pays a real,

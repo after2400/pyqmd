@@ -16,6 +16,10 @@ PARITY_DATASET_CONFIG=path/to/mine.yaml uv run pytest parity/  # equivalent, via
 No `bun`/Node dependency is needed to run the suite day-to-day — it
 compares live `pyqmd` against already-captured JSON snapshots.
 
+### Heading breadcrumbs
+
+pyqmd can embed `.md` chunks with their section-heading path in the title (opt-in, `PYQMD_EMBED_BREADCRUMBS=1`); Node does not. They are off by default, so the suite compares against Node's input unless you turn them on. `tests/parity/test_embedding_inputs.py` proves the Node match with breadcrumbs off and that, with them on, the only difference from Node's strings is the added path.
+
 ## Building your own dataset profile
 
 Create a YAML file (anywhere on disk — it doesn't need to live in this
