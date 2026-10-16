@@ -6,6 +6,29 @@ collections. Apple Silicon + MLX only (no GGUF, no cross-platform support).
 > **Beta: feedback wanted.** pyqmd is in public beta. Please report problems or surprises in
 > [Issues](https://github.com/after2400/pyqmd/issues).
 
+## Why this exists
+
+Reasonable people might ask "why?" I read about [qmd](https://github.com/tobi/qmd), and as a
+Python engineer on Apple Silicon my first thought was: is there a Python version of this that
+uses MLX models? I couldn't find one, so I built it with fidelity to qmd's behavior as the
+primary goal. Where fidelity wasn't feasible, or I found a clear improvement, the difference is
+deliberate and tracked in
+[COMMAND_STATUS.md](https://github.com/after2400/pyqmd/blob/main/COMMAND_STATUS.md). pyqmd is an
+independent port and is not affiliated with qmd.
+
+Somewhere along the way it became as much about building quality software _agentically_ as about
+the port itself, and by that I mean not vibe-coded. It's built with multiple coding agents
+(primarily [Claude Code](https://claude.com/claude-code), plus [OpenCode](https://opencode.ai)
+with Muse Spark models), all using the [obra/superpowers](https://github.com/obra/superpowers)
+skills, under my direction. The repo's convention is that agent-written commits carry a model
+co-author trailer. Non-trivial changes start as a design doc
+([published here](https://github.com/after2400/pyqmd/tree/main/docs/specs)) and a plan, then go
+in test-first, and that workflow includes an independent review step before merging. There are
+over 9k lines of code and over 20k lines of tests and parity checks, including a suite that
+compares results against a pinned copy of Node qmd. Search-quality changes are measured against
+pass criteria fixed beforehand, not eyeballed, and the specs record flat or negative results as
+plainly as wins. The most recent experiment had its decision rule written down before it ran.
+
 ## Install
 
 ```sh
