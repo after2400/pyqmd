@@ -1,11 +1,17 @@
 import json
 
+import pytest
+from bench_breadcrumbs import Chunk
+from bench_breadcrumbs_rerank import Logger
 from bench_contextual import (
     ContextCache,
     build_prompt,
+    cached_contexts,
+    chunk_prompt,
     clean_context,
     context_key,
     ctx_text,
+    generate_contexts,
     window_text,
 )
 
@@ -81,3 +87,84 @@ def test_context_cache_without_a_path_is_in_memory():
     cache = ContextCache(None)
     cache.put("k", "v")
     assert cache.get("k") == "v"
+
+
+PAGES = {"alpha": "# Alpha\n\n## Deadline\n\nYou have ten days.\n", "beta": "# Beta\n\ntext b\n"}
+CHUNKS = [
+    Chunk("alpha", 0, "# Alpha\n\n## Deadline\n\nYou have ten days.\n", "Alpha", ("Deadline",)),
+    Chunk("beta", 0, "# Beta\n\ntext b\n", "Beta", ()),
+]
+
+
+def counting_generator(calls, answer="Context line."):
+    def generate(prompt):
+        calls.append(prompt)
+        return answer
+
+    return generate
+
+
+def make(chunks=CHUNKS, generator="gen", fn=None, cache=None, **kwargs):
+    cache = ContextCache(None) if cache is None else cache
+    made = generate_contexts(
+        chunks, PAGES, generator, fn or counting_generator([]), cache, Logger(None), **kwargs
+    )
+    return made, cache
+
+
+def test_chunk_prompt_uses_the_pages_window_and_the_chunk():
+    prompt = chunk_prompt(CHUNKS[1], PAGES)
+    assert "text b" in prompt and "<chunk>\n# Beta\n\ntext b\n\n</chunk>" in prompt
+
+
+def test_generate_contexts_writes_every_chunk_to_the_cache():
+    calls = []
+    made, cache = make(fn=counting_generator(calls))
+    assert made == 2 and len(calls) == 2
+    assert cached_contexts(CHUNKS, PAGES, "gen", cache) == ["Context line.", "Context line."]
+
+
+def test_generate_contexts_resumes_without_regenerating_cached_chunks(tmp_path):
+    path = tmp_path / "c.jsonl"
+    make(cache=ContextCache(path), limit=1)
+    calls = []
+    made, _ = make(fn=counting_generator(calls), cache=ContextCache(path))
+    assert made == 1 and len(calls) == 1 and "text b" in calls[0]
+
+
+def test_generate_contexts_limit_processes_only_the_first_chunks():
+    calls = []
+    make(fn=counting_generator(calls), limit=1)
+    assert len(calls) == 1
+
+
+def test_a_different_generator_does_not_reuse_cached_lines():
+    _, cache = make(generator="gen-a")
+    calls = []
+    make(generator="gen-b", fn=counting_generator(calls), cache=cache)
+    assert len(calls) == 2
+
+
+def test_generate_contexts_cleans_what_the_model_returned():
+    fn = counting_generator([], "<think>x</think>\nAbout  the\nappeal.")
+    _, cache = make(fn=fn)
+    assert cached_contexts(CHUNKS, PAGES, "gen", cache)[0] == "About the appeal."
+
+
+def test_an_empty_cleaned_context_is_cached_and_not_regenerated():
+    _, cache = make(fn=counting_generator([], "<think>no end"))
+    calls = []
+    make(fn=counting_generator(calls), cache=cache)
+    assert calls == [] and cached_contexts(CHUNKS, PAGES, "gen", cache) == ["", ""]
+
+
+def test_cached_contexts_names_how_many_chunks_are_missing():
+    _, cache = make(limit=1)
+    with pytest.raises(ValueError, match=r"1 of 2 chunks.*generate"):
+        cached_contexts(CHUNKS, PAGES, "gen", cache)
+
+
+def test_generate_contexts_logs_progress_in_chunks(capsys):
+    make(log_every=1)
+    out = capsys.readouterr().out
+    assert "2/2 chunks" in out and "questions" not in out

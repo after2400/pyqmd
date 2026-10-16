@@ -66,13 +66,15 @@ def reranked_pages(store, query: str, limit: int = LIMIT) -> list[str]:
     return [Path(r.file).stem for r in results]
 
 
-def format_progress(done: int, total: int, elapsed: float, resumed: int) -> str:
-    """`done` counts every finished question; `resumed` of them came from the
+def format_progress(
+    done: int, total: int, elapsed: float, resumed: int, unit: str = "questions"
+) -> str:
+    """`done` counts every finished item; `resumed` of them came from the
     checkpoint, so the rate uses only the ones this session did."""
     this_session = max(done - resumed, 1)
     rate = elapsed / this_session
     left = round(rate * (total - done) / 60)
-    return f"{done}/{total} questions, {rate:.1f} s/question, ~{left} min left"
+    return f"{done}/{total} {unit}, {rate:.1f} s/{unit.removesuffix('s')}, ~{left} min left"
 
 
 def load_checkpoint(path: Path, header: dict) -> dict[int, dict]:

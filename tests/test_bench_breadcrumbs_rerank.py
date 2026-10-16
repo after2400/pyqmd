@@ -109,6 +109,11 @@ def test_format_progress_rates_only_the_questions_done_this_session():
     assert "1.0 s/question" in text and "2 min left" in text
 
 
+def test_format_progress_names_the_unit_it_is_given():
+    text = format_progress(done=3, total=9, elapsed=6.0, resumed=0, unit="chunks")
+    assert "3/9 chunks" in text and "s/chunk" in text and "questions" not in text
+
+
 def test_rerank_verdict_never_flips_the_default_by_itself():
     ci = {"page_ndcg10": (0.02, 0.01, 0.03), "page_mrr": (0.0, -0.01, 0.01)}
     code, text = rerank_verdict(ci)
