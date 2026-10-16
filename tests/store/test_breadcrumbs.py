@@ -164,3 +164,28 @@ def test_breadcrumbs_not_enabled_by_other_env_values(value):
 
 def test_breadcrumbs_are_off_when_unset():
     assert breadcrumbs_enabled({}) is False
+
+
+def test_find_headings_ignores_hash_lines_inside_tilde_fences():
+    content = "# T\n\n## Real\n\n~~~\n# not a heading\n~~~\n\ntail"
+    assert [h.text for h in find_headings(content)] == ["T", "Real"]
+
+
+def test_find_headings_ignores_hash_lines_inside_an_indented_fence():
+    content = "# T\n\n## Real\n\n  ```sh\n# not a heading\n  ```\n\ntail"
+    assert [h.text for h in find_headings(content)] == ["T", "Real"]
+
+
+def test_find_headings_ignores_hash_lines_in_a_fence_on_the_first_line():
+    content = "```\n# not a heading\n```\n\n## Real\n\ntail"
+    assert [h.text for h in find_headings(content)] == ["Real"]
+
+
+def test_find_headings_a_longer_fence_is_not_closed_by_a_shorter_one():
+    content = "## Real\n\n````\n```\n# not a heading\n```\n````\n\n## After\n"
+    assert [h.text for h in find_headings(content)] == ["Real", "After"]
+
+
+def test_find_headings_an_unclosed_fence_hides_the_rest_like_commonmark():
+    content = "## Real\n\n```\n# not a heading\n"
+    assert [h.text for h in find_headings(content)] == ["Real"]
