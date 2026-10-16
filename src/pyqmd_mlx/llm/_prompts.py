@@ -35,12 +35,23 @@ def format_doc_for_embedding(text: str, model_id: str, title: str | None = None)
 
 
 def format_embedding_inputs(
-    texts: list[str], model_id: str, kind: str, title: str | None = None
+    texts: list[str],
+    model_id: str,
+    kind: str,
+    title: str | list[str | None] | None = None,
 ) -> list[str]:
     """The exact strings embed() tokenizes. Shared with the model-input
     parity test (tests/parity/test_embedding_inputs.py), so what's compared
-    against Node is what the model sees. `title` applies to documents only."""
+    against Node is what the model sees. `title` applies to documents only:
+    one title for every text, or a list with one title per text."""
     if kind == "document":
+        if isinstance(title, list):
+            if len(title) != len(texts):
+                raise ValueError(f"title list has {len(title)} entries for {len(texts)} texts")
+            return [
+                format_doc_for_embedding(text, model_id, t)
+                for text, t in zip(texts, title, strict=True)
+            ]
         return [format_doc_for_embedding(text, model_id, title) for text in texts]
     if kind == "query":
         return [format_query_for_embedding(text, model_id) for text in texts]

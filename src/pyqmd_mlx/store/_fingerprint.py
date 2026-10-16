@@ -5,27 +5,34 @@ Stored on every content_vectors row; a row without the current value
 counts as pending, so any change to the embedding input re-embeds on the
 next `pyqmd embed` without --force. Lives in store, not llm, because it
 combines llm's formatters with store's chunk constants (llm importing
-store would be circular)."""
+store would be circular).
+
+Section-heading breadcrumbs are part of the input, so turning them on or off
+re-embeds. With them off the value is exactly the one Node's algorithm gives."""
 
 import hashlib
 
 from pyqmd_mlx.llm._prompts import format_doc_for_embedding, format_query_for_embedding
 
+from ._breadcrumbs import MAX_BREADCRUMB_CHARS
 from ._chunking import CHUNK_OVERLAP_TOKENS, CHUNK_SIZE_TOKENS
 
 PROBE_QUERY = "__qmd_embedding_query_probe__"
 PROBE_TITLE = "__qmd_embedding_title_probe__"
 PROBE_DOC = "__qmd_embedding_document_probe__"
 
+# Names the breadcrumb format and its cap; change it when either changes.
+BREADCRUMB_FORMAT = f"breadcrumbs:section-path-v1:{MAX_BREADCRUMB_CHARS}"
 
-def embedding_fingerprint(model: str) -> str:
-    significant = "\n".join(
-        [
-            f"model:{model}",
-            f"query:{format_query_for_embedding(PROBE_QUERY, model)}",
-            f"doc:{format_doc_for_embedding(PROBE_DOC, model, PROBE_TITLE)}",
-            f"chunk_tokens:{CHUNK_SIZE_TOKENS}",
-            f"chunk_overlap_tokens:{CHUNK_OVERLAP_TOKENS}",
-        ]
-    )
-    return hashlib.sha256(significant.encode("utf-8")).hexdigest()[:6]
+
+def embedding_fingerprint(model: str, breadcrumbs: bool = False) -> str:
+    parts = [
+        f"model:{model}",
+        f"query:{format_query_for_embedding(PROBE_QUERY, model)}",
+        f"doc:{format_doc_for_embedding(PROBE_DOC, model, PROBE_TITLE)}",
+        f"chunk_tokens:{CHUNK_SIZE_TOKENS}",
+        f"chunk_overlap_tokens:{CHUNK_OVERLAP_TOKENS}",
+    ]
+    if breadcrumbs:
+        parts.append(BREADCRUMB_FORMAT)
+    return hashlib.sha256("\n".join(parts).encode("utf-8")).hexdigest()[:6]

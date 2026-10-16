@@ -10,20 +10,16 @@ from bench_breadcrumbs import (
     METRICS,
     PAGE_GUARD_METRICS,
     Chunk,
-    Heading,
     Selection,
     build_chunks,
     check_exclusions,
     chunks_by_page,
     cluster_bootstrap,
     decide,
-    dominant_heading_path,
     embed_queries,
     embed_variant,
     evidence_spans,
-    find_headings,
     format_report,
-    heading_path,
     load_dataset,
     query_metrics,
     run_experiment,
@@ -31,93 +27,6 @@ from bench_breadcrumbs import (
     strict_evidence_spans,
     variant_title,
 )
-
-DOC = (
-    "# Page\n\nintro\n\n## A\n\ntext a\n\n### A1\n\ntext a1\n\n"
-    "### A2\n\ntext a2\n\n## B\n\ntext b\n"
-)
-
-
-def test_find_headings_returns_level_text_and_position():
-    headings = find_headings(DOC)
-    assert [(h.level, h.text) for h in headings] == [
-        (1, "Page"),
-        (2, "A"),
-        (3, "A1"),
-        (3, "A2"),
-        (2, "B"),
-    ]
-    assert headings[1].pos == DOC.index("## A")
-
-
-def test_find_headings_ignores_hash_lines_inside_code_fences():
-    content = "# T\n\n## Real\n\n```\n# not a heading\n```\n\ntail"
-    assert [h.text for h in find_headings(content)] == ["T", "Real"]
-
-
-def test_find_headings_strips_closing_hashes_but_keeps_a_trailing_hash_in_the_text():
-    content = "## Rates ##\n\n# C#\n"
-    assert [h.text for h in find_headings(content)] == ["Rates", "C#"]
-
-
-def test_heading_path_nests_and_pops_siblings():
-    headings = find_headings(DOC)
-    assert heading_path(headings, DOC.index("intro")) == []
-    assert heading_path(headings, DOC.index("text a1")) == ["A", "A1"]
-    assert heading_path(headings, DOC.index("text a2")) == ["A", "A2"]
-    assert heading_path(headings, DOC.index("text b")) == ["B"]
-
-
-def test_heading_path_includes_a_heading_that_starts_at_pos_and_drops_its_siblings():
-    headings = find_headings(DOC)
-    # The section that starts at "## B" is B, not the A2 section before it.
-    assert heading_path(headings, DOC.index("## B")) == ["B"]
-    assert heading_path(headings, DOC.index("## B") - 1) == ["A", "A2"]
-
-
-SECTIONED = "# P\n\n## A\n\n" + "a" * 50 + "\n\n## B\n\n" + "b" * 500 + "\n"
-
-
-def test_dominant_heading_path_picks_the_section_holding_most_of_the_chunk():
-    headings = find_headings(SECTIONED)
-    # Starts in A's last ten characters, then runs through all of B: B wins.
-    pos = SECTIONED.index("a" * 50) + 40
-    assert dominant_heading_path(headings, pos, len(SECTIONED) - pos) == ["B"]
-    # Starts at the top of A's text and stops inside B's first lines: A wins.
-    start = SECTIONED.index("a" * 50)
-    assert dominant_heading_path(headings, start, 50 + 10) == ["A"]
-
-
-def test_dominant_heading_path_without_a_heading_inside_the_chunk_is_the_path_at_pos():
-    headings = find_headings(DOC)
-    pos = DOC.index("text a1")
-    assert dominant_heading_path(headings, pos, 5) == ["A", "A1"]
-
-
-def test_dominant_heading_path_breaks_a_tie_toward_the_earlier_section():
-    content = "# P\n\n## A\n\n" + "a" * 20 + "\n\n## B\n\n" + "b" * 20 + "\n"
-    headings = find_headings(content)
-    boundary = content.index("## B")
-    start = boundary - 10
-    assert dominant_heading_path(headings, start, 20) == ["A"]
-
-
-def test_dominant_heading_path_for_a_page_without_headings_is_empty():
-    assert dominant_heading_path(find_headings("plain text\n"), 0, 10) == []
-
-
-def test_heading_path_after_a_code_fence_keeps_the_real_section():
-    content = "# T\n\n## Real\n\n```\n# not a heading\n```\n\ntail"
-    assert heading_path(find_headings(content), content.index("tail")) == ["Real"]
-
-
-def test_heading_path_without_headings_is_empty():
-    assert heading_path(find_headings("just some text\n"), 5) == []
-
-
-def test_heading_path_never_contains_level_one_headings():
-    content = "# One\n\n## Two\n\n# Three\n\ntext"
-    assert heading_path(find_headings(content), content.index("text")) == []
 
 
 @pytest.mark.parametrize(
@@ -137,10 +46,6 @@ def test_variant_title(variant, path, expected):
 def test_variant_title_rejects_an_unknown_variant():
     with pytest.raises(ValueError):
         variant_title("nope", "Page", ["A"])
-
-
-def test_heading_is_a_plain_value():
-    assert Heading(3, 2, "x") == Heading(pos=3, level=2, text="x")
 
 
 def fake_chunks(content, filename):

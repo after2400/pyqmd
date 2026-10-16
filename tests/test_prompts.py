@@ -1,3 +1,5 @@
+import pytest
+
 from pyqmd_mlx.llm._prompts import (
     build_rerank_prompt,
     format_doc_for_embedding,
@@ -77,3 +79,37 @@ def test_format_embedding_inputs_queries():
     assert format_embedding_inputs(["q"], "mlx-community/embeddinggemma-300m-8bit", "query") == [
         "task: search result | query: q"
     ]
+
+
+GEMMA = "mlx-community/embeddinggemma-300m-8bit"
+QWEN = "mlx-community/Qwen3-Embedding-0.6B"
+
+
+def test_format_embedding_inputs_accepts_one_title_per_text():
+    out = format_embedding_inputs(["a", "b"], GEMMA, "document", ["Doc > S1", "Doc > S2"])
+    assert out == ["title: Doc > S1 | text: a", "title: Doc > S2 | text: b"]
+
+
+def test_format_embedding_inputs_none_entries_render_as_none():
+    out = format_embedding_inputs(["a", "b"], GEMMA, "document", ["T", None])
+    assert out == ["title: T | text: a", "title: none | text: b"]
+
+
+def test_format_embedding_inputs_per_text_titles_for_qwen_models():
+    out = format_embedding_inputs(["a", "b"], QWEN, "document", ["T > S", None])
+    assert out == ["T > S\na", "b"]
+
+
+def test_format_embedding_inputs_a_single_title_is_unchanged():
+    out = format_embedding_inputs(["a", "b"], GEMMA, "document", "T")
+    assert out == ["title: T | text: a", "title: T | text: b"]
+
+
+def test_format_embedding_inputs_rejects_a_title_list_of_the_wrong_length():
+    with pytest.raises(ValueError, match="2 entries for 3 texts"):
+        format_embedding_inputs(["a", "b", "c"], GEMMA, "document", ["x", "y"])
+
+
+def test_format_embedding_inputs_queries_ignore_titles():
+    out = format_embedding_inputs(["q"], GEMMA, "query", ["wrong", "length"])
+    assert out == format_embedding_inputs(["q"], GEMMA, "query")

@@ -19,6 +19,17 @@ def test_embed_returns_normalized_vectors_of_expected_dimension():
 
 
 @pytest.mark.slow
+def test_identical_text_under_different_heading_paths_embeds_differently():
+    first, second = embed(
+        ["Set it to 30 seconds."] * 2,
+        kind="document",
+        title=["Guide > Timeouts > Retry", "Guide > Fees > Late"],
+    )
+
+    assert first != second
+
+
+@pytest.mark.slow
 def test_rerank_scores_relevant_document_higher():
     query = "What is the boiling point of water at sea level?"
     documents = [

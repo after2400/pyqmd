@@ -129,6 +129,10 @@ stranger's installed pyqmd) and must not drift apart.
   An older gitignored `models/qmd-query-expansion-1.7b-mlx` dir in a dev
   checkout holds the broken pre-fix weights; delete it.
 - Reciprocal Rank Fusion (RRF) combines FTS + vector result lists before rerank
+- Embedding input: each chunk is embedded as `title: <doc title> | text: <chunk>` (Node's
+  format). Opt-in: with `PYQMD_EMBED_BREADCRUMBS=1`, `.md` chunks add their section-heading path to
+  the title (`<doc title> > <h2> > <h3>`, `store/_breadcrumbs.py`). Off by default; the embedding
+  fingerprint covers it, so toggling re-embeds.
 - Metadata extraction/storage/filtering: `src/pyqmd_mlx/store/_metadata.py` +
   `_metadata_filter.py` (extraction happens at `collection add` time only)
 - Index stored at `~/.cache/pyqmd/index.sqlite` by default, overridable via
