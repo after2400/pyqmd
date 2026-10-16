@@ -9,7 +9,7 @@ def _counting_store(calls):
         calls.append(list(texts))
         return [[1.0, 0.0] for _ in texts]
 
-    return Store(":memory:", embed_fn=counting_embed, embed_model=MODEL)
+    return Store(":memory:", embed_fn=counting_embed, embed_model=MODEL, breadcrumbs=False)
 
 
 def _seed(store, path="a.md", body="# A\nalpha"):
@@ -24,6 +24,13 @@ def test_fingerprint_values_are_pinned():
     # the formatted probes and the chunk token sizes, first 6 hex chars.
     assert embedding_fingerprint("mlx-community/embeddinggemma-300m-8bit") == "aa71c5"
     assert embedding_fingerprint("mlx-community/Qwen3-Embedding-0.6B") == "1bee40"
+
+
+def test_breadcrumbs_change_the_fingerprint_and_off_matches_the_old_value():
+    model = "mlx-community/embeddinggemma-300m-8bit"
+    on = embedding_fingerprint(model, breadcrumbs=True)
+    off = embedding_fingerprint(model, breadcrumbs=False)
+    assert off == "aa71c5" and on != off and len(on) == 6
 
 
 def test_index_content_stores_the_current_fingerprint_on_every_row():

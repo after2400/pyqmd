@@ -89,7 +89,9 @@ def test_index_content_hands_the_embedder_node_matching_inputs(tmp_path):
 
     root = tmp_path / "fixtures"
     shutil.copytree(FIXTURES, root, ignore=shutil.ignore_patterns(*NOT_DOCUMENTS))
-    store = Store(":memory:", embed_fn=recording_embed)
+    # Breadcrumbs off: this proves the Node match; the on-mode difference is
+    # checked separately below.
+    store = Store(":memory:", embed_fn=recording_embed, breadcrumbs=False)
     store.add_collection("fx", str(root), pattern="**/*")
     scan_and_register_collection(store, str(root), "**/*", "fx")
     for row in store.get_indexable_content("fx"):
@@ -106,6 +108,56 @@ def test_index_content_hands_the_embedder_node_matching_inputs(tmp_path):
         for doc in EXPECTED["documents"].values()
     }
     assert actual == expected
+
+
+def _store_titles(relpath: str, breadcrumbs: bool):
+    """The title argument Store.index_content hands the embedder, plus the
+    chunk texts, for one fixture document."""
+    calls = []
+
+    def recording_embed(texts, model, kind="query", title=None):
+        calls.append({"texts": list(texts), "title": title})
+        return [[1.0, 0.0] for _ in texts]
+
+    store = Store(":memory:", embed_fn=recording_embed, breadcrumbs=breadcrumbs)
+    content = _read(relpath)
+    content_hash = store.hash_content(content)
+    store.index_content(content_hash, content, model=DEFAULT_EMBED_MODEL, filepath=relpath)
+    store.close()
+    return calls[0]
+
+
+@pytest.mark.parametrize("relpath", sorted(EXPECTED["documents"]))
+def test_store_inputs_with_breadcrumbs_off_match_node(relpath):
+    call = _store_titles(relpath, breadcrumbs=False)
+    formatted = format_embedding_inputs(
+        call["texts"], DEFAULT_EMBED_MODEL, "document", call["title"]
+    )
+    assert formatted == [c["formatted"] for c in EXPECTED["documents"][relpath]["chunks"]]
+
+
+@pytest.mark.parametrize("relpath", sorted(EXPECTED["documents"]))
+def test_store_inputs_with_breadcrumbs_on_differ_from_node_only_by_the_path(relpath):
+    call = _store_titles(relpath, breadcrumbs=True)
+    node = EXPECTED["documents"][relpath]
+    formatted = format_embedding_inputs(
+        call["texts"], DEFAULT_EMBED_MODEL, "document", call["title"]
+    )
+    titles = call["title"] if isinstance(call["title"], list) else [call["title"]] * len(formatted)
+    restored = [
+        f.replace(f"title: {t} |", f"title: {node['title']} |", 1)
+        for f, t in zip(formatted, titles, strict=True)
+    ]
+    assert restored == [c["formatted"] for c in node["chunks"]]
+
+
+def test_at_least_one_fixture_gets_a_breadcrumb():
+    changed = [
+        relpath
+        for relpath in EXPECTED["documents"]
+        if isinstance(_store_titles(relpath, breadcrumbs=True)["title"], list)
+    ]
+    assert changed, "no fixture has markdown headings, so the on-mode test proves nothing"
 
 
 def test_fingerprint_port_matches_nodes_value():

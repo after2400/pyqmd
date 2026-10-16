@@ -18,6 +18,12 @@ from pyqmd_mlx.llm import embed as _default_embed
 from pyqmd_mlx.llm import expand_query as _default_expand_query
 from pyqmd_mlx.llm import rerank as _default_rerank
 
+from ._breadcrumbs import (
+    breadcrumb_title,
+    breadcrumbs_enabled,
+    dominant_heading_path,
+    find_headings,
+)
 from ._schema import load_sqlite_vec, migrate
 
 if TYPE_CHECKING:
@@ -144,6 +150,7 @@ class Store:
         embed_model: str | None = None,
         rerank_model: str | None = None,
         expand_model: str | None = None,
+        breadcrumbs: bool | None = None,
     ):
         self.db_path = db_path
         # check_same_thread=False: every other caller (CLI, the full test
@@ -172,6 +179,9 @@ class Store:
         self._embed_model = embed_model or DEFAULT_EMBED_MODEL
         self._rerank_model = rerank_model or DEFAULT_RERANK_MODEL
         self._expand_model = expand_model or resolve_expand_model()
+        # Opt-in: markdown chunks are embedded under "<doc title> > <section
+        # path>" only when PYQMD_EMBED_BREADCRUMBS is 1/true/on; the keyword wins.
+        self._breadcrumbs = breadcrumbs_enabled() if breadcrumbs is None else breadcrumbs
 
     def close(self) -> None:
         self.conn.close()
@@ -901,6 +911,31 @@ class Store:
         ).fetchone()
         return row["path"]
 
+    def _breadcrumb_titles(
+        self,
+        content: str,
+        filepath: str | None,
+        title: str | None,
+        chunks: list[tuple[str, int]],
+    ) -> list[str] | None:
+        """One title per chunk, "<doc title> > <section path>", for markdown
+        content when breadcrumbs are on and at least one chunk has a path;
+        None means "embed with the plain title" (exactly the call made
+        before breadcrumbs existed). Markdown means the lower-cased last
+        extension of `filepath` is ".md", the rule extract_title uses."""
+        if not self._breadcrumbs or filepath is None or title is None:
+            return None
+        if filepath[filepath.rfind(".") :].lower() != ".md":
+            return None
+        headings = find_headings(content)
+        titles = [
+            breadcrumb_title(title, dominant_heading_path(headings, pos, len(text)))
+            for text, pos in chunks
+        ]
+        if all(t == title for t in titles):
+            return None
+        return titles
+
     def index_content(
         self,
         content_hash: str,
@@ -939,7 +974,7 @@ class Store:
         model = model or self._embed_model
         if filepath is None:
             filepath = self._representative_path(content_hash)
-        fingerprint = embedding_fingerprint(model)
+        fingerprint = embedding_fingerprint(model, self._breadcrumbs)
         existing = self.conn.execute(
             "SELECT pos, embed_fingerprint FROM content_vectors "
             "WHERE hash = ? AND model = ? ORDER BY seq",
@@ -959,7 +994,8 @@ class Store:
         # text: <chunk>" (store.ts:2125). Content with no document at all
         # (bare unit tests) has no path, so no title: "title: none".
         title = extract_title(content, filepath) if filepath is not None else None
-        embeddings = self._embed_fn(texts, model, kind="document", title=title)
+        titles = self._breadcrumb_titles(content, filepath, title, chunks)
+        embeddings = self._embed_fn(texts, model, kind="document", title=titles or title)
         self.ensure_vec_table(len(embeddings[0]))
 
         # vectors_vec only exists once ensure_vec_table has run at least
@@ -1065,7 +1101,7 @@ class Store:
         from ._fingerprint import embedding_fingerprint
 
         collection_filter = "AND d.collection = ?" if collection else ""
-        params: list = [model, embedding_fingerprint(model)]
+        params: list = [model, embedding_fingerprint(model, self._breadcrumbs)]
         if collection:
             params.append(collection)
         row = self.conn.execute(
