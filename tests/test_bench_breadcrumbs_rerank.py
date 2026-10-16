@@ -9,6 +9,7 @@ from bench_breadcrumbs_rerank import (
     rerank_verdict,
     reranked_pages,
     run_questions,
+    write_atomic,
 )
 
 
@@ -125,3 +126,25 @@ def test_rerank_verdict_two_and_three():
     assert rerank_verdict(flat)[0] == 2
     worse = {"page_ndcg10": (0.0, -0.01, 0.01), "page_mrr": (-0.02, -0.03, -0.01)}
     assert rerank_verdict(worse)[0] == 3
+
+
+def test_write_atomic_replaces_the_file_and_leaves_no_temp_file(tmp_path):
+    path = tmp_path / "ck.jsonl"
+    path.write_text("old", encoding="utf-8")
+    write_atomic(path, "new")
+    assert path.read_text(encoding="utf-8") == "new"
+    assert not list(tmp_path.glob("*.tmp"))
+
+
+def test_resuming_does_not_rewrite_an_intact_checkpoint(tmp_path):
+    path = tmp_path / "ck.jsonl"
+    answers = {"q1": ["gold"]}
+    stores = {"off": fake_store(answers, []), "on": fake_store(answers, [])}
+    qs = questions(("q1", "gold"))
+    run_questions(stores, qs, path, HEADER, Logger(None), log_every=1)
+    path.chmod(0o444)  # a rewrite would raise PermissionError
+    try:
+        results = run_questions(stores, qs, path, HEADER, Logger(None), log_every=1)
+    finally:
+        path.chmod(0o644)
+    assert list(results["off"]["page_mrr"]) == [1.0]

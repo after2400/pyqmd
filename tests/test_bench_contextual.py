@@ -1,4 +1,5 @@
 import json
+import os
 import re
 import zlib
 
@@ -362,3 +363,40 @@ def test_common_options_are_accepted_after_the_subcommand():
     args = build_parser().parse_args(["score", "--max-pages", "10", "--generators", "small"])
     assert args.generators == ["small"] and args.max_pages == 10
     assert build_parser().parse_args(["score"]).max_pages is None
+
+
+def test_generate_contexts_closing_line_reports_the_measured_rate(capsys):
+    make()
+    out = capsys.readouterr().out
+    assert "2 chunks have a context (2 generated now" in out and "s/chunk" in out
+
+
+def test_generate_contexts_closing_line_has_no_rate_when_nothing_was_generated(capsys):
+    _, cache = make()
+    capsys.readouterr()
+    make(cache=cache)
+    out = capsys.readouterr().out
+    assert "0 generated now" in out and "s/chunk" not in out
+
+
+def test_an_intact_context_cache_is_not_rewritten_on_load(tmp_path):
+    path = tmp_path / "ctx.jsonl"
+    ContextCache(path).put("k", "v")
+    path.chmod(0o444)  # a rewrite would raise PermissionError
+    try:
+        assert ContextCache(path).get("k") == "v"
+    finally:
+        path.chmod(0o644)
+
+
+def test_a_torn_context_cache_is_repaired_with_an_atomic_replace(tmp_path, monkeypatch):
+    path = tmp_path / "ctx.jsonl"
+    ContextCache(path).put("k", "v")
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write('{"key": "torn')
+    replaced = []
+    real_replace = os.replace
+    monkeypatch.setattr(os, "replace", lambda a, b: (replaced.append(b), real_replace(a, b)))
+    ContextCache(path)
+    assert replaced == [path]
+    assert not list(tmp_path.glob("*.tmp"))

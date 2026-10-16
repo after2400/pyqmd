@@ -19,6 +19,7 @@ Usage: uv run scripts/bench_breadcrumbs_rerank.py [--data-dir data/conditionalqa
 
 import argparse
 import json
+import os
 import time
 from collections.abc import Callable
 from pathlib import Path
@@ -57,6 +58,13 @@ class Logger:
         if self.path is not None:
             with self.path.open("a", encoding="utf-8") as handle:
                 handle.write(line + "\n")
+
+
+def write_atomic(path: Path, text: str) -> None:
+    """Write via a temp file and rename, so a kill never leaves `path` half-written."""
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text(text, encoding="utf-8")
+    os.replace(tmp, path)
 
 
 def reranked_pages(store, query: str, limit: int = LIMIT) -> list[str]:
@@ -108,9 +116,12 @@ def run_questions(
     for i, record in done.items():
         if i < len(questions) and record["q"] != questions[i].query:
             raise ValueError(f"checkpoint question {i} is not the one being run now")
-    # Rewriting also drops a torn trailing line, so appends start on a clean line.
-    lines = [json.dumps(header)] + [json.dumps(done[i]) for i in sorted(done)]
-    checkpoint.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    # Rewrite (atomically) only for a new file or one with a torn trailing line,
+    # so appends start on a clean line and an intact checkpoint is never touched.
+    on_disk = checkpoint.read_text(encoding="utf-8").splitlines() if checkpoint.exists() else []
+    if len(on_disk) != 1 + len(done):
+        lines = [json.dumps(header)] + [json.dumps(done[i]) for i in sorted(done)]
+        write_atomic(checkpoint, "\n".join(lines) + "\n")
     resumed = sum(1 for i in done if i < len(questions))
     started = time.monotonic()
     rows: dict[str, list[dict[str, float]]] = {arm: [] for arm in ARMS}

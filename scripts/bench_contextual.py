@@ -32,7 +32,7 @@ from bench_breadcrumbs import (
     select_questions,
     variant_title,
 )
-from bench_breadcrumbs_rerank import Logger, format_progress
+from bench_breadcrumbs_rerank import Logger, format_progress, write_atomic
 
 from pyqmd_mlx.llm import DEFAULT_EMBED_MODEL, embed
 
@@ -94,15 +94,17 @@ class ContextCache:
         self.path = path
         self._items: dict[str, str] = {}
         if path is not None and path.exists():
-            good = []
+            good, torn = [], False
             for line in path.read_text(encoding="utf-8").splitlines():
                 try:
                     record = json.loads(line)
                 except json.JSONDecodeError:
+                    torn = True
                     continue
                 self._items[record["key"]] = record["context"]
                 good.append(line)
-            path.write_text("".join(f"{line}\n" for line in good), encoding="utf-8")
+            if torn:  # an intact file is never rewritten (a kill mid-rewrite would lose it)
+                write_atomic(path, "".join(f"{line}\n" for line in good))
 
     def get(self, key: str) -> str | None:
         return self._items.get(key)
@@ -148,7 +150,9 @@ def generate_contexts(
         if made == 3 or done % log_every == 0:
             elapsed = time.monotonic() - started
             log.say(format_progress(done, len(targets), elapsed, resumed, unit="chunks"))
-    log.say(f"{len(targets)} chunks have a context ({made} generated now)")
+    elapsed = time.monotonic() - started
+    rate = f", {elapsed:.0f} s, {elapsed / made:.1f} s/chunk" if made else ""
+    log.say(f"{len(targets)} chunks have a context ({made} generated now{rate})")
     return made
 
 
