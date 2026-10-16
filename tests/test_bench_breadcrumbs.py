@@ -590,3 +590,17 @@ def test_load_dataset_names_a_missing_split_file(tmp_path):
 def test_load_dataset_rejects_an_unknown_split(tmp_path):
     with pytest.raises(ValueError, match="split"):
         load_dataset(tmp_path, max_pages=None, split="test")
+
+
+def test_cache_misses_when_the_embedding_input_format_changes(tmp_path, monkeypatch):
+    monkeypatch.setattr(bench_breadcrumbs, "embedding_chunks", fake_chunks)
+    chunks = build_chunks({"alpha": PAGE})
+    embed_variant(chunks, "full", "m", FakeEmbed(), cache_dir=tmp_path)
+    bench_breadcrumbs.embed_queries(["q"], "m", FakeEmbed(), tmp_path)
+    monkeypatch.setattr(bench_breadcrumbs, "embedding_fingerprint", lambda model: "changed")
+    after_format_change = FakeEmbed()
+    embed_variant(chunks, "full", "m", after_format_change, cache_dir=tmp_path)
+    assert after_format_change.calls
+    queries_after = FakeEmbed()
+    bench_breadcrumbs.embed_queries(["q"], "m", queries_after, tmp_path)
+    assert queries_after.calls

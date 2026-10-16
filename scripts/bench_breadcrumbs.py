@@ -29,6 +29,7 @@ from prepare_conditionalqa_corpus import _parse_item, page_slug
 from pyqmd_mlx.llm import DEFAULT_EMBED_MODEL, embed
 from pyqmd_mlx.store._breadcrumbs import dominant_heading_path, find_headings
 from pyqmd_mlx.store._chunking import embedding_chunks
+from pyqmd_mlx.store._fingerprint import embedding_fingerprint
 from pyqmd_mlx.store._title import extract_title
 
 DEFAULT_DATA_DIR = Path(__file__).resolve().parent.parent / "data" / "conditionalqa"
@@ -306,8 +307,12 @@ def _normalise(vectors: list[list[float]]) -> np.ndarray:
     return matrix / np.where(norms == 0, 1.0, norms)
 
 
-def _cache_key(*parts: object) -> str:
-    return hashlib.sha256(json.dumps(parts, ensure_ascii=False).encode("utf-8")).hexdigest()[:16]
+def _cache_key(model: str, *parts: object) -> str:
+    """The embedding fingerprint (model, input format, chunk sizes) is part of
+    the key, so a change to how pyqmd formats embedding input never reuses
+    vectors made under the old format."""
+    key = (embedding_fingerprint(model), model, *parts)
+    return hashlib.sha256(json.dumps(key, ensure_ascii=False).encode("utf-8")).hexdigest()[:16]
 
 
 def embed_variant(
