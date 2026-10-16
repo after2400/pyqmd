@@ -57,14 +57,14 @@ def embed(
     texts: list[str],
     model: str = DEFAULT_EMBED_MODEL,
     kind: str = "query",
-    title: str | None = None,
+    title: str | list[str | None] | None = None,
 ) -> list[list[float]]:
     """Embed a batch of texts, returning one vector per input text.
 
     `kind` selects the formatter: "query" (default) applies the query
     prefix; "document" the document format, with `title` (the document's
-    title, shared by every chunk in the batch; "none" when absent, as in
-    Node). embeddinggemma is asymmetric by training, so documents must not
+    title, shared by every chunk in the batch, or a list with one title per
+    text; "none" when absent, as in Node). embeddinggemma is asymmetric by training, so documents must not
     receive the query prefix. Inputs are truncated at
     min(EMBED_CONTEXT_TOKENS, the tokenizer's model_max_length), Node's
     embedding context.
