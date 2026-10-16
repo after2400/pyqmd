@@ -1,6 +1,58 @@
 # CHANGELOG
 
 
+## v0.9.0 (2026-10-16)
+
+### ✨ Features
+
+- **llm**: Accept one embedding title per text ([#22](https://github.com/after2400/pyqmd/pull/22),
+  [`a2d8112`](https://github.com/after2400/pyqmd/commit/a2d81121eb7fd85b3dc4782e0fd1b6302383018a))
+
+format_embedding_inputs and embed take a title list with one entry per text, so the chunks of one document can carry different titles. A single title or None behaves as before.
+
+- **store**: Add opt-in heading breadcrumbs for embeddings
+  ([#22](https://github.com/after2400/pyqmd/pull/22),
+  [`a2d8112`](https://github.com/after2400/pyqmd/commit/a2d81121eb7fd85b3dc4782e0fd1b6302383018a))
+
+- **store**: Add opt-in section-heading breadcrumbs for embedding titles
+  ([#22](https://github.com/after2400/pyqmd/pull/22),
+  [`a2d8112`](https://github.com/after2400/pyqmd/commit/a2d81121eb7fd85b3dc4782e0fd1b6302383018a))
+
+With PYQMD_EMBED_BREADCRUMBS=1, a .md chunk is embedded under '<doc title> > <section path>', the path of the section holding most of the chunk. Off by default, so Node's embedding input and every existing fingerprint are unchanged. The fingerprint covers the setting, so toggling it re-embeds on the next 'pyqmd embed'.
+
+### ✅ Testing
+
+- **scripts**: Add the heading-breadcrumbs embedding experiment
+  ([#20](https://github.com/after2400/pyqmd/pull/20),
+  [`efcf3a2`](https://github.com/after2400/pyqmd/commit/efcf3a2385679c0c977f2b4a6a8a1f9e1d82064b))
+
+Embeds ConditionalQA chunks with and without the section-heading path in the title, searches by cosine similarity in memory, and reports chunk- and page-level metrics with page-clustered bootstrap intervals. Gold chunks come from the dataset's evidence sentences; strict labelling drops evidence that repeats on a page. Reads the dev or train split. It never opens the user's index.
+
+- **scripts**: Add the hybrid-stage check and reuse the breadcrumbs module
+  ([#22](https://github.com/after2400/pyqmd/pull/22),
+  [`a2d8112`](https://github.com/after2400/pyqmd/commit/a2d81121eb7fd85b3dc4782e0fd1b6302383018a))
+
+The experiment script now imports the heading-path code from the store. The new script asks whether the gain survives FTS and RRF fusion, comparing two real in-memory Stores.
+
+### 📖 Documentation
+
+- Add a "Why this exists" section to the README ([#21](https://github.com/after2400/pyqmd/pull/21),
+  [`a67214a`](https://github.com/after2400/pyqmd/commit/a67214a6c3a65c87125de4d866369c666dc9cec8))
+
+Explains where pyqmd came from, that it is independent of qmd, and how it is built.
+
+- Document opt-in heading breadcrumbs ([#22](https://github.com/after2400/pyqmd/pull/22),
+  [`a2d8112`](https://github.com/after2400/pyqmd/commit/a2d81121eb7fd85b3dc4782e0fd1b6302383018a))
+
+- **specs**: Publish the heading breadcrumbs experiment spec
+  ([#20](https://github.com/after2400/pyqmd/pull/20),
+  [`efcf3a2`](https://github.com/after2400/pyqmd/commit/efcf3a2385679c0c977f2b4a6a8a1f9e1d82064b))
+
+- **specs**: Publish the heading breadcrumbs feature spec
+  ([#22](https://github.com/after2400/pyqmd/pull/22),
+  [`a2d8112`](https://github.com/after2400/pyqmd/commit/a2d81121eb7fd85b3dc4782e0fd1b6302383018a))
+
+
 ## v0.8.1 (2026-10-02)
 
 ### 🐞 Bug Fixes
