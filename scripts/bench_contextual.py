@@ -9,6 +9,7 @@ The rule and every choice here are fixed in advance in the spec
 user's index.
 """
 
+import argparse
 import hashlib
 import json
 import re
@@ -16,8 +17,24 @@ import time
 from collections.abc import Callable
 from pathlib import Path
 
-from bench_breadcrumbs import Chunk
+import numpy as np
+from bench_breadcrumbs import (
+    DEFAULT_DATA_DIR,
+    METRICS,
+    Chunk,
+    build_chunks,
+    check_exclusions,
+    cluster_bootstrap,
+    embed_inputs,
+    embed_queries,
+    load_dataset,
+    query_metrics,
+    select_questions,
+    variant_title,
+)
 from bench_breadcrumbs_rerank import Logger, format_progress
+
+from pyqmd_mlx.llm import DEFAULT_EMBED_MODEL, embed
 
 GENERATORS = {
     "small": "mlx-community/Qwen3-1.7B-4bit",
@@ -167,3 +184,218 @@ def load_generator(model_id: str) -> Callable[[str], str]:
         return generate(model, tokenizer, prompt=text, max_tokens=MAX_NEW_TOKENS)
 
     return generate_context
+
+
+REGRESSION = -0.01
+CONTRAST_LEVEL = 0.975  # two generator sizes are tested
+
+
+def arm_inputs(
+    chunks: list[Chunk], contexts: dict[str, list[str]]
+) -> dict[str, tuple[list[str], list[str]]]:
+    """arm name -> (titles, texts) handed to embed(kind="document"). The ctx
+    arms keep the plain document title: only the text changes."""
+    plain_titles = [c.title for c in chunks]
+    texts = [c.text for c in chunks]
+    arms = {
+        "base": (plain_titles, texts),
+        "crumbs": ([variant_title("full", c.title, list(c.path)) for c in chunks], texts),
+    }
+    for size, lines in contexts.items():
+        arms[f"ctx-{size}"] = (
+            plain_titles,
+            [ctx_text(line, c.text) for line, c in zip(lines, chunks, strict=True)],
+        )
+    return arms
+
+
+def contrast(
+    rows: dict[str, dict[str, np.ndarray]],
+    a: str,
+    b: str,
+    clusters: list[str],
+    resamples: int,
+    metrics: tuple[str, ...] = METRICS,
+) -> dict[str, tuple[float, float, float]]:
+    """metric -> (mean, lower, upper) of arm a minus arm b, page-clustered."""
+    return {
+        m: cluster_bootstrap(rows[a][m] - rows[b][m], clusters, resamples, level=CONTRAST_LEVEL)
+        for m in metrics
+    }
+
+
+def regressions(vs_base: dict[str, tuple[float, float, float]]) -> list[str]:
+    """Metrics whose point estimate against base is below -0.01."""
+    return [m for m, (mean, _lo, _hi) in vs_base.items() if mean < REGRESSION]
+
+
+def contextual_verdict(
+    vs_crumbs: dict[str, tuple[float, float, float]],
+    vs_base: dict[str, tuple[float, float, float]],
+) -> tuple[int, str]:
+    """The spec's rule, in order: 1, then 2, else 3."""
+    if vs_crumbs["chunk_mrr"][1] > 0 and vs_crumbs["page_ndcg10"][0] >= 0:
+        return 1, (
+            "1: beats breadcrumbs (chunk MRR bound above zero, nDCG@10 not lower); "
+            "worth a feature spec, the user decides"
+        )
+    if vs_base["chunk_mrr"][1] > 0:
+        return 2, (
+            "2: beats plain embedding but not breadcrumbs; "
+            "not worth the generation cost, no feature"
+        )
+    return 3, "3: no gain over plain embedding that survives the interval"
+
+
+def score_arms(arms, chunks, questions, query_vectors, model, embed_fn, cache_dir):
+    """Per-arm per-question metrics, and each arm's embedding seconds."""
+    page_names = list(dict.fromkeys(c.page for c in chunks))
+    page_index = {name: i for i, name in enumerate(page_names)}
+    starts = [i for i, c in enumerate(chunks) if i == 0 or chunks[i - 1].page != c.page]
+    bounds = np.array([*starts, len(chunks)])
+    rows, seconds = {}, {}
+    for arm, (titles, texts) in arms.items():
+        vectors, seconds[arm] = embed_inputs(titles, texts, arm, model, embed_fn, cache_dir)
+        scores = query_vectors @ vectors.T
+        per_query = [
+            query_metrics(scores[i], bounds, page_index[q.page], sorted(q.gold))
+            for i, q in enumerate(questions)
+        ]
+        rows[arm] = {m: np.array([r[m] for r in per_query]) for m in METRICS}
+    return rows, seconds
+
+
+def _cell(ci: tuple[float, float, float]) -> str:
+    mean, lo, hi = ci
+    return f"{mean:+.4f} [{lo:+.4f}, {hi:+.4f}]"
+
+
+def format_report(selection, n_chunks, rows, seconds, empties, vs_crumbs, vs_base) -> str:
+    lines = [
+        "# Contextual embedding: vector-stage check",
+        "",
+        f"- Questions scored: {len(selection.questions)} (strict labelling; "
+        f"{selection.ambiguous} excluded as ambiguous); chunks: {n_chunks}",
+        f"- Contrast intervals are {CONTRAST_LEVEL:.1%} (page-clustered bootstrap)",
+        "",
+        "| Arm | " + " | ".join(METRICS) + " | embed s |",
+        "| --- |" + " --- |" * (len(METRICS) + 1),
+    ]
+    for arm, metrics in rows.items():
+        cells = " | ".join(f"{metrics[m].mean():.4f}" for m in METRICS)
+        lines.append(f"| {arm} | {cells} | {seconds[arm]:.0f} |")
+    for size in empties:
+        lines += [
+            "",
+            f"## {size}: ctx-{size} minus crumbs, and minus base (empty contexts: {empties[size]})",
+            "",
+            "| Metric | vs crumbs | vs base |",
+            "| --- | --- | --- |",
+        ]
+        for m in METRICS:
+            lines.append(f"| {m} | {_cell(vs_crumbs[size][m])} | {_cell(vs_base[size][m])} |")
+        flagged = regressions(vs_base[size])
+        if flagged:
+            lines += ["", f"Regression flag against base (point estimate below -0.01): {flagged}"]
+        _code, text = contextual_verdict(vs_crumbs[size], vs_base[size])
+        lines += ["", f"## Verdict ({size}) {text}"]
+    return "\n".join(lines) + "\n"
+
+
+def score_run(
+    pages: dict[str, str],
+    source: list[dict],
+    *,
+    model: str,
+    embed_fn,
+    cache_dir: Path | None,
+    caches: dict[str, ContextCache],
+    resamples: int = 10_000,
+    strict: bool = True,
+) -> str:
+    """Embed the arms, score every question and return the report. Fails before
+    any embedding if a requested generator has not finished."""
+    chunks = build_chunks(pages)
+    selection = select_questions(source, pages, chunks)
+    if strict:
+        check_exclusions(selection, 0.15)
+    questions = selection.questions
+    if not questions:
+        raise RuntimeError("no eligible questions")
+    contexts = {
+        size: cached_contexts(chunks, pages, GENERATORS[size], cache)
+        for size, cache in caches.items()
+    }
+    arms = arm_inputs(chunks, contexts)
+    query_vectors = embed_queries([q.query for q in questions], model, embed_fn, cache_dir)
+    rows, seconds = score_arms(arms, chunks, questions, query_vectors, model, embed_fn, cache_dir)
+    clusters = [q.page for q in questions]
+    vs_crumbs = {s: contrast(rows, f"ctx-{s}", "crumbs", clusters, resamples) for s in contexts}
+    vs_base = {s: contrast(rows, f"ctx-{s}", "base", clusters, resamples) for s in contexts}
+    empties = {size: sum(1 for line in lines if not line) for size, lines in contexts.items()}
+    return format_report(selection, len(chunks), rows, seconds, empties, vs_crumbs, vs_base)
+
+
+def _paths(data_dir: Path, smoke: bool) -> Path:
+    return data_dir / ("contextual-smoke" if smoke else "contextual")
+
+
+def build_parser() -> argparse.ArgumentParser:
+    """The common options are accepted after the subcommand (that is how the
+    plan's commands are written)."""
+    common = argparse.ArgumentParser(add_help=False)
+    common.add_argument("--data-dir", type=Path, default=DEFAULT_DATA_DIR)
+    common.add_argument("--max-pages", type=int, default=None, help="Smoke run on N pages")
+    parser = argparse.ArgumentParser(description="Contextual embedding experiment")
+    commands = parser.add_subparsers(dest="command", required=True)
+    gen = commands.add_parser(
+        "generate", parents=[common], help="Write a context line for every chunk"
+    )
+    gen.add_argument("--generator", choices=sorted(GENERATORS), required=True)
+    gen.add_argument("--limit-chunks", type=int, default=None, help="First N chunks (timing)")
+    score = commands.add_parser("score", parents=[common], help="Embed the arms and apply the rule")
+    score.add_argument(
+        "--generators", nargs="+", choices=sorted(GENERATORS), default=list(GENERATORS)
+    )
+    score.add_argument("--resamples", type=int, default=10_000)
+    return parser
+
+
+def main() -> None:
+    args = build_parser().parse_args()
+
+    work = _paths(args.data_dir, args.max_pages is not None)
+    work.mkdir(parents=True, exist_ok=True)
+    pages, source, _subset = load_dataset(args.data_dir, args.max_pages, "train")
+
+    if args.command == "generate":
+        log = Logger(work / f"generate-{args.generator}.log")
+        log.say(f"--- started {time.strftime('%Y-%m-%d %H:%M:%S')} ---")
+        chunks = build_chunks(pages)
+        log.say(f"{len(chunks)} chunks over {len(pages)} pages; generator {args.generator}")
+        cache = ContextCache(work / f"contexts-{args.generator}.jsonl")
+        generator_id = GENERATORS[args.generator]
+        generate_fn = load_generator(generator_id)
+        generate_contexts(
+            chunks, pages, generator_id, generate_fn, cache, log, limit=args.limit_chunks
+        )
+        return
+
+    caches = {size: ContextCache(work / f"contexts-{size}.jsonl") for size in args.generators}
+    report = score_run(
+        pages,
+        source,
+        model=DEFAULT_EMBED_MODEL,
+        embed_fn=embed,
+        cache_dir=work / "embeddings",
+        caches=caches,
+        resamples=args.resamples,
+        strict=args.max_pages is None,
+    )
+    (work / "report.md").write_text(report, encoding="utf-8")
+    print(report)
+    print(f"Wrote {work / 'report.md'}")
+
+
+if __name__ == "__main__":
+    main()
