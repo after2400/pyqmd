@@ -253,9 +253,13 @@ def query_metrics(
 
 
 def cluster_bootstrap(
-    values: np.ndarray, clusters: list[str], resamples: int = 10_000, seed: int = 0
+    values: np.ndarray,
+    clusters: list[str],
+    resamples: int = 10_000,
+    seed: int = 0,
+    level: float = 0.95,
 ) -> tuple[float, float, float]:
-    """Mean of `values` with a 95% percentile interval from resampling whole
+    """Mean of `values` with a `level` (95% by default) percentile interval from resampling whole
     clusters (gold pages) with replacement: several dev questions share a
     page and are not independent."""
     names = sorted(set(clusters))
@@ -265,7 +269,8 @@ def cluster_bootstrap(
     counts = np.bincount(ids, minlength=len(names)).astype(float)
     draw = np.random.default_rng(seed).integers(0, len(names), size=(resamples, len(names)))
     means = sums[draw].sum(axis=1) / counts[draw].sum(axis=1)
-    lo, hi = np.percentile(means, [2.5, 97.5])
+    tail = (1 - level) / 2 * 100
+    lo, hi = np.percentile(means, [tail, 100 - tail])
     return float(values.mean()), float(lo), float(hi)
 
 
@@ -318,15 +323,28 @@ def _cache_key(model: str, *parts: object) -> str:
 def embed_variant(
     chunks: list[Chunk], variant: str, model: str, embed_fn: EmbedFn, cache_dir: Path | None
 ) -> tuple[np.ndarray, float]:
-    """Normalised document vectors for every chunk under one variant, and the
-    seconds spent embedding (from the cache's sidecar on a hit). Chunks that
-    share a title string go through one embed() call (it takes one title per
-    call). The cache key covers the model, every title and every text."""
+    """`embed_inputs` for one breadcrumb variant's titles over the chunks' own text."""
     titles = [variant_title(variant, c.title, list(c.path)) for c in chunks]
     texts = [c.text for c in chunks]
+    return embed_inputs(titles, texts, variant, model, embed_fn, cache_dir)
+
+
+def embed_inputs(
+    titles: list[str],
+    texts: list[str],
+    label: str,
+    model: str,
+    embed_fn: EmbedFn,
+    cache_dir: Path | None,
+) -> tuple[np.ndarray, float]:
+    """Normalised document vectors for every (title, text) pair, and the
+    seconds spent embedding (from the cache's sidecar on a hit). Inputs that
+    share a title string go through one embed() call (it takes one title per
+    call). The cache key covers the model, every title and every text; `label`
+    only names the cache file."""
     stem = None
     if cache_dir is not None:
-        stem = cache_dir / f"{variant}-{_cache_key(model, titles, texts)}"
+        stem = cache_dir / f"{label}-{_cache_key(model, titles, texts)}"
         if stem.with_suffix(".npy").exists() and stem.with_suffix(".json").exists():
             meta = json.loads(stem.with_suffix(".json").read_text(encoding="utf-8"))
             return np.load(stem.with_suffix(".npy")), float(meta["seconds"])
@@ -334,7 +352,7 @@ def embed_variant(
     groups: dict[str, list[int]] = {}
     for index, title in enumerate(titles):
         groups.setdefault(title, []).append(index)
-    out: list[list[float] | None] = [None] * len(chunks)
+    out: list[list[float] | None] = [None] * len(texts)
     seconds = 0.0
     for title, indices in groups.items():
         for start in range(0, len(indices), EMBED_BATCH):

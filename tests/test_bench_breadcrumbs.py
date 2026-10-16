@@ -16,6 +16,7 @@ from bench_breadcrumbs import (
     chunks_by_page,
     cluster_bootstrap,
     decide,
+    embed_inputs,
     embed_queries,
     embed_variant,
     evidence_spans,
@@ -604,3 +605,31 @@ def test_cache_misses_when_the_embedding_input_format_changes(tmp_path, monkeypa
     queries_after = FakeEmbed()
     bench_breadcrumbs.embed_queries(["q"], "m", queries_after, tmp_path)
     assert queries_after.calls
+
+
+def test_embed_inputs_groups_by_title_and_returns_normalised_rows_in_input_order():
+    fake = FakeEmbed()
+    vectors, seconds = embed_inputs(
+        ["T1", "T2", "T1"], ["a", "b", "c"], "lbl", "m", fake, cache_dir=None
+    )
+    assert vectors.shape[0] == 3 and seconds >= 0
+    assert sorted((c[3], c[0]) for c in fake.calls) == [("T1", ("a", "c")), ("T2", ("b",))]
+    assert np.allclose(np.linalg.norm(vectors, axis=1), 1.0)
+
+
+def test_embed_inputs_caches_by_label_and_misses_when_a_text_changes(tmp_path):
+    embed_inputs(["T"], ["a"], "lbl", "m", FakeEmbed(), cache_dir=tmp_path)
+    again = FakeEmbed()
+    embed_inputs(["T"], ["a"], "lbl", "m", again, cache_dir=tmp_path)
+    assert again.calls == []
+    changed = FakeEmbed()
+    embed_inputs(["T"], ["a changed"], "lbl", "m", changed, cache_dir=tmp_path)
+    assert changed.calls
+
+
+def test_cluster_bootstrap_a_wider_level_gives_a_wider_interval():
+    values = np.random.default_rng(1).random(80)
+    clusters = [f"page{i // 2}" for i in range(80)]
+    _m, lo95, hi95 = cluster_bootstrap(values, clusters, resamples=2000)
+    _m, lo975, hi975 = cluster_bootstrap(values, clusters, resamples=2000, level=0.975)
+    assert lo975 <= lo95 and hi975 >= hi95 and (lo975, hi975) != (lo95, hi95)
