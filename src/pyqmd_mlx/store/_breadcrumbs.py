@@ -8,14 +8,16 @@ import re
 from collections.abc import Mapping
 from dataclasses import dataclass
 
-from ._chunking import find_code_fences, is_inside_code_fence
-
 BREADCRUMBS_ENV_VAR = "PYQMD_EMBED_BREADCRUMBS"
 MAX_BREADCRUMB_CHARS = 256
 
 # ATX heading; an optional closing run of hashes needs a space before it, so
 # "# C#" keeps its "#".
 _HEADING_RE = re.compile(r"^(#{1,6})[ \t]+(.+?)(?:[ \t]+#+)?[ \t]*\r?$", re.MULTILINE)
+
+
+# Opening or closing fence line: up to 3 spaces of indent, then 3+ backticks or tildes.
+_FENCE_RE = re.compile(r"^ {0,3}(`{3,}|~{3,})(.*)$", re.MULTILINE)
 
 
 @dataclass(frozen=True)
@@ -25,14 +27,37 @@ class Heading:
     text: str
 
 
+def _fenced_ranges(content: str) -> list[tuple[int, int]]:
+    """Character ranges covered by fenced code blocks, CommonMark-style: ```
+    or ~~~ opens, a line of the same character at least as long (and with
+    nothing after it) closes, and an unclosed fence runs to the end. This is
+    independent of the chunker's fence finder, which only knows Node's
+    "\n```" pairs; a `#` line is a heading or not by markdown's rules."""
+    ranges: list[tuple[int, int]] = []
+    open_start = 0
+    marker = ""
+    for match in _FENCE_RE.finditer(content):
+        run, rest = match.group(1), match.group(2)
+        if not marker:
+            if run[0] == "`" and "`" in rest:
+                continue  # inline code, not a fence
+            marker, open_start = run, match.start()
+        elif run[0] == marker[0] and len(run) >= len(marker) and not rest.strip():
+            ranges.append((open_start, match.end()))
+            marker = ""
+    if marker:
+        ranges.append((open_start, len(content)))
+    return ranges
+
+
 def find_headings(content: str) -> list[Heading]:
     """ATX headings in document order, skipping `#` lines inside code fences
     and headings with no text."""
-    fences = find_code_fences(content)
+    fenced = _fenced_ranges(content)
     headings = []
     for match in _HEADING_RE.finditer(content):
         text = match.group(2).strip()
-        if text and not is_inside_code_fence(match.start(), fences):
+        if text and not any(start <= match.start() < end for start, end in fenced):
             headings.append(Heading(match.start(), len(match.group(1)), text))
     return headings
 
