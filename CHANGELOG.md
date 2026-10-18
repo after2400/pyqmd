@@ -1,6 +1,15 @@
 # CHANGELOG
 
 
+## v0.9.1 (2026-10-18)
+
+### 🐞 Bug Fixes
+
+- **store**: Find breadcrumb headings outside every kind of code fence
+  ([#23](https://github.com/after2400/pyqmd/pull/23),
+  [`b69cade`](https://github.com/after2400/pyqmd/commit/b69cadeeda62039b22fe2382b01b3a9081566b0f))
+
+
 ## v0.9.0 (2026-10-16)
 
 ### ✨ Features
