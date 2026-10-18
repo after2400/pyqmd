@@ -347,3 +347,59 @@ The hybrid-stage result was rule 2 (inconclusive): every point estimate positive
 - The corpus is the best case for headings; flatter notes will see less.
 
 Changes from the first draft: `breadcrumbs_enabled` is true only for `1`/`true`/`on`; the Store default is off, so `embedding_fingerprint(model)` (default off) and `Store` agree; the README section is "Optional: heading breadcrumbs" and the pending-embedding note applies only when the setting is toggled.
+
+## Amendment 2: reranker-stage check (written 2026-10-16, before any run)
+
+Amendment 1 showed the vector-stage gain shrinks after FTS + RRF fusion
+(nDCG@10 +0.0048, interval spans zero). The one stage never measured at
+useful power is the reranker: the 59-query end-to-end check had a noise margin
+of 0.04 to 0.05. The question this amendment answers: **is there any
+difference in the final, reranked ranking?**
+
+- **Questions:** the same 2,217 train questions as Amendment 1 (strict
+  labelling, `--split train`, same selection code), page-level gold.
+- **Pipeline:** the Amendment 1 stores (652-page corpus, breadcrumbs on and
+  off), then `Store.query(q, limit=40)` with an `expand_fn` that returns no
+  expansion lines and reranking ON. That is FTS + vector + RRF + the real
+  reranker over the top 40 candidates, minus query expansion (expansion is
+  identical in both arms and costs about as much as everything else; leaving it
+  out keeps the run to hours, and it is named as not measured). A page not in
+  the top 40 scores 0.
+- **Metrics, bootstrap, primary metric and rule:** exactly Amendment 1's
+  (page MRR, nDCG@10, Recall@10; `on` minus `off`; cluster bootstrap by gold
+  page, 10,000 resamples, seed 0; primary page nDCG@10; precedence 3 > 1 > 2,
+  regression threshold −0.01). Consequences differ because the default is
+  already decided as opt-in:
+  1. Interval above zero: the gain reaches the final ranking. Reopen the
+     default question with the user; nothing flips automatically.
+  2. Spans zero, no metric below −0.01: no evidence of a final-ranking gain.
+     Stays opt-in; the README keeps saying the benefit is established at the
+     retrieval stages only.
+  3. Any metric below −0.01: record a regression; the README says so.
+- **Resumable run.** The reranker is slow (hours for 2 × 2,217 queries), so each
+  question's ranking is appended to a JSONL checkpoint as it finishes and a
+  restart skips what is done. Resuming is not a second run.
+- **One run.** Same rule as Amendment 1: a defect in the script may be fixed
+  and the run repeated once, with the defect recorded here. A disappointing
+  result may not.
+- **Not in scope:** query expansion, other corpora, the reranker's own quality.
+
+### Amendment 2 result (run 2026-10-16, one run, no script defects)
+
+2,217 of 2,217 questions, 29 excluded as ambiguous. Pipeline as specified
+(FTS + vector + RRF + reranker over the top 40, no expansion). 95% cluster-bootstrap intervals, `on` minus `off`:
+
+| Metric         | off    | on     | on − off                   |
+| -------------- | ------ | ------ | -------------------------- |
+| page MRR       | 0.6243 | 0.6267 | +0.0024 [−0.0045, +0.0091] |
+| page nDCG@10   | 0.6627 | 0.6652 | +0.0025 [−0.0040, +0.0087] |
+| page Recall@10 | 0.7961 | 0.8002 | +0.0041 [−0.0045, +0.0125] |
+
+**Rule 2.** Every interval spans zero and no point estimate is below −0.01.
+Stays opt-in; the README keeps saying the benefit is established at the
+retrieval stages only.
+
+What this shows: at this sample size (about 2,200 questions on one corpus) a
+final-ranking gain larger than roughly +0.009 nDCG@10 is unlikely. What it does
+not show: that there is no gain at all (the interval does not exclude a
+small one), anything about query expansion, or other corpora.
