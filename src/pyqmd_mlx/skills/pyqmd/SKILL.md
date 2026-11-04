@@ -150,3 +150,7 @@ parameter shapes.
   than retrying in a loop — they can point `PYQMD_EXPAND_MODEL` at another
   Hub repo id or a local MLX model directory. `pyqmd search` (BM25) needs
   no model and still works.
+- The reranker is overridable the same way: if a query fails with
+  `Could not load rerank model`, report it rather than retrying;
+  `PYQMD_RERANK_MODEL` points at another Hub repo id or a local MLX model
+  directory.
