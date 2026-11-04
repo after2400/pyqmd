@@ -625,7 +625,11 @@ def test_query_command_rerank_model_flag_reaches_reranker(monkeypatch):
 
     def fake_get_store(db_path=None, *, rerank_model=None):
         store = Store(
-            ":memory:", embed_fn=_fake_embed, rerank_fn=recording_rerank, rerank_model=rerank_model
+            ":memory:",
+            embed_fn=_fake_embed,
+            expand_fn=lambda query, model: [],  # no expansion model on CI runners
+            rerank_fn=recording_rerank,
+            rerank_model=rerank_model,
         )
         store.add_collection("notes", "/notes")
         _seed_doc(store, "auth.md", "Auth", "authentication setup guide")
@@ -646,7 +650,12 @@ def test_query_command_without_rerank_model_flag_passes_none(monkeypatch):
 
     def fake_get_store(db_path=None, *, rerank_model=None):
         captured["rerank_model"] = rerank_model
-        store = Store(":memory:", embed_fn=_fake_embed, rerank_fn=_fake_rerank)
+        store = Store(
+            ":memory:",
+            embed_fn=_fake_embed,
+            expand_fn=lambda query, model: [],  # no expansion model on CI runners
+            rerank_fn=_fake_rerank,
+        )
         store.add_collection("notes", "/notes")
         _seed_doc(store, "auth.md", "Auth", "authentication setup guide")
         return store

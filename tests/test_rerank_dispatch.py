@@ -79,6 +79,11 @@ def test_unreadable_config_falls_back_to_yes_no_and_reports_the_load_error(monke
         raise ValueError("Repo id must be in the form 'repo_name' or 'namespace/repo_name'")
 
     monkeypatch.setitem(sys.modules, "mlx_lm", types.SimpleNamespace(load=boom))
+    # The yes/no path imports mlx.core before it loads; stub it for runners without MLX.
+    mlx_stub = types.ModuleType("mlx")
+    mlx_stub.core = types.ModuleType("mlx.core")
+    monkeypatch.setitem(sys.modules, "mlx", mlx_stub)
+    monkeypatch.setitem(sys.modules, "mlx.core", mlx_stub.core)
     missing = str(tmp_path / "no-such-model")  # no config.json anywhere -> not a cross-encoder
 
     with pytest.raises(RerankModelError) as excinfo:
