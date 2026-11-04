@@ -4,6 +4,7 @@ Needs real MLX (not model weights), so it skips where mlx can't import."""
 
 import importlib
 import json
+import warnings
 from types import SimpleNamespace
 
 import pytest
@@ -243,11 +244,40 @@ def test_load_cross_encoder_fixes_the_head_once_and_reads_calibration(monkeypatc
     assert (encoder.bias, encoder.temperature) == (0.7, 1.5)
 
 
-def test_load_cross_encoder_defaults_to_identity_calibration(monkeypatch):
+def _stub_load(monkeypatch):
     model = SimpleNamespace(head=SimpleNamespace(act=nn.SiLU()), is_regression=False)
     monkeypatch.setattr("mlx_embeddings.utils.load", lambda model_id: (model, FakeTokenizer()))
     monkeypatch.setattr(cross_encoder, "read_config", lambda model_id: {})
 
-    encoder = cross_encoder.load_cross_encoder("unknown/checkpoint")
+
+def test_load_cross_encoder_without_a_calibration_entry_warns_and_uses_identity(monkeypatch):
+    _stub_load(monkeypatch)
+
+    with pytest.warns(RuntimeWarning, match="calibration") as caught:
+        encoder = cross_encoder.load_cross_encoder("unknown/checkpoint")
 
     assert (encoder.bias, encoder.temperature) == (0.0, 1.0)
+    # The message names the model and says entries are keyed by Hub repo id, so a
+    # user who pointed PYQMD_RERANK_MODEL at a local copy knows why.
+    assert "unknown/checkpoint" in str(caught[0].message)
+    assert "repo id" in str(caught[0].message)
+
+
+def test_load_cross_encoder_matches_the_calibration_entry_ignoring_case(monkeypatch):
+    _stub_load(monkeypatch)
+    monkeypatch.setitem(_constants.RERANK_CALIBRATION, "someorg/some-cross-encoder", (0.7, 1.5))
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        encoder = cross_encoder.load_cross_encoder("SomeOrg/Some-Cross-Encoder")
+
+    assert (encoder.bias, encoder.temperature) == (0.7, 1.5)
+
+
+def test_load_cross_encoder_with_an_entry_does_not_warn(monkeypatch):
+    _stub_load(monkeypatch)
+    monkeypatch.setitem(_constants.RERANK_CALIBRATION, MODEL_ID, (0.7, 1.5))
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        cross_encoder.load_cross_encoder(MODEL_ID)

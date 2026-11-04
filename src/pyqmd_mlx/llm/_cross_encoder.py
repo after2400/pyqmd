@@ -15,6 +15,7 @@ Store.
 
 import json
 import math
+import warnings
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -93,6 +94,26 @@ def _load(model_id: str):
     return load(model_id)
 
 
+def _calibration_for(model_id: str) -> tuple[float, float]:
+    """The (bias, temperature) for a checkpoint, matched case-insensitively on
+    its Hub repo id. A checkpoint with no entry (including a local copy of a
+    calibrated model, whose directory name is not the repo id) gets the
+    identity mapping and a warning, because its scores may then sit on a
+    different scale than the 0..1 one the RRF blend and --min-score assume."""
+    wanted = model_id.casefold()
+    for repo_id, calibration in _constants.RERANK_CALIBRATION.items():
+        if repo_id.casefold() == wanted:
+            return calibration
+    warnings.warn(
+        f"No score calibration for rerank model '{model_id}' (calibrations are keyed by "
+        "Hub repo id): its scores may be compressed, which shifts --min-score and weakens "
+        "the rerank half of the ranking blend.",
+        RuntimeWarning,
+        stacklevel=3,
+    )
+    return 0.0, 1.0
+
+
 def load_cross_encoder(model_id: str) -> CrossEncoder:
     model, tokenizer = load_quietly_if_cached(model_id, _load)
     config = read_config(model_id) or {}
@@ -101,7 +122,7 @@ def load_cross_encoder(model_id: str) -> CrossEncoder:
     # pooler_output; otherwise it applies a sigmoid, which saturates for
     # confident pairs and loses their order.
     model.is_regression = True
-    bias, temperature = _constants.RERANK_CALIBRATION.get(model_id, (0.0, 1.0))
+    bias, temperature = _calibration_for(model_id)
     return CrossEncoder(model, tokenizer, bias, temperature)
 
 
