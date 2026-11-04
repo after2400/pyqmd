@@ -136,8 +136,8 @@ stranger's installed pyqmd) and must not drift apart.
   keyed by Hub repo id, case-insensitive; fitted with `scripts/eval_rerankers.py` so scores match
   Qwen's scale, which the RRF blend and `--min-score` assume). A checkpoint with no entry, such as
   a local copy of a calibrated model, gets identity scores and a `RuntimeWarning`. Tested alternative: `ibm-granite/granite-embedding-reranker-english-r2`
-  (Apache 2.0, English only; ties Qwen on SciFact and is about 1.5x faster; `--intent` costs it
-  a little ranking quality). A load failure is a `RerankModelError` → one-line `Error:` + exit 1
+  (Apache 2.0, English only; ties Qwen on SciFact and ConditionalQA and is 1.5-2x faster; real
+  `--intent` text helps it about as much as it helps Qwen). A load failure is a `RerankModelError` → one-line `Error:` + exit 1
   (CLI, including `bench`) / `is_error` (MCP). `mlx-embeddings` 0.1.0 hardcodes a GELU
   classifier head, so `fix_classifier_activation` patches it from `config.json`; drop that
   when the exact pin moves past an upstream fix.
