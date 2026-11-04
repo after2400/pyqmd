@@ -27,7 +27,13 @@ CROSS_ENCODER_MAX_TOKENS = 2048
 
 # Hub repo id -> (bias b, temperature t) mapping a cross-encoder's raw logit to
 # a 0..1 score, sigmoid((logit - b) / t). Unlisted checkpoints use (0.0, 1.0).
-RERANK_CALIBRATION: dict[str, tuple[float, float]] = {}
+# Fitted with scripts/eval_rerankers.py (300 SciFact test queries, 30 BM25 candidates
+# plus the judged documents each) so the median relevant and median other document
+# score as Qwen3-Reranker's do (~0.995 and ~0.0025), the scale the RRF blend and
+# --min-score assume.
+RERANK_CALIBRATION: dict[str, tuple[float, float]] = {
+    GRANITE_RERANK_MODEL: (1.237, 0.0709),
+}
 
 # Embedding context in tokens, Node's EMBED_CONTEXT_SIZE (llm.ts). embed()
 # truncates at min(this, the tokenizer's model_max_length), mirroring

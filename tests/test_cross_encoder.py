@@ -109,6 +109,14 @@ def test_calibrate_is_monotonic_in_the_logit():
     assert len(set(scores)) == len(scores)
 
 
+def test_granite_has_a_fitted_calibration_entry():
+    bias, temperature = _constants.RERANK_CALIBRATION[_constants.GRANITE_RERANK_MODEL]
+    assert temperature > 0
+    # Irrelevant pairs sit near logit 0.8 and relevant ones near 1.6; the median
+    # matching to Qwen's scale puts the bias between them.
+    assert 0.8 < bias < 1.6
+
+
 @pytest.mark.parametrize("temperature", [0.0, -1.0])
 def test_calibrate_rejects_a_non_positive_temperature(temperature):
     with pytest.raises(ValueError, match="temperature"):
