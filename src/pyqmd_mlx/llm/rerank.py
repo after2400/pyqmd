@@ -5,12 +5,26 @@ the design spec's "Research finding" section) -- mlx-lm keeps the LM head
 intact, so we implement the scoring ourselves.
 """
 
+import os
+
 from ._cache import get_or_load
-from ._constants import DEFAULT_RERANK_MODEL
+from ._constants import DEFAULT_RERANK_MODEL, RERANK_MODEL_ENV_VAR
 from ._hub import load_quietly_if_cached
 from ._prompts import build_rerank_prompt, score_from_logits
 
 _rerank_cache: dict = {}
+
+
+def resolve_rerank_model() -> str:
+    """The effective rerank model: $PYQMD_RERANK_MODEL when set and
+    non-empty, else DEFAULT_RERANK_MODEL."""
+    return os.environ.get(RERANK_MODEL_ENV_VAR) or DEFAULT_RERANK_MODEL
+
+
+class RerankModelError(RuntimeError):
+    """The rerank model couldn't be loaded (bad repo id or path, not
+    downloadable, ...). Lets the CLI and MCP server report one clean line
+    that names the override."""
 
 
 def _load(model_id: str):

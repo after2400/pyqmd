@@ -540,6 +540,33 @@ def test_query_command_reports_expansion_model_error_cleanly(monkeypatch):
     assert "Traceback" not in result.output
 
 
+def test_query_command_reports_rerank_model_error_cleanly(monkeypatch):
+    from pyqmd_mlx.llm import RerankModelError
+
+    def failing_rerank(query, documents, model):
+        raise RerankModelError(
+            f"Could not load rerank model '{model}': boom. Set PYQMD_RERANK_MODEL "
+            "to a Hugging Face repo id or a local MLX model directory to override."
+        )
+
+    store = Store(
+        ":memory:",
+        embed_fn=_fake_embed,
+        rerank_fn=failing_rerank,
+        expand_fn=lambda query, model: [],
+        rerank_model="bad/rerank-model",
+    )
+    store.add_collection("notes", "/notes")
+    _seed_doc(store, "cooking.md", "Cooking", "pasta recipe instructions")
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None: store)
+
+    result = runner.invoke(app, ["query", "pasta"])
+
+    assert result.exit_code == 1
+    assert "Error: Could not load rerank model 'bad/rerank-model'" in result.output
+    assert "Traceback" not in result.output
+
+
 def test_vsearch_and_query_warn_on_stderr_when_embeddings_are_pending(monkeypatch):
     store = Store(
         ":memory:",
