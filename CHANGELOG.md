@@ -1,6 +1,17 @@
 # CHANGELOG
 
 
+## v0.9.2 (2026-11-04)
+
+### 🐞 Bug Fixes
+
+- **config**: Drop Claude-Session trailers from the changelog
+  ([#24](https://github.com/after2400/pyqmd/pull/24),
+  [`1c1f531`](https://github.com/after2400/pyqmd/commit/1c1f531aeb0b6942c58f530c4039b4d56b2a8c5f))
+
+Matched case-insensitively like the other trailers.
+
+
 ## v0.9.1 (2026-10-18)
 
 ### 🐞 Bug Fixes
