@@ -13,7 +13,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from pyqmd_mlx.llm import DEFAULT_EMBED_MODEL, DEFAULT_RERANK_MODEL, resolve_expand_model
+from pyqmd_mlx.llm import DEFAULT_EMBED_MODEL, resolve_expand_model, resolve_rerank_model
 from pyqmd_mlx.llm import embed as _default_embed
 from pyqmd_mlx.llm import expand_query as _default_expand_query
 from pyqmd_mlx.llm import rerank as _default_rerank
@@ -177,7 +177,7 @@ class Store:
         self._rerank_fn = rerank_fn or _default_rerank
         self._expand_fn = expand_fn or _default_expand_query
         self._embed_model = embed_model or DEFAULT_EMBED_MODEL
-        self._rerank_model = rerank_model or DEFAULT_RERANK_MODEL
+        self._rerank_model = rerank_model or resolve_rerank_model()
         self._expand_model = expand_model or resolve_expand_model()
         # Opt-in: markdown chunks are embedded under "<doc title> > <section
         # path>" only when PYQMD_EMBED_BREADCRUMBS is 1/true/on; the keyword wins.

@@ -29,7 +29,7 @@ def test_search_command_finds_fts_match(monkeypatch):
     store = Store(":memory:", embed_fn=_fake_embed)
     store.add_collection("notes", "/notes")
     _seed_doc(store, "auth.md", "Auth", "authentication setup guide")
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None, **_: store)
 
     result = runner.invoke(app, ["search", "authentication", "--format", "json"])
 
@@ -46,7 +46,7 @@ def test_search_command_json_file_field_is_qmd_uri_prefixed(monkeypatch):
     store = Store(":memory:", embed_fn=_fake_embed)
     store.add_collection("notes", "/notes")
     _seed_doc(store, "auth.md", "Auth", "authentication setup guide")
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None, **_: store)
 
     result = runner.invoke(app, ["search", "authentication", "--format", "json"])
 
@@ -60,7 +60,7 @@ def test_vsearch_command_finds_vector_match(monkeypatch):
     store.add_collection("notes", "/notes")
     _seed_doc(store, "auth.md", "Auth", "authentication setup guide")
     _seed_doc(store, "cooking.md", "Cooking", "pasta recipe instructions")
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None, **_: store)
 
     result = runner.invoke(app, ["vsearch", "login credentials for auth", "--format", "json"])
 
@@ -73,7 +73,7 @@ def test_vsearch_command_json_file_field_is_qmd_uri_prefixed(monkeypatch):
     store = Store(":memory:", embed_fn=_fake_embed)
     store.add_collection("notes", "/notes")
     _seed_doc(store, "auth.md", "Auth", "authentication setup guide")
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None, **_: store)
 
     result = runner.invoke(app, ["vsearch", "login credentials for auth", "--format", "json"])
 
@@ -87,7 +87,7 @@ def test_query_command_returns_hybrid_result(monkeypatch):
     store = Store(":memory:", embed_fn=_fake_embed, rerank_fn=_fake_rerank)
     store.add_collection("notes", "/notes")
     _seed_doc(store, "auth.md", "Auth", "authentication setup guide")
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None, **_: store)
 
     result = runner.invoke(app, ["query", "authentication", "--format", "json"])
 
@@ -101,7 +101,7 @@ def test_query_command_json_file_field_is_qmd_uri_prefixed(monkeypatch):
     store = Store(":memory:", embed_fn=_fake_embed, rerank_fn=_fake_rerank)
     store.add_collection("notes", "/notes")
     _seed_doc(store, "auth.md", "Auth", "authentication setup guide")
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None, **_: store)
 
     result = runner.invoke(app, ["query", "authentication", "--format", "json"])
 
@@ -118,7 +118,7 @@ def test_query_command_uses_shared_default_limit_of_20(monkeypatch):
     store.add_collection("notes", "/notes")
     for i in range(DEFAULT_SEARCH_LIMIT + 5):
         _seed_doc(store, f"widget-{i}.md", f"Widget {i}", f"widget widget widget number {i}")
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None, **_: store)
 
     result = runner.invoke(app, ["query", "widget", "--format", "json"])
 
@@ -138,7 +138,7 @@ def test_query_command_no_rerank_skips_reranker(monkeypatch):
     store = Store(":memory:", embed_fn=_fake_embed, rerank_fn=counting_rerank)
     store.add_collection("notes", "/notes")
     _seed_doc(store, "auth.md", "Auth", "authentication setup guide")
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None, **_: store)
 
     result = runner.invoke(app, ["query", "authentication", "--no-rerank", "--format", "json"])
 
@@ -151,7 +151,7 @@ def test_query_command_accepts_intent_flag(monkeypatch):
     store = Store(":memory:", embed_fn=_fake_embed, rerank_fn=_fake_rerank)
     store.add_collection("notes", "/notes")
     _seed_doc(store, "auth.md", "Auth", "authentication setup guide")
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None, **_: store)
 
     result = runner.invoke(
         app, ["query", "authentication", "--intent", "deployment", "--format", "json"]
@@ -164,7 +164,7 @@ def test_search_command_respects_min_score(monkeypatch):
     store = Store(":memory:", embed_fn=_fake_embed)
     store.add_collection("notes", "/notes")
     _seed_doc(store, "auth.md", "Auth", "authentication setup guide")
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None, **_: store)
 
     result = runner.invoke(
         app, ["search", "authentication", "--min-score", "0.99", "--format", "json"]
@@ -178,7 +178,7 @@ def test_search_command_rejects_unknown_format_cleanly(monkeypatch):
     store = Store(":memory:", embed_fn=_fake_embed)
     store.add_collection("notes", "/notes")
     _seed_doc(store, "auth.md", "Auth", "authentication setup guide")
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None, **_: store)
 
     result = runner.invoke(app, ["search", "authentication", "--format", "yaml"])
 
@@ -197,7 +197,7 @@ def test_search_accepts_repeated_collection_flag(monkeypatch):
             captured["collection"] = collection
             return []
 
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda: FakeStore())
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda **_: FakeStore())
 
     from typer.testing import CliRunner
 
@@ -217,7 +217,7 @@ def test_search_with_no_collection_flag_passes_none(monkeypatch):
             captured["collection"] = collection
             return []
 
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda: FakeStore())
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda **_: FakeStore())
 
     from typer.testing import CliRunner
 
@@ -251,7 +251,7 @@ def test_query_accepts_repeated_collection_flag(monkeypatch):
             captured["collection"] = collection
             return []
 
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda: FakeStore())
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda **_: FakeStore())
 
     from typer.testing import CliRunner
 
@@ -280,7 +280,7 @@ def test_query_command_filter_narrows_results(monkeypatch):
         )
         store.sync_document_metadata(doc_id, content, path)
         store.index_content(h, content, model="fake-model")
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None, **_: store)
 
     result = runner.invoke(
         app,
@@ -314,7 +314,7 @@ def test_search_command_filter_narrows_results(monkeypatch):
             "notes", path, title, h, "2026-01-01T00:00:00Z", "2026-01-01T00:00:00Z"
         )
         store.sync_document_metadata(doc_id, content, path)
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None, **_: store)
 
     result = runner.invoke(
         app,
@@ -349,7 +349,7 @@ def test_vsearch_command_filter_narrows_results(monkeypatch):
         )
         store.sync_document_metadata(doc_id, content, path)
         store.index_content(h, content, model="fake-model")
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None, **_: store)
 
     result = runner.invoke(
         app,
@@ -372,7 +372,7 @@ def test_query_command_invalid_filter_json_exits_non_zero(monkeypatch):
     store = Store(":memory:", embed_fn=_fake_embed, rerank_fn=_fake_rerank)
     store.add_collection("notes", "/notes")
     _seed_doc(store, "auth.md", "Auth", "authentication setup guide")
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None, **_: store)
 
     result = runner.invoke(app, ["query", "authentication", "--filter", "not json"])
 
@@ -385,7 +385,7 @@ def test_search_command_json_includes_context_when_configured(monkeypatch):
     store.add_collection("notes", "/notes")
     store.add_context("notes", "", "Notes root context")
     _seed_doc(store, "auth.md", "Auth", "authentication setup guide")
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None, **_: store)
 
     result = runner.invoke(app, ["search", "authentication", "--format", "json"])
 
@@ -399,7 +399,7 @@ def test_vsearch_command_json_includes_context_when_configured(monkeypatch):
     store.add_collection("notes", "/notes")
     store.add_context("notes", "", "Notes root context")
     _seed_doc(store, "auth.md", "Auth", "authentication setup guide")
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None, **_: store)
 
     result = runner.invoke(app, ["vsearch", "authentication", "--format", "json"])
 
@@ -414,7 +414,7 @@ def test_query_command_json_includes_context_when_configured(monkeypatch):
     store.add_collection("notes", "/notes")
     store.add_context("notes", "", "Notes root context")
     _seed_doc(store, "auth.md", "Auth", "authentication setup guide")
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None, **_: store)
 
     result = runner.invoke(app, ["query", "authentication", "--format", "json"])
 
@@ -428,7 +428,7 @@ def test_search_full_path_swaps_display_and_drops_docid(tmp_path, monkeypatch):
     store = Store(":memory:", embed_fn=_fake_embed)
     store.add_collection("notes", str(tmp_path))
     _seed_doc(store, "auth.md", "Auth", "authentication setup guide")
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None, **_: store)
 
     result = runner.invoke(app, ["search", "authentication", "--full-path", "--format", "json"])
 
@@ -442,7 +442,7 @@ def test_search_full_path_falls_back_and_warns_when_file_missing(monkeypatch):
     store = Store(":memory:", embed_fn=_fake_embed)
     store.add_collection("notes", "/nonexistent-dir")
     _seed_doc(store, "auth.md", "Auth", "authentication setup guide")
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None, **_: store)
 
     result = runner.invoke(app, ["search", "authentication", "--full-path", "--format", "json"])
 
@@ -462,7 +462,7 @@ def test_query_full_path_swaps_display_and_drops_docid(tmp_path, monkeypatch):
     store = Store(":memory:", embed_fn=_fake_embed, rerank_fn=_fake_rerank)
     store.add_collection("notes", str(tmp_path))
     _seed_doc(store, "auth.md", "Auth", "authentication setup guide")
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None, **_: store)
 
     result = runner.invoke(app, ["query", "authentication", "--full-path", "--format", "json"])
 
@@ -484,7 +484,7 @@ def test_query_chunk_strategy_auto_threads_to_store(monkeypatch):
     store = _SpyStore(":memory:", embed_fn=_fake_embed, rerank_fn=_fake_rerank)
     store.add_collection("code", "/code")
     _seed_doc(store, "sample.py", "Sample", "def foo():\n    pass\n")
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None, **_: store)
 
     result = runner.invoke(app, ["query", "foo", "--chunk-strategy", "auto"])
 
@@ -504,7 +504,7 @@ def test_query_chunk_strategy_defaults_to_regex(monkeypatch):
     store = _SpyStore(":memory:", embed_fn=_fake_embed, rerank_fn=_fake_rerank)
     store.add_collection("notes", "/notes")
     _seed_doc(store, "a.md", "A", "authentication setup guide")
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None, **_: store)
 
     result = runner.invoke(app, ["query", "authentication"])
 
@@ -531,12 +531,39 @@ def test_query_command_reports_expansion_model_error_cleanly(monkeypatch):
     )
     store.add_collection("notes", "/notes")
     _seed_doc(store, "cooking.md", "Cooking", "pasta recipe instructions")
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None, **_: store)
 
     result = runner.invoke(app, ["query", "authentication"])
 
     assert result.exit_code == 1
     assert "Error: Could not load query-expansion model 'bad/model'" in result.output
+    assert "Traceback" not in result.output
+
+
+def test_query_command_reports_rerank_model_error_cleanly(monkeypatch):
+    from pyqmd_mlx.llm import RerankModelError
+
+    def failing_rerank(query, documents, model):
+        raise RerankModelError(
+            f"Could not load rerank model '{model}': boom. Set PYQMD_RERANK_MODEL "
+            "to a Hugging Face repo id or a local MLX model directory to override."
+        )
+
+    store = Store(
+        ":memory:",
+        embed_fn=_fake_embed,
+        rerank_fn=failing_rerank,
+        expand_fn=lambda query, model: [],
+        rerank_model="bad/rerank-model",
+    )
+    store.add_collection("notes", "/notes")
+    _seed_doc(store, "cooking.md", "Cooking", "pasta recipe instructions")
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None, **_: store)
+
+    result = runner.invoke(app, ["query", "pasta"])
+
+    assert result.exit_code == 1
+    assert "Error: Could not load rerank model 'bad/rerank-model'" in result.output
     assert "Traceback" not in result.output
 
 
@@ -549,7 +576,7 @@ def test_vsearch_and_query_warn_on_stderr_when_embeddings_are_pending(monkeypatc
     )
     store.add_collection("notes", "/notes")
     _seed_doc(store, "auth.md", "Auth", "authentication setup guide")  # embedded as fake-model
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None, **_: store)
 
     for command in ("vsearch", "query"):
         result = runner.invoke(app, [command, "authentication", "--format", "json"])
@@ -563,7 +590,7 @@ def test_search_never_warns(monkeypatch):
     store = Store(":memory:", embed_fn=_fake_embed)
     store.add_collection("notes", "/notes")
     _seed_doc(store, "auth.md", "Auth", "authentication setup guide")
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None, **_: store)
 
     result = runner.invoke(app, ["search", "authentication", "--format", "json"])
 
@@ -581,9 +608,61 @@ def test_vsearch_is_silent_when_current_and_fresh(monkeypatch):
     store.insert_content(h, body, now)
     store.insert_document("notes", "auth.md", "Auth", h, now, now)
     store.index_content(h, body)  # the store's own model: nothing pending
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", lambda db_path=None, **_: store)
 
     result = runner.invoke(app, ["vsearch", "authentication", "--format", "json"])
 
     assert result.exit_code == 0
     assert result.stderr == ""
+
+
+def test_query_command_rerank_model_flag_reaches_reranker(monkeypatch):
+    seen = []
+
+    def recording_rerank(query, documents, model):
+        seen.append(model)
+        return [1.0] * len(documents)
+
+    def fake_get_store(db_path=None, *, rerank_model=None):
+        store = Store(
+            ":memory:",
+            embed_fn=_fake_embed,
+            expand_fn=lambda query, model: [],  # no expansion model on CI runners
+            rerank_fn=recording_rerank,
+            rerank_model=rerank_model,
+        )
+        store.add_collection("notes", "/notes")
+        _seed_doc(store, "auth.md", "Auth", "authentication setup guide")
+        return store
+
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", fake_get_store)
+
+    result = runner.invoke(
+        app, ["query", "authentication", "--rerank-model", "org/some-reranker", "--format", "json"]
+    )
+
+    assert result.exit_code == 0
+    assert seen == ["org/some-reranker"]
+
+
+def test_query_command_without_rerank_model_flag_passes_none(monkeypatch):
+    captured = {}
+
+    def fake_get_store(db_path=None, *, rerank_model=None):
+        captured["rerank_model"] = rerank_model
+        store = Store(
+            ":memory:",
+            embed_fn=_fake_embed,
+            expand_fn=lambda query, model: [],  # no expansion model on CI runners
+            rerank_fn=_fake_rerank,
+        )
+        store.add_collection("notes", "/notes")
+        _seed_doc(store, "auth.md", "Auth", "authentication setup guide")
+        return store
+
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", fake_get_store)
+
+    result = runner.invoke(app, ["query", "authentication", "--format", "json"])
+
+    assert result.exit_code == 0
+    assert captured["rerank_model"] is None

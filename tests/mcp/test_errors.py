@@ -70,3 +70,14 @@ def test_tool_result_or_error_catches_expansion_model_error():
     result = tool_result_or_error(_raises)
     assert result.is_error is True
     assert "Could not load query-expansion model 'x/y'" in result.content[0].text
+
+
+def test_tool_result_or_error_catches_rerank_model_error():
+    from pyqmd_mlx.llm import RerankModelError
+
+    def _raises():
+        raise RerankModelError("Could not load rerank model 'x/y': boom")
+
+    result = tool_result_or_error(_raises)
+    assert result.is_error is True
+    assert "Could not load rerank model 'x/y'" in result.content[0].text

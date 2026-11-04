@@ -81,7 +81,7 @@ pyqmd skill list                      # List bundled skill names (pyqmd, pyqmd-l
 pyqmd skill show [name]               # Print a bundled skill doc (default: pyqmd)
 pyqmd skill install [name] [--global] [--force] [--yes]  # Install a skill into .agents/skills/<name>
 pyqmd skills list|get|path [--json]   # Discover bundled runtime skills (get takes <name>|--all [--full]; path takes [name])
-pyqmd bench <fixture.json> [--json] [-c/--collection <name>] [--samples N]  # Run search-quality benchmarks against your own corpus
+pyqmd bench <fixture.json> [--json] [-c/--collection <name>] [--samples N] [--rerank-model <model>]  # Run search-quality benchmarks against your own corpus
 pyqmd --version                       # Print the pyqmd release version and exit
 pyqmd [command...] -h, --help         # Help for pyqmd or any (sub)command
 ```
@@ -96,6 +96,7 @@ pyqmd [command...] -h, --help         # Help for pyqmd or any (sub)command
 --full                    # Show full document content, not just a snippet
 --no-rerank               # (query only) skip LLM reranking
 --intent <text>           # (query only) sharpen ranking with a stated intent
+--rerank-model <model>    # (query, bench) rerank with this Hub repo id or local MLX dir; beats PYQMD_RERANK_MODEL
 --format <kind>           # cli (default) | json | csv | md | xml | files
 --line-numbers            # Add line numbers to output
 --full-path               # Show on-disk paths instead of qmd:// + docid
@@ -128,6 +129,20 @@ stranger's installed pyqmd) and must not drift apart.
   `Error:` + exit 1 (CLI, including `bench`) / `is_error` (MCP).
   An older gitignored `models/qmd-query-expansion-1.7b-mlx` dir in a dev
   checkout holds the broken pre-fix weights; delete it.
+- Rerank model: default `mlx-community/Qwen3-Reranker-0.6B-mxfp8` (yes/no-logit scoring on
+  mlx-lm); override it with `--rerank-model` (`query`, `bench`) or `PYQMD_RERANK_MODEL` (a Hub
+  repo id or a local MLX model dir; the flag wins). A
+  checkpoint whose `config.json` lists a `*ForSequenceClassification` architecture runs as a
+  cross-encoder instead (`llm/_cross_encoder.py`, through `mlx_embeddings`): its raw logit is
+  mapped to 0..1 by a per-model bias and temperature in `RERANK_CALIBRATION` (`llm/_constants.py`,
+  keyed by Hub repo id, case-insensitive; fitted with `scripts/eval_rerankers.py` so scores match
+  Qwen's scale, which the RRF blend and `--min-score` assume). A checkpoint with no entry, such as
+  a local copy of a calibrated model, gets identity scores and a `RuntimeWarning`. Tested alternative: `ibm-granite/granite-embedding-reranker-english-r2`
+  (Apache 2.0, English only; ties Qwen on SciFact and ConditionalQA and is 1.5-2x faster; real
+  `--intent` text helps it about as much as it helps Qwen). A load failure is a `RerankModelError` → one-line `Error:` + exit 1
+  (CLI, including `bench`) / `is_error` (MCP). `mlx-embeddings` 0.1.0 hardcodes a GELU
+  classifier head, so `fix_classifier_activation` patches it from `config.json`; drop that
+  when the exact pin moves past an upstream fix.
 - Reciprocal Rank Fusion (RRF) combines FTS + vector result lists before rerank
 - Embedding input: each chunk is embedded as `title: <doc title> | text: <chunk>` (Node's
   format). Opt-in: with `PYQMD_EMBED_BREADCRUMBS=1`, `.md` chunks add their section-heading path to

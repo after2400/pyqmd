@@ -46,3 +46,19 @@ def test_get_store_explicit_arg_wins_over_env_var(tmp_path, monkeypatch):
     assert explicit_path.exists()
     assert not env_path.exists()
     store.close()
+
+
+def test_get_store_passes_rerank_model_to_store():
+    store = get_store(":memory:", rerank_model="org/some-reranker")
+
+    assert store._rerank_model == "org/some-reranker"
+    store.close()
+
+
+def test_get_store_rerank_model_wins_over_env_var(monkeypatch):
+    monkeypatch.setenv("PYQMD_RERANK_MODEL", "org/from-env")
+
+    store = get_store(":memory:", rerank_model="org/from-flag")
+
+    assert store._rerank_model == "org/from-flag"
+    store.close()

@@ -61,7 +61,7 @@ def test_end_to_end_add_embed_query_via_real_app(tmp_path, monkeypatch):
     store = Store(":memory:", embed_fn=_fake_embed, rerank_fn=_fake_rerank)
     for module_name in ("collection", "documents", "search", "embed", "status"):
         monkeypatch.setattr(
-            f"pyqmd_mlx.cli.commands.{module_name}.get_store", lambda db_path=None, s=store: s
+            f"pyqmd_mlx.cli.commands.{module_name}.get_store", lambda db_path=None, s=store, **_: s
         )
 
     add_result = runner.invoke(app, ["collection", "add", str(tmp_path), "--name", "notes"])
@@ -97,10 +97,10 @@ def test_embed_and_status_do_not_emit_callback_not_supported_warning(tmp_path, m
         return [1.0 for _ in documents]
 
     store = Store(":memory:", embed_fn=_fake_embed, rerank_fn=_fake_rerank)
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.embed.get_store", lambda db_path=None: store)
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.status.get_store", lambda db_path=None: store)
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.update.get_store", lambda db_path=None: store)
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.cleanup.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.embed.get_store", lambda db_path=None, **_: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.status.get_store", lambda db_path=None, **_: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.update.get_store", lambda db_path=None, **_: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.cleanup.get_store", lambda db_path=None, **_: store)
 
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
