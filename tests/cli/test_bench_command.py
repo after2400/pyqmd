@@ -62,7 +62,7 @@ def _seeded_store():
 
 def test_bench_prints_table_by_default(tmp_path, monkeypatch):
     store = _seeded_store()
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.bench.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.bench.get_store", lambda db_path=None, **_: store)
     fixture_path = _write_fixture(tmp_path)
 
     result = runner.invoke(app, ["bench", fixture_path])
@@ -75,7 +75,7 @@ def test_bench_prints_table_by_default(tmp_path, monkeypatch):
 
 def test_bench_json_produces_valid_json(tmp_path, monkeypatch):
     store = _seeded_store()
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.bench.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.bench.get_store", lambda db_path=None, **_: store)
     fixture_path = _write_fixture(tmp_path)
 
     result = runner.invoke(app, ["bench", fixture_path, "--json"])
@@ -88,7 +88,7 @@ def test_bench_json_produces_valid_json(tmp_path, monkeypatch):
 
 def test_bench_uses_fixture_collection_when_no_flag_given(tmp_path, monkeypatch):
     store = _seeded_store()
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.bench.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.bench.get_store", lambda db_path=None, **_: store)
     fixture_path = _write_fixture(tmp_path, collection="notes")
 
     result = runner.invoke(app, ["bench", fixture_path])
@@ -99,7 +99,7 @@ def test_bench_uses_fixture_collection_when_no_flag_given(tmp_path, monkeypatch)
 def test_bench_flag_overrides_fixture_collection(tmp_path, monkeypatch):
     store = _seeded_store()
     store.add_collection("other", "/other")
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.bench.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.bench.get_store", lambda db_path=None, **_: store)
     fixture_path = _write_fixture(tmp_path, collection="other")
 
     result = runner.invoke(app, ["bench", fixture_path, "-c", "notes"])
@@ -110,7 +110,7 @@ def test_bench_flag_overrides_fixture_collection(tmp_path, monkeypatch):
 
 def test_bench_fails_fast_for_unknown_collection(tmp_path, monkeypatch):
     store = _seeded_store()
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.bench.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.bench.get_store", lambda db_path=None, **_: store)
     fixture_path = _write_fixture(tmp_path, collection="nonexistent")
 
     result = runner.invoke(app, ["bench", fixture_path])
@@ -121,7 +121,7 @@ def test_bench_fails_fast_for_unknown_collection(tmp_path, monkeypatch):
 
 def test_bench_fails_fast_for_empty_index(tmp_path, monkeypatch):
     store = Store(":memory:", embed_fn=_fake_embed)
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.bench.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.bench.get_store", lambda db_path=None, **_: store)
     fixture_path = _write_fixture(tmp_path)
 
     result = runner.invoke(app, ["bench", fixture_path])
@@ -146,7 +146,7 @@ def test_bench_reports_expansion_model_error_cleanly(tmp_path, monkeypatch):
     )
     store.add_collection("notes", "/notes")
     _seed_doc(store, "notes", "cooking.md", "Cooking", "pasta recipe instructions")
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.bench.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.bench.get_store", lambda db_path=None, **_: store)
     fixture_path = _write_fixture(tmp_path)
 
     result = runner.invoke(app, ["bench", fixture_path])
@@ -173,7 +173,7 @@ def _zero_volatile(d):
 
 def test_bench_samples_one_matches_default_text(tmp_path, monkeypatch):
     store = _seeded_store()
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.bench.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.bench.get_store", lambda db_path=None, **_: store)
     fixture_path = _write_fixture(tmp_path)
 
     default = runner.invoke(app, ["bench", fixture_path])
@@ -186,7 +186,7 @@ def test_bench_samples_one_matches_default_text(tmp_path, monkeypatch):
 
 def test_bench_samples_one_matches_default_json(tmp_path, monkeypatch):
     store = _seeded_store()
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.bench.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.bench.get_store", lambda db_path=None, **_: store)
     fixture_path = _write_fixture(tmp_path)
 
     default = json.loads(runner.invoke(app, ["bench", fixture_path, "--json"]).stdout)
@@ -198,7 +198,7 @@ def test_bench_samples_one_matches_default_json(tmp_path, monkeypatch):
 
 def test_bench_samples_table_shows_means_and_ranges(tmp_path, monkeypatch):
     store = _seeded_store()
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.bench.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.bench.get_store", lambda db_path=None, **_: store)
     fixture_path = _write_fixture(tmp_path)
 
     result = runner.invoke(app, ["bench", fixture_path, "--samples", "3"])
@@ -217,7 +217,7 @@ def test_bench_samples_table_shows_means_and_ranges(tmp_path, monkeypatch):
 
 def test_bench_samples_columns_line_up(tmp_path, monkeypatch):
     store = _seeded_store()
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.bench.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.bench.get_store", lambda db_path=None, **_: store)
     fixture_path = _write_fixture(tmp_path)
 
     out = runner.invoke(app, ["bench", fixture_path, "--samples", "2"]).stdout
@@ -229,7 +229,7 @@ def test_bench_samples_columns_line_up(tmp_path, monkeypatch):
 
 def test_bench_samples_json_has_every_draw(tmp_path, monkeypatch):
     store = _seeded_store()
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.bench.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.bench.get_store", lambda db_path=None, **_: store)
     fixture_path = _write_fixture(tmp_path)
 
     result = runner.invoke(app, ["bench", fixture_path, "--json", "--samples", "3"])
@@ -242,7 +242,7 @@ def test_bench_samples_json_has_every_draw(tmp_path, monkeypatch):
 
 def test_bench_samples_progress_goes_to_stderr_only(tmp_path, monkeypatch):
     store = _seeded_store()
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.bench.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.bench.get_store", lambda db_path=None, **_: store)
     fixture_path = _write_fixture(tmp_path)
 
     result = runner.invoke(app, ["bench", fixture_path, "--json", "--samples", "2"])
@@ -253,7 +253,7 @@ def test_bench_samples_progress_goes_to_stderr_only(tmp_path, monkeypatch):
 
 def test_bench_rejects_samples_below_one(tmp_path, monkeypatch):
     store = _seeded_store()
-    monkeypatch.setattr("pyqmd_mlx.cli.commands.bench.get_store", lambda db_path=None: store)
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.bench.get_store", lambda db_path=None, **_: store)
     fixture_path = _write_fixture(tmp_path)
 
     result = runner.invoke(app, ["bench", fixture_path, "--samples", "0"])
@@ -267,3 +267,32 @@ def test_bench_checks_samples_before_loading_the_fixture(tmp_path):
 
     assert result.exit_code == 1
     assert "Error: --samples must be at least 1" in result.output
+
+
+def test_bench_rerank_model_flag_reaches_reranker(monkeypatch, tmp_path):
+    seen = []
+
+    def recording_rerank(query, documents, model):
+        seen.append(model)
+        return [1.0 if query.lower() in doc.lower() else 0.1 for doc in documents]
+
+    def fake_get_store(db_path=None, *, rerank_model=None):
+        store = Store(
+            ":memory:",
+            embed_fn=_fake_embed,
+            expand_fn=_fake_expand,
+            rerank_fn=recording_rerank,
+            rerank_model=rerank_model,
+        )
+        store.add_collection("notes", "/notes")
+        _seed_doc(store, "notes", "auth.md", "Auth", "authentication configuration guide content")
+        _seed_doc(store, "notes", "cooking.md", "Cooking", "pasta recipe instructions")
+        return store
+
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.bench.get_store", fake_get_store)
+    fixture = _write_fixture(tmp_path, collection="notes")
+
+    result = runner.invoke(app, ["bench", fixture, "--rerank-model", "org/some-reranker", "--json"])
+
+    assert result.exit_code == 0
+    assert seen and set(seen) == {"org/some-reranker"}

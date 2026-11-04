@@ -42,12 +42,15 @@ rejected at load — write single plain-text queries.
 ## Run
 
 ```sh
-pyqmd bench <fixture.json> [-c <name>] [--json] [--samples N]
+pyqmd bench <fixture.json> [-c <name>] [--json] [--samples N] [--rerank-model <model>]
 ```
 
 Scores all 4 retrieval backends (bm25 / vector / hybrid /
 full-reranked) with recall, MRR, and nDCG. `--json` for structured
-output; `-c` restricts to one collection.
+output; `-c` restricts to one collection. `--rerank-model <model>` (a Hub
+repo id or local MLX model directory) swaps the reranker for that run, so
+two runs of the same fixture compare rerankers (only the full-reranked
+backend changes).
 
 hybrid and full expand the query with a sampled model, so one run is one
 draw. `--samples N` (e.g. 5) re-runs them with N different seeds and

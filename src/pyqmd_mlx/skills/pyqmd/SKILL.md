@@ -34,7 +34,8 @@ instead of `qmd://collection/path` + docid).
 
 `query`-only: `--no-rerank` (skip reranking, faster/cheaper), `--intent
 <text>` (see above), `--chunk-strategy <regex|auto>` (chunk code files at
-AST boundaries for best-chunk selection).
+AST boundaries for best-chunk selection), `--rerank-model <model>` (rerank
+with another Hub repo id or local MLX model directory for this one query).
 
 ## Collection routing
 
@@ -100,7 +101,7 @@ composed with `and`/`or`/`not`.
 
 ## Benchmarking search quality
 
-- `pyqmd bench <fixture.json> [--json] [-c <name>] [--samples N]` — runs a
+- `pyqmd bench <fixture.json> [--json] [-c <name>] [--samples N] [--rerank-model <model>]` — runs a
   user-supplied fixture of queries + expected files against all 4
   retrieval backends (bm25/vector/hybrid/full-reranked) and reports
   recall/MRR/nDCG per backend. Needs a fixture file the user (or you,
@@ -152,5 +153,5 @@ parameter shapes.
   no model and still works.
 - The reranker is overridable the same way: if a query fails with
   `Could not load rerank model`, report it rather than retrying;
-  `PYQMD_RERANK_MODEL` points at another Hub repo id or a local MLX model
-  directory.
+  `--rerank-model` (or `PYQMD_RERANK_MODEL`) points at another Hub repo id
+  or a local MLX model directory.
