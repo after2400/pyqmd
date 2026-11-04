@@ -153,7 +153,10 @@ half of the blend.
 
 Add `PYQMD_RERANK_MODEL` (Hub repo id or local MLX model dir) and
 `resolve_rerank_model()`, mirroring `PYQMD_EXPAND_MODEL` / `resolve_expand_model`;
-`Store` uses it when no `rerank_model` argument is given. No new CLI flag. A load
+`Store` uses it when no `rerank_model` argument is given. `pyqmd query` and
+`pyqmd bench` also take `--rerank-model <model>` (passed to the `Store` through
+`get_store(rerank_model=...)`), which beats the env var; the flag makes a
+per-run A/B of two rerankers possible without touching the environment. A load
 failure is a one-line `Error:` + exit 1 (CLI/`bench`) / `is_error` (MCP), as for
 the expansion model; add a `RerankModelError` for that.
 
