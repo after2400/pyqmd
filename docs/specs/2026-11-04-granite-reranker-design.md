@@ -1,8 +1,9 @@
 # Opt-in cross-encoder reranker backend (IBM Granite) — design
 
 **Status:** Implemented (2026-11-04), written against v0.9.1. The default stays Qwen3-Reranker;
-Granite is opt-in. Calibration is fitted by median matching (see §3 and "Evaluation results").
-Open: the intent finding (§5) and a `pyqmd bench` run on a real notes corpus before any default flip.
+Granite is opt-in. Calibration is fitted by median matching (see §3 and "Evaluation results");
+the SciFact intent loss did not repeat on ConditionalQA (§5). Open: a `pyqmd bench` run on a real
+notes corpus before any default flip.
 **Related:** `docs/specs/2026-09-10-python-mlx-rewrite-roadmap.md`
 (model-defaults backlog); `docs/specs/2026-09-24-expand-model-hf-default-design.md`
 (the `PYQMD_EXPAND_MODEL` precedent); `docs/specs/2026-09-24-qrels-margin-calibration-design.md`
@@ -164,22 +165,15 @@ becomes part of the pair's first segment. Check whether this helps or hurts on
 the evaluation set; if it hurts, the cross-encoder backend ignores intent for
 scoring (intent still affects expansion and chunk selection). Decide with data.
 
-**Outcome (2026-11-04): left as is, flagged.** With the intent prefix
-"biomedical research abstracts", Granite's nDCG@10 on SciFact fell from 0.7988 to
-0.7764 (−0.022; MRR 0.7650 → 0.7381, recall@10 0.9287 → 0.9192). That is past the
-0.02 line this spec set, but it is one synthetic intent on one corpus, and the code
-path (intent prefixed to the query) is Node's. Not changed here: withholding
-intent from cross-encoders needs `Store` to know which backend is active, a
-separate decision. Qwen3-Reranker was not measured with the same prefix, so the
-loss is not yet shown to be specific to the cross-encoder. Follow-up if wanted: run that comparison with Qwen, and with a few real intents.
-
-### 6. Default stays Qwen3-Reranker
-
-The default does not change in this work. Granite is opt-in via
-`PYQMD_RERANK_MODEL=ibm-granite/granite-embedding-reranker-english-r2`.
-Flip the default only if the evaluation below passes; that would be a separate,
-tiny change (and a spec amendment). Parity with Node (which uses a Qwen3
-reranker) is unaffected while Qwen is the default.
+**Outcome (2026-11-04): left as is; the loss did not repeat on real intents.**
+On SciFact, with the synthetic prefix "biomedical research abstracts", Granite's
+nDCG@10 fell 0.022 (0.7988 → 0.7764). On ConditionalQA, where every question
+comes with its own scenario as the intent, adding the scenario _raised_ nDCG@10
+for both rerankers: Qwen +0.080 [+0.054, +0.107] (rerank-only) and +0.046
+[+0.022, +0.069] (blended with BM25 position); Granite +0.061 [+0.033, +0.089]
+and +0.044 [+0.020, +0.069]. So a cross-encoder using prefixed intent is fine in
+practice, and the SciFact drop reflects a generic, uninformative prefix on a
+corpus that did not need one. Nothing to change in `Store`.
 
 ## Evaluation (gate for flipping the default)
 
@@ -215,6 +209,31 @@ calibration `(b, t) = (1.237, 0.0709)`: calibrated medians relevant 0.9954 / oth
 unchanged), so Granite stays F32 and no converted copy is hosted. Batching was not
 attempted. Not measured: `pyqmd bench` on a real notes corpus (left to the maintainer),
 and non-English text (Granite is English-only).
+
+### ConditionalQA (gov.uk guides), added 2026-11-04
+
+An exploratory script (not committed) on the 285 dev questions: 652 gov.uk pages
+chunked as `pyqmd embed` chunks them (2,566 chunks); per question, the BM25 top-30
+chunks as the shared pool (the gold page is in the pool for 239/285, 83.9%); each
+reranker scores the chunk text through the real `rerank()`; a page ranks by its best
+chunk. "Blended" averages a 1-list RRF-style position weight with the reranker score,
+as `Store.query` does (a proxy: no vector search, no expansion). nDCG@10, with and
+without the question's scenario as the intent:
+
+| ranker              | no intent, rerank-only | no intent, blended | scenario, rerank-only | scenario, blended |
+| ------------------- | ---------------------- | ------------------ | --------------------- | ----------------- |
+| BM25 position only  | 0.5984                 |                    |                       |                   |
+| Qwen3-Reranker-0.6B | 0.6949                 | 0.6920             | 0.7752                | 0.7374            |
+| Granite             | 0.7051                 | 0.6808             | 0.7660                | 0.7246            |
+
+Granite minus Qwen, paired bootstrap 95% CI: every difference is within ±0.016
+and every interval includes zero (rerank-only +0.010 [−0.010, +0.029] without
+intent, −0.009 [−0.027, +0.008] with; blended −0.011 [−0.027, +0.005] and −0.013
+[−0.032, +0.006]). Per question: Qwen 1.6–1.8 s, Granite 0.7–1.0 s. With 285
+questions an interval is about ±0.02, so a true loss of up to ~0.03 nDCG@10 in
+the blended setting is not excluded. The blended runs are slightly below Granite's
+rerank-only ones for both models, so the calibration (fitted on SciFact) transfers
+without an obvious scale problem.
 
 ## Testing
 
