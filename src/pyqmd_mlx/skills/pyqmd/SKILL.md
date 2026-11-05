@@ -35,7 +35,8 @@ instead of `qmd://collection/path` + docid).
 `query`-only: `--no-rerank` (skip reranking, faster/cheaper), `--intent
 <text>` (see above), `--chunk-strategy <regex|auto>` (chunk code files at
 AST boundaries for best-chunk selection), `--rerank-model <model>` (rerank
-with another Hub repo id or local MLX model directory for this one query).
+with another Hub repo id or local MLX model directory for this one query),
+`--expand-model <model>` (expand with another one).
 
 ## Collection routing
 
@@ -97,11 +98,15 @@ composed with `and`/`or`/`not`.
 - `pyqmd collection list` / `pyqmd collection show <name>` — what's indexed.
 - `pyqmd ls [collection]` — collections, or files within one.
 - `pyqmd skills list|get|path [--json]` — bundled agent skill docs (`get` takes `<name>` or `--all [--full]`; `path` takes `[name]`).
+- `pyqmd models [show|list|use <set> [--download]]` — which models are in use
+  and where each choice came from; the available sets (`default`, `granite`);
+  choose one.
+- `pyqmd pull` — download the models currently selected (no model is loaded).
 - `pyqmd <command> -h` (or `--help`) — flags for any command or subcommand.
 
 ## Benchmarking search quality
 
-- `pyqmd bench <fixture.json> [--json] [-c <name>] [--samples N] [--rerank-model <model>]` — runs a
+- `pyqmd bench <fixture.json> [--json] [-c <name>] [--samples N] [--rerank-model <model>] [--expand-model <model>]` — runs a
   user-supplied fixture of queries + expected files against all 4
   retrieval backends (bm25/vector/hybrid/full-reranked) and reports
   recall/MRR/nDCG per backend. Needs a fixture file the user (or you,
@@ -145,13 +150,19 @@ parameter shapes.
   (no `-c`) scope.
 - Never run indexing/maintenance commands (`collection add`, `update`,
   `embed`, `cleanup`) unless the user explicitly asked for it.
-- The first `pyqmd query` downloads the query-expansion model (~934 MB)
-  from Hugging Face. If it fails with
-  `Could not load query-expansion model`, report that to the user rather
-  than retrying in a loop — they can point `PYQMD_EXPAND_MODEL` at another
-  Hub repo id or a local MLX model directory. `pyqmd search` (BM25) needs
-  no model and still works.
-- The reranker is overridable the same way: if a query fails with
-  `Could not load rerank model`, report it rather than retrying;
-  `--rerank-model` (or `PYQMD_RERANK_MODEL`) points at another Hub repo id
-  or a local MLX model directory.
+- The first `pyqmd query` downloads three models from Hugging Face (about
+  2 GB in all; the query-expansion model is ~1.0 GB). `pyqmd pull`
+  downloads them ahead of time. If a query fails with
+  `Could not load query-expansion model`, `Could not load rerank model` or
+  `Could not load embedding model`, report that to the user rather than
+  retrying in a loop: the message says why (access denied, TLS
+  verification, Hugging Face unreachable) and what to do. `pyqmd search`
+  (BM25) needs no model and still works.
+- The models are chosen, in this order, by `--rerank-model` /
+  `--expand-model`, `PYQMD_RERANK_MODEL` / `PYQMD_EXPAND_MODEL` (a Hub repo
+  id or a local MLX model directory), `PYQMD_MODEL_SET`, then the config
+  file (`~/.config/pyqmd/config.toml`). `pyqmd models` shows what is in use;
+  `pyqmd models use granite` saves the IBM Granite set (reranker and
+  expansion model; English only) in the config file without downloading
+  anything, and `pyqmd models use default` goes back. Do not run `models use`
+  unless the user asks: it changes their configuration.
