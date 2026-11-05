@@ -10,7 +10,7 @@ from typing import TypeVar
 
 import typer
 
-from pyqmd_mlx.llm import ExpansionModelError, RerankModelError
+from pyqmd_mlx.llm import EmbeddingModelError, ExpansionModelError, RerankModelError
 
 T = TypeVar("T")
 
@@ -19,6 +19,7 @@ EXPECTED_EXCEPTIONS = (
     ValueError,
     FileNotFoundError,
     NotADirectoryError,
+    EmbeddingModelError,
     ExpansionModelError,
     RerankModelError,
 )

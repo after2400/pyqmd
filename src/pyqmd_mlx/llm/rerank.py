@@ -10,6 +10,7 @@ from . import _cross_encoder
 from ._cache import get_or_load
 from ._constants import DEFAULT_RERANK_MODEL, RERANK_MODEL_ENV_VAR
 from ._hub import load_quietly_if_cached
+from ._load_errors import load_failure_message
 from ._models import resolve_model
 from ._prompts import build_rerank_prompt, score_from_logits
 
@@ -56,9 +57,7 @@ def _last_position_logits(rerank_model, inputs):
 
 def _load_error(model_id: str, exc: Exception) -> RerankModelError:
     return RerankModelError(
-        f"Could not load rerank model '{model_id}': {str(exc).rstrip('.')}. "
-        f"Set {RERANK_MODEL_ENV_VAR} to a Hugging Face repo id or a local "
-        "MLX model directory to override."
+        load_failure_message("rerank", model_id, exc, role="rerank", env_var=RERANK_MODEL_ENV_VAR)
     )
 
 

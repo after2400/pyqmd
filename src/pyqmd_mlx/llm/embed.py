@@ -3,9 +3,15 @@
 from ._cache import get_or_load
 from ._constants import DEFAULT_EMBED_MODEL, EMBED_CONTEXT_TOKENS
 from ._hub import load_quietly_if_cached
+from ._load_errors import load_failure_message
 from ._prompts import format_embedding_inputs
 
 _embed_cache: dict = {}
+
+
+class EmbeddingModelError(RuntimeError):
+    """The embedding model couldn't be loaded (not downloadable, blocked by the
+    network, ...). Lets the CLI and MCP server report one clean line."""
 
 
 def _load(model_id: str):
@@ -15,7 +21,12 @@ def _load(model_id: str):
     # search/status/ls, which never call embed() at all.
     from mlx_embeddings import load as _load_embed_model
 
-    return load_quietly_if_cached(model_id, _load_embed_model)
+    try:
+        return load_quietly_if_cached(model_id, _load_embed_model)
+    except Exception as exc:
+        raise EmbeddingModelError(
+            load_failure_message("embedding", model_id, exc, role="embed")
+        ) from exc
 
 
 def _activation_dtype(embed_tokens):

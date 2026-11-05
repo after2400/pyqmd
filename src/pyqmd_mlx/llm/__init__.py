@@ -7,7 +7,7 @@ from ._constants import (
     EXPAND_MODEL_ENV_VAR,
     RERANK_MODEL_ENV_VAR,
 )
-from .embed import embed
+from .embed import EmbeddingModelError, embed
 from .expand import ExpansionModelError, expand_query, resolve_expand_model
 from .rerank import RerankModelError, rerank, resolve_rerank_model
 
@@ -17,6 +17,7 @@ __all__ = [
     "expand_query",
     "resolve_expand_model",
     "resolve_rerank_model",
+    "EmbeddingModelError",
     "ExpansionModelError",
     "RerankModelError",
     "DEFAULT_EMBED_MODEL",

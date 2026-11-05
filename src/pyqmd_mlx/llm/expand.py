@@ -13,6 +13,7 @@ from ._cache import get_or_load
 from ._constants import DEFAULT_EXPAND_MODEL, EXPAND_MODEL_ENV_VAR
 from ._expand_grammar import DEAD, START0, GrammarTables, build_tables, vocab_token_bytes
 from ._hub import load_quietly_if_cached
+from ._load_errors import load_failure_message
 from ._models import resolve_model
 
 _expand_cache: dict = {}
@@ -137,9 +138,13 @@ def _load(model_id: str):
         tables = _build_grammar_tables(tokenizer)
     except Exception as exc:
         raise ExpansionModelError(
-            f"Could not load query-expansion model '{model_id}': {str(exc).rstrip('.')}. "
-            f"Set {EXPAND_MODEL_ENV_VAR} to a Hugging Face repo id or a local "
-            "MLX model directory to override."
+            load_failure_message(
+                "query-expansion",
+                model_id,
+                exc,
+                role="expand",
+                env_var=EXPAND_MODEL_ENV_VAR,
+            )
         ) from exc
     return model, tokenizer, tables
 
