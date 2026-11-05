@@ -149,6 +149,20 @@ calibrates to the labelled set's ~3% relevant prevalence and gave relevant
 documents a median score of 0.295 against Qwen's 0.995, flattening the rerank
 half of the blend.
 
+**Amendment (2026-11-05): refit across three corpora.** Median matching on SciFact alone left
+Granite scoring loosely related documents far above Qwen elsewhere: the same two top results scored
+80% and 76% under Granite and 52% and 43% under the default in a real notes index, and the median
+calibrated score on CQADupStack-unix pairs was 0.88 against Qwen's 0.38. The constants were refitted
+as a quantile match: 4,800 query/document pairs recorded from the real pipeline (40 queries each
+from SciFact, NFCorpus and CQADupStack-unix, top 40 candidates, both rerankers scoring the same
+pairs), the line through 25 matched quantiles of Granite's logit against the logit of Qwen's score,
+giving (b, t) = (1.363, 0.0756) instead of (1.237, 0.0709). Mean absolute quantile difference from
+Qwen fell from 0.093 to 0.058 (NFCorpus) and 0.244 to 0.070 (unix) and rose from 0.020 to 0.055
+(SciFact, where the first fit was made); leaving each corpus out of the fit in turn improved two of
+three. Retrieval is unchanged: over 10 SciFact salts MRR 0.828, nDCG@10 0.841, Recall@10 0.931,
+against 0.828 / 0.840 / 0.927 over 30 salts before. No single sigmoid can match Qwen on every corpus,
+because Qwen's own scores sit very differently per corpus (median 0.0 on SciFact, 0.38 on unix).
+
 ### 4. Configuration
 
 Add `PYQMD_RERANK_MODEL` (Hub repo id or local MLX model dir) and

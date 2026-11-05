@@ -144,8 +144,8 @@ stranger's installed pyqmd) and must not drift apart.
   checkpoint whose `config.json` lists a `*ForSequenceClassification` architecture runs as a
   cross-encoder instead (`llm/_cross_encoder.py`, through `mlx_embeddings`): its raw logit is
   mapped to 0..1 by a per-model bias and temperature in `RERANK_CALIBRATION` (`llm/_constants.py`,
-  keyed by Hub repo id, case-insensitive; fitted with `scripts/eval_rerankers.py` so scores match
-  Qwen's scale, which the RRF blend and `--min-score` assume). A checkpoint with no entry, such as
+  keyed by Hub repo id, case-insensitive; quantile-matched to Qwen's score scale over SciFact, NFCorpus
+  and CQADupStack-unix pairs, since the RRF blend and `--min-score` assume it; see the comment in `_constants.py`). A checkpoint with no entry, such as
   a local copy of a calibrated model, gets identity scores and a `RuntimeWarning`. Tested alternative: `ibm-granite/granite-embedding-reranker-english-r2`
   (Apache 2.0, English only; ties Qwen on SciFact and ConditionalQA and is 1.5-2x faster; real
   `--intent` text helps it about as much as it helps Qwen). A load failure is a `RerankModelError` → one-line `Error:` + exit 1
