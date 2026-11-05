@@ -135,10 +135,17 @@ def query(
         help="Rerank with this Hugging Face repo id or local MLX model dir "
         "(overrides PYQMD_RERANK_MODEL).",
     ),
+    expand_model: str = typer.Option(
+        None,
+        "--expand-model",
+        metavar="MODEL",
+        help="Expand queries with this Hugging Face repo id or local MLX model dir "
+        "(overrides PYQMD_EXPAND_MODEL).",
+    ),
 ) -> None:
     """Search with query expansion and reranking (recommended)."""
     parsed_filter = parse_cli_metadata_filter(filter)
-    store = get_store(rerank_model=rerank_model)
+    store = get_store(rerank_model=rerank_model, expand_model=expand_model)
     check_index_health(store)
     results = run_or_exit(
         lambda: store.query(

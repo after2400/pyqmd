@@ -6,12 +6,12 @@ family (see the design spec's "Research finding" section) -- mlx-lm keeps the
 LM head intact, so we implement the scoring ourselves.
 """
 
-import os
-
 from . import _cross_encoder
 from ._cache import get_or_load
 from ._constants import DEFAULT_RERANK_MODEL, RERANK_MODEL_ENV_VAR
 from ._hub import load_quietly_if_cached
+from ._load_errors import load_failure_message
+from ._models import resolve_model
 from ._prompts import build_rerank_prompt, score_from_logits
 
 _rerank_cache: dict = {}
@@ -19,9 +19,9 @@ _cross_encoder_cache: dict = {}
 
 
 def resolve_rerank_model() -> str:
-    """The effective rerank model: $PYQMD_RERANK_MODEL when set and
-    non-empty, else DEFAULT_RERANK_MODEL."""
-    return os.environ.get(RERANK_MODEL_ENV_VAR) or DEFAULT_RERANK_MODEL
+    """The effective rerank model: $PYQMD_RERANK_MODEL, else the chosen
+    model set's (PYQMD_MODEL_SET or the config file), else DEFAULT_RERANK_MODEL."""
+    return resolve_model("rerank")
 
 
 class RerankModelError(RuntimeError):
@@ -57,9 +57,7 @@ def _last_position_logits(rerank_model, inputs):
 
 def _load_error(model_id: str, exc: Exception) -> RerankModelError:
     return RerankModelError(
-        f"Could not load rerank model '{model_id}': {str(exc).rstrip('.')}. "
-        f"Set {RERANK_MODEL_ENV_VAR} to a Hugging Face repo id or a local "
-        "MLX model directory to override."
+        load_failure_message("rerank", model_id, exc, role="rerank", env_var=RERANK_MODEL_ENV_VAR)
     )
 
 

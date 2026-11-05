@@ -38,6 +38,8 @@ def test_help_lists_all_top_level_commands():
         "update",
         "cleanup",
         "mcp",
+        "models",
+        "pull",
     ):
         assert command in result.output
 

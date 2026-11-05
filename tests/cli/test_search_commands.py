@@ -623,7 +623,7 @@ def test_query_command_rerank_model_flag_reaches_reranker(monkeypatch):
         seen.append(model)
         return [1.0] * len(documents)
 
-    def fake_get_store(db_path=None, *, rerank_model=None):
+    def fake_get_store(db_path=None, *, rerank_model=None, expand_model=None):
         store = Store(
             ":memory:",
             embed_fn=_fake_embed,
@@ -648,7 +648,7 @@ def test_query_command_rerank_model_flag_reaches_reranker(monkeypatch):
 def test_query_command_without_rerank_model_flag_passes_none(monkeypatch):
     captured = {}
 
-    def fake_get_store(db_path=None, *, rerank_model=None):
+    def fake_get_store(db_path=None, *, rerank_model=None, expand_model=None):
         captured["rerank_model"] = rerank_model
         store = Store(
             ":memory:",
@@ -666,3 +666,32 @@ def test_query_command_without_rerank_model_flag_passes_none(monkeypatch):
 
     assert result.exit_code == 0
     assert captured["rerank_model"] is None
+
+
+def test_query_command_expand_model_flag_reaches_the_expander(monkeypatch):
+    seen = []
+
+    def recording_expand(query, model, salt=None):
+        seen.append(model)
+        return []
+
+    def fake_get_store(db_path=None, *, rerank_model=None, expand_model=None):
+        store = Store(
+            ":memory:",
+            embed_fn=_fake_embed,
+            expand_fn=recording_expand,
+            rerank_fn=_fake_rerank,
+            expand_model=expand_model,
+        )
+        store.add_collection("notes", "/notes")
+        _seed_doc(store, "auth.md", "Auth", "authentication setup guide")
+        return store
+
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.search.get_store", fake_get_store)
+
+    result = runner.invoke(
+        app, ["query", "authentication", "--expand-model", "org/some-expander", "--format", "json"]
+    )
+
+    assert result.exit_code == 0
+    assert seen == ["org/some-expander"]

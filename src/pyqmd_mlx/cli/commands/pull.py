@@ -2,12 +2,16 @@
 
 import typer
 
-app = typer.Typer(help="No-op stub: pyqmd's MLX models download automatically on first use.")
+from pyqmd_mlx.cli._errors import run_or_exit
+from pyqmd_mlx.cli.commands._model_output import print_download_results
+from pyqmd_mlx.llm._download import active_models, download_models
+
+app = typer.Typer(help="Download the models pyqmd is set to use.")
 
 
 @app.callback()
 def _pull_callback() -> None:
-    """No-op stub: pyqmd's MLX models download automatically on first use.
+    """Download the models pyqmd is set to use.
 
     A no-op callback: without it, Typer/Click collapses a Typer() app that
     has only one @app.command() registered into a single top-level command,
@@ -24,16 +28,15 @@ def pull(
     refresh: bool = typer.Option(False, "--refresh", hidden=True),
     progress: bool = typer.Option(False, "--progress", hidden=True),
 ) -> None:
-    """Explain that pyqmd has no separate model-download step.
+    """Download the embedding, rerank and expansion models pyqmd is set to use.
 
-    Node's `qmd pull [--refresh] [--progress]` downloads embedding/
-    generation/rerank GGUF model files. pyqmd's MLX models load straight
-    from the Hugging Face Hub cache on first use, so there's nothing to
-    pull -- this stub exists only so someone typing `pull` out of Node
-    habit gets an explanation instead of a "no such command" error.
-    `--refresh`/`--progress` are accepted and silently ignored for the
-    same reason.
+    Fetches only what a query would use under the current settings (flag-free:
+    environment variables, `pyqmd models use`, the config file, then the
+    default set), and never a model you did not select. Models already
+    downloaded are skipped. It downloads files; it does not load a model.
+    `--refresh` and `--progress` are Node qmd's flags and are accepted and
+    ignored.
     """
-    typer.echo(
-        "pyqmd's MLX models download automatically on first use — no separate pull step is needed."
-    )
+    results = run_or_exit(lambda: download_models(active_models()))
+    if print_download_results(results):
+        raise typer.Exit(1)

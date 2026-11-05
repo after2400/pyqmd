@@ -68,7 +68,9 @@ pyqmd embed [-c/--collection <name>] [--force] [--chunk-strategy <regex|auto>]  
 pyqmd status                          # Index/collection health summary
 pyqmd update [-c/--collection <name>] [--pull]  # Re-scan collections; re-index new/changed files
 pyqmd cleanup [--dry-run]             # Clear LLM cache, purge inactive docs, vacuum
-pyqmd pull                            # No-op: MLX models download automatically on first use
+pyqmd pull                            # Download the models currently selected (no model is loaded)
+pyqmd models [show|list]              # Models in use + where each choice came from; the available sets
+pyqmd models use <default|granite> [--download]  # Save a model set in the config file; --download fetches only that set
 pyqmd query <query>                   # Hybrid search: FTS + vector + RRF fusion + rerank (recommended)
 pyqmd search <query>                  # Full-text keyword search (BM25, no LLM)
 pyqmd vsearch <query>                 # Vector similarity search only
@@ -81,7 +83,7 @@ pyqmd skill list                      # List bundled skill names (pyqmd, pyqmd-l
 pyqmd skill show [name]               # Print a bundled skill doc (default: pyqmd)
 pyqmd skill install [name] [--global] [--force] [--yes]  # Install a skill into .agents/skills/<name>
 pyqmd skills list|get|path [--json]   # Discover bundled runtime skills (get takes <name>|--all [--full]; path takes [name])
-pyqmd bench <fixture.json> [--json] [-c/--collection <name>] [--samples N] [--rerank-model <model>]  # Run search-quality benchmarks against your own corpus
+pyqmd bench <fixture.json> [--json] [-c/--collection <name>] [--samples N] [--rerank-model <model>] [--expand-model <model>]  # Run search-quality benchmarks against your own corpus
 pyqmd --version                       # Print the pyqmd release version and exit
 pyqmd [command...] -h, --help         # Help for pyqmd or any (sub)command
 ```
@@ -97,6 +99,7 @@ pyqmd [command...] -h, --help         # Help for pyqmd or any (sub)command
 --no-rerank               # (query only) skip LLM reranking
 --intent <text>           # (query only) sharpen ranking with a stated intent
 --rerank-model <model>    # (query, bench) rerank with this Hub repo id or local MLX dir; beats PYQMD_RERANK_MODEL
+--expand-model <model>    # (query, bench) expand with this Hub repo id or local MLX dir; beats PYQMD_EXPAND_MODEL
 --format <kind>           # cli (default) | json | csv | md | xml | files
 --line-numbers            # Add line numbers to output
 --full-path               # Show on-disk paths instead of qmd:// + docid
@@ -149,6 +152,18 @@ stranger's installed pyqmd) and must not drift apart.
   (CLI, including `bench`) / `is_error` (MCP). `mlx-embeddings` 0.1.0 hardcodes a GELU
   classifier head, so `fix_classifier_activation` patches it from `config.json`; drop that
   when the exact pin moves past an upstream fix.
+- Model sets and config: `llm/_constants.py` `MODEL_SETS` holds the `default` and `granite` sets
+  (expansion + rerank; the embedding model is shared and fixed). Each role resolves, first match
+  wins, through `llm/_models.py`: flag, `PYQMD_RERANK_MODEL`/`PYQMD_EXPAND_MODEL`, `PYQMD_MODEL_SET`,
+  the TOML config file's entry (`llm/_config.py`; `$PYQMD_CONFIG`, `$XDG_CONFIG_HOME/pyqmd/`, or
+  `~/.config/pyqmd/config.toml`), its `set`, then the default set. `pyqmd models use <set>` only
+  writes the config; `pyqmd pull`/`models use --download` fetch (`llm/_download.py`) only the ids the
+  selection resolves to. A model that cannot be loaded or downloaded raises one of
+  `ExpansionModelError`/`RerankModelError`/`EmbeddingModelError` with a message from
+  `llm/_load_errors.py` (access denied / TLS verification / unreachable / original text, plus the way
+  out). `tests/test_model_set_isolation.py` fails if the Granite set ever touches a default-set model,
+  which must hold on networks that block those. Tests run with an isolated config file
+  (`tests/conftest.py`). Docs: `docs/specs/2026-11-04-model-sets-and-config-design.md`.
 - Reciprocal Rank Fusion (RRF) combines FTS + vector result lists before rerank
 - Embedding input: each chunk is embedded as `title: <doc title> | text: <chunk>` (Node's
   format). Opt-in: with `PYQMD_EMBED_BREADCRUMBS=1`, `.md` chunks add their section-heading path to

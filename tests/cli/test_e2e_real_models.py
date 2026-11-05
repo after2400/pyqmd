@@ -36,7 +36,7 @@ def test_pyqmd_add_embed_query_end_to_end_with_real_models(tmp_path, monkeypatch
     store = Store(":memory:")
     for module_name in ("collection", "documents", "search", "embed", "status"):
         monkeypatch.setattr(
-            f"pyqmd_mlx.cli.commands.{module_name}.get_store", lambda db_path=None, s=store: s
+            f"pyqmd_mlx.cli.commands.{module_name}.get_store", lambda db_path=None, s=store, **_: s
         )
 
     add_result = runner.invoke(app, ["collection", "add", str(tmp_path), "--name", "docs"])

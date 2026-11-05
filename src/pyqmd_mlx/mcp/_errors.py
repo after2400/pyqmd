@@ -9,7 +9,7 @@ from typing import TypeVar
 
 from mcp.types import CallToolResult, TextContent
 
-from pyqmd_mlx.llm import ExpansionModelError, RerankModelError
+from pyqmd_mlx.llm import EmbeddingModelError, ExpansionModelError, RerankModelError
 
 T = TypeVar("T", bound=CallToolResult)
 
@@ -19,6 +19,7 @@ EXPECTED_EXCEPTIONS = (
     ValueError,
     FileNotFoundError,
     NotADirectoryError,
+    EmbeddingModelError,
     ExpansionModelError,
     RerankModelError,
 )
