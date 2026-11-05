@@ -8,7 +8,7 @@ import os
 import typer
 
 from pyqmd_mlx.cli._errors import run_or_exit
-from pyqmd_mlx.cli.commands._model_output import print_download_results
+from pyqmd_mlx.cli.commands._model_output import download_with_progress, print_download_results
 from pyqmd_mlx.llm._config import config_path, load_models_config, write_models_config
 from pyqmd_mlx.llm._constants import (
     DEFAULT_EMBED_MODEL,
@@ -17,7 +17,6 @@ from pyqmd_mlx.llm._constants import (
     MODEL_SETS,
     RERANK_MODEL_ENV_VAR,
 )
-from pyqmd_mlx.llm._download import download_models
 from pyqmd_mlx.llm._hub import is_downloaded
 from pyqmd_mlx.llm._models import model_set, resolve_model_source
 
@@ -125,7 +124,7 @@ def use(
             ("rerank", chosen.rerank),
             ("expand", chosen.expand),
         ]
-        return print_download_results(download_models(models))
+        return print_download_results(download_with_progress(models))
 
     if run_or_exit(body):
         raise typer.Exit(1)

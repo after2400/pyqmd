@@ -3,8 +3,8 @@
 import typer
 
 from pyqmd_mlx.cli._errors import run_or_exit
-from pyqmd_mlx.cli.commands._model_output import print_download_results
-from pyqmd_mlx.llm._download import active_models, download_models
+from pyqmd_mlx.cli.commands._model_output import download_with_progress, print_download_results
+from pyqmd_mlx.llm._download import active_models
 
 app = typer.Typer(help="Download the models pyqmd is set to use.")
 
@@ -37,6 +37,6 @@ def pull(
     `--refresh` and `--progress` are Node qmd's flags and are accepted and
     ignored.
     """
-    results = run_or_exit(lambda: download_models(active_models()))
+    results = run_or_exit(lambda: download_with_progress(active_models()))
     if print_download_results(results):
         raise typer.Exit(1)
