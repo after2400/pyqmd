@@ -1,6 +1,53 @@
 # CHANGELOG
 
 
+## v0.11.0 (2026-11-05)
+
+### ✨ Features
+
+- **cli**: Show help when pyqmd is run with no arguments
+  ([#26](https://github.com/after2400/pyqmd/pull/26),
+  [`00fd3f4`](https://github.com/after2400/pyqmd/commit/00fd3f4be57dbce2816832fba6e06e56f25a06cc))
+
+- **llm**: Choose the expansion prompt by model family
+  ([#26](https://github.com/after2400/pyqmd/pull/26),
+  [`00fd3f4`](https://github.com/after2400/pyqmd/commit/00fd3f4be57dbce2816832fba6e06e56f25a06cc))
+
+Qwen3 models keep "/no_think" and Node's system prompt. Any other base gets the bare user message, so it matches how a retrained model is fine-tuned and works with whatever default system text its own chat template adds. The family comes from the loaded model's config model_type.
+
+- **llm**: Opt-in expansion model on a US-made base (IBM Granite 4.0 1B)
+  ([#26](https://github.com/after2400/pyqmd/pull/26),
+  [`00fd3f4`](https://github.com/after2400/pyqmd/commit/00fd3f4be57dbce2816832fba6e06e56f25a06cc))
+
+### ✅ Testing
+
+- **llm**: Check Granite's rendered prompt against the fine-tuning prompt
+  ([#26](https://github.com/after2400/pyqmd/pull/26),
+  [`00fd3f4`](https://github.com/after2400/pyqmd/commit/00fd3f4be57dbce2816832fba6e06e56f25a06cc))
+
+- **scripts**: Add a BEIR corpus preparer for NFCorpus and CQADupStack
+  ([#26](https://github.com/after2400/pyqmd/pull/26),
+  [`00fd3f4`](https://github.com/after2400/pyqmd/commit/00fd3f4be57dbce2816832fba6e06e56f25a06cc))
+
+Writes the same layout as prepare_scifact_corpus.py, from the MTEB copies on the Hub, so expansion models can be compared on short-query corpora.
+
+- **scripts**: Add the MLX fine-tuning recipe for a non-Qwen expansion base
+  ([#26](https://github.com/after2400/pyqmd/pull/26),
+  [`00fd3f4`](https://github.com/after2400/pyqmd/commit/00fd3f4be57dbce2816832fba6e06e56f25a06cc))
+
+LoRA on qmd's expansion data with mlx_lm.lora, then fuse and quantize with the mixed 4/6-bit recipe. The training prompt is built by the same function pyqmd serves with, and each target ends with a newline so the output grammar's end-of-text rule is satisfied.
+
+### 📖 Documentation
+
+- Document the opt-in Granite expansion model and per-family prompts
+  ([#26](https://github.com/after2400/pyqmd/pull/26),
+  [`00fd3f4`](https://github.com/after2400/pyqmd/commit/00fd3f4be57dbce2816832fba6e06e56f25a06cc))
+
+- **specs**: Publish the US-made expansion model design
+  ([#26](https://github.com/after2400/pyqmd/pull/26),
+  [`00fd3f4`](https://github.com/after2400/pyqmd/commit/00fd3f4be57dbce2816832fba6e06e56f25a06cc))
+
+
 ## v0.10.0 (2026-11-04)
 
 ### ✨ Features
