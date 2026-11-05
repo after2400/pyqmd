@@ -1,6 +1,73 @@
 # CHANGELOG
 
 
+## v0.12.0 (2026-11-05)
+
+### ✨ Features
+
+- **cli**: Add --expand-model to query and bench ([#27](https://github.com/after2400/pyqmd/pull/27),
+  [`29a1b8d`](https://github.com/after2400/pyqmd/commit/29a1b8dc6e7e911d0b3def361531c1cff8704d71))
+
+Mirrors --rerank-model: it beats PYQMD_EXPAND_MODEL and the chosen model set.
+
+- **cli**: Add pyqmd models and make pull download the active models
+  ([#27](https://github.com/after2400/pyqmd/pull/27),
+  [`29a1b8d`](https://github.com/after2400/pyqmd/commit/29a1b8dc6e7e911d0b3def361531c1cff8704d71))
+
+'models show' lists where each model comes from and whether it is downloaded; 'models list' lists the sets; 'models use <set>' saves the choice in the config file without contacting any model, and --download fetches only the chosen set. 'pull' now downloads what a query would use instead of being a no-op.
+
+- **cli**: Model sets, a config file and pyqmd models, with clear errors for blocked downloads
+  ([#27](https://github.com/after2400/pyqmd/pull/27),
+  [`29a1b8d`](https://github.com/after2400/pyqmd/commit/29a1b8dc6e7e911d0b3def361531c1cff8704d71))
+
+- **llm**: Add the pyqmd config file reader and writer
+  ([#27](https://github.com/after2400/pyqmd/pull/27),
+  [`29a1b8d`](https://github.com/after2400/pyqmd/commit/29a1b8dc6e7e911d0b3def361531c1cff8704d71))
+
+TOML at $PYQMD_CONFIG, $XDG_CONFIG_HOME/pyqmd or ~/.config/pyqmd. Invalid files raise a ConfigError that names the file; writes are atomic and keep unrelated tables.
+
+- **llm**: Choose models by named set, env var or config file
+  ([#27](https://github.com/after2400/pyqmd/pull/27),
+  [`29a1b8d`](https://github.com/after2400/pyqmd/commit/29a1b8dc6e7e911d0b3def361531c1cff8704d71))
+
+PYQMD_MODEL_SET and the config file's [models] table select the default or granite set for the expansion and rerank roles. Resolution order: role env var, PYQMD_MODEL_SET, config entry, config set, built-in default. The tests now run with an isolated config file.
+
+- **llm**: Report a blocked or failed model download as one clear error
+  ([#27](https://github.com/after2400/pyqmd/pull/27),
+  [`29a1b8d`](https://github.com/after2400/pyqmd/commit/29a1b8dc6e7e911d0b3def361531c1cff8704d71))
+
+A model that cannot be loaded now says why (access denied, TLS verification, Hugging Face unreachable, or the original message) and what to do: a built-in default model suggests the Granite set, an explicit choice names its variable. The embedding model, which had no error wrapping, gets EmbeddingModelError, handled by both the CLI and the MCP server.
+
+### 🐞 Bug Fixes
+
+- **skills**: Document the models, pull and config behaviour in the pyqmd skill
+  ([#27](https://github.com/after2400/pyqmd/pull/27),
+  [`29a1b8d`](https://github.com/after2400/pyqmd/commit/29a1b8dc6e7e911d0b3def361531c1cff8704d71))
+
+Corrects the stale 934 MB download size and adds --expand-model, the model sets, the config file and what to do when a model cannot be downloaded.
+
+### ✅ Testing
+
+- **llm**: Check the Granite set never touches a default-set model
+  ([#27](https://github.com/after2400/pyqmd/pull/27),
+  [`29a1b8d`](https://github.com/after2400/pyqmd/commit/29a1b8dc6e7e911d0b3def361531c1cff8704d71))
+
+Runs query, vsearch, status, models and pull with the Granite set chosen by config, environment variable or flags, and fails if any model of the default set is loaded, downloaded or looked up in the cache.
+
+### 📖 Documentation
+
+- Add a Models section to the README ([#27](https://github.com/after2400/pyqmd/pull/27),
+  [`29a1b8d`](https://github.com/after2400/pyqmd/commit/29a1b8dc6e7e911d0b3def361531c1cff8704d71))
+
+- Document model sets, the config file and pull in CLAUDE.md and COMMAND_STATUS.md
+  ([#27](https://github.com/after2400/pyqmd/pull/27),
+  [`29a1b8d`](https://github.com/after2400/pyqmd/commit/29a1b8dc6e7e911d0b3def361531c1cff8704d71))
+
+- **specs**: Publish the model sets and config design
+  ([#27](https://github.com/after2400/pyqmd/pull/27),
+  [`29a1b8d`](https://github.com/after2400/pyqmd/commit/29a1b8dc6e7e911d0b3def361531c1cff8704d71))
+
+
 ## v0.11.0 (2026-11-05)
 
 ### ✨ Features
