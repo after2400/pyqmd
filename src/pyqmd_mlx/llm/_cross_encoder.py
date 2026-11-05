@@ -91,7 +91,10 @@ class CrossEncoder:
 def _load(model_id: str):
     from mlx_embeddings.utils import load
 
-    return load(model_id)
+    # A cross-encoder only encodes pairs, never decodes, so tokenizer clean-up is
+    # irrelevant; IBM's reranker ships clean_up_tokenization_spaces=true on a BPE
+    # tokenizer, which makes recent transformers warn on every load.
+    return load(model_id, tokenizer_config={"clean_up_tokenization_spaces": False})
 
 
 def _calibration_for(model_id: str) -> tuple[float, float]:
