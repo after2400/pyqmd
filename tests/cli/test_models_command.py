@@ -213,3 +213,29 @@ def test_pull_then_switching_to_granite_succeeds_after_a_block(hub):
 
 def test_pull_still_accepts_the_node_flags(hub):
     assert runner.invoke(app, ["pull", "--refresh", "--progress"]).exit_code == 0
+
+
+def test_download_progress_does_not_run_into_the_result_lines(hub, monkeypatch):
+    """huggingface_hub's progress bars redraw one line with carriage returns and
+    leave the cursor mid-line; the result lines must start on a fresh line and
+    each download is announced before its bar."""
+    import sys
+
+    def snapshot_download(model_id, **_):
+        hub.requested.append(model_id)
+        sys.stderr.write(f"\rFetching {model_id}:  50%|#####     |")
+        sys.stderr.write(f"\rFetching {model_id}: 100%|##########|")  # no newline, like tqdm
+        hub.downloaded.add(model_id)
+        return "/cache/" + model_id
+
+    monkeypatch.setattr("huggingface_hub.snapshot_download", snapshot_download)
+
+    result = runner.invoke(app, ["pull"])
+
+    assert result.exit_code == 0
+    lines = result.output.replace("\r", "\n").splitlines()
+    status_lines = [line for line in lines if " downloaded " in line and "100%" in line]
+    assert status_lines == []  # a result line sharing a line with a bar fragment
+    for model_id in (DEFAULT_EMBED_MODEL, DEFAULT_RERANK_MODEL, DEFAULT_EXPAND_MODEL):
+        assert any(line.startswith("Downloading ") and model_id in line for line in lines)
+        assert any(line.strip().endswith(model_id) and "downloaded" in line for line in lines)

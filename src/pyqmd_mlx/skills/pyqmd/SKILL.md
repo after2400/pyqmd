@@ -163,6 +163,7 @@ parameter shapes.
   id or a local MLX model directory), `PYQMD_MODEL_SET`, then the config
   file (`~/.config/pyqmd/config.toml`). `pyqmd models` shows what is in use;
   `pyqmd models use granite` saves the IBM Granite set (reranker and
-  expansion model; English only) in the config file without downloading
+  expansion model built on US-developed base models, for users who prefer not to use non-US models;
+  English only) in the config file without downloading
   anything, and `pyqmd models use default` goes back. Do not run `models use`
   unless the user asks: it changes their configuration.

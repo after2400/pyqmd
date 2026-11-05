@@ -222,7 +222,7 @@ def test_load_cross_encoder_fixes_the_head_once_and_reads_calibration(monkeypatc
         head=SimpleNamespace(act=nn.GELU(approx="precise")), is_regression=False
     )
     tokenizer = FakeTokenizer()
-    monkeypatch.setattr("mlx_embeddings.utils.load", lambda model_id: (model, tokenizer))
+    monkeypatch.setattr("mlx_embeddings.utils.load", lambda model_id, **_: (model, tokenizer))
     monkeypatch.setattr(
         cross_encoder, "read_config", lambda model_id: {"classifier_activation": "silu"}
     )
@@ -246,7 +246,7 @@ def test_load_cross_encoder_fixes_the_head_once_and_reads_calibration(monkeypatc
 
 def _stub_load(monkeypatch):
     model = SimpleNamespace(head=SimpleNamespace(act=nn.SiLU()), is_regression=False)
-    monkeypatch.setattr("mlx_embeddings.utils.load", lambda model_id: (model, FakeTokenizer()))
+    monkeypatch.setattr("mlx_embeddings.utils.load", lambda model_id, **_: (model, FakeTokenizer()))
     monkeypatch.setattr(cross_encoder, "read_config", lambda model_id: {})
 
 
@@ -281,3 +281,22 @@ def test_load_cross_encoder_with_an_entry_does_not_warn(monkeypatch):
     with warnings.catch_warnings():
         warnings.simplefilter("error")
         cross_encoder.load_cross_encoder(MODEL_ID)
+
+
+def test_load_turns_off_tokenizer_clean_up_so_transformers_does_not_warn(monkeypatch):
+    # IBM's reranker ships clean_up_tokenization_spaces=true on a BPE tokenizer,
+    # which makes recent transformers print a warning on every load. A
+    # cross-encoder only encodes, never decodes, so the clean-up is irrelevant.
+    seen = {}
+
+    def fake_load(model_id, **kwargs):
+        seen.update(kwargs, model_id=model_id)
+        return "model", "tokenizer"
+
+    monkeypatch.setattr("mlx_embeddings.utils.load", fake_load)
+
+    assert cross_encoder._load("org/reranker") == ("model", "tokenizer")
+    assert seen == {
+        "model_id": "org/reranker",
+        "tokenizer_config": {"clean_up_tokenization_spaces": False},
+    }

@@ -77,9 +77,11 @@ needed (`pyqmd pull` fetches them ahead of time):
 | Reranking       | `mlx-community/Qwen3-Reranker-0.6B-mxfp8` (Alibaba)                                      | `ibm-granite/granite-embedding-reranker-english-r2` (IBM, English only)                             | 0.60 / 0.57 GB           |
 | Query expansion | `after2400/qmd-query-expansion-1.7B-mlx-mixed-4-6` (Qwen3-1.7B fine-tune, from Node qmd) | `after2400/qmd-query-expansion-granite-1b-mlx-mixed-4-6` (IBM Granite 4.0 1B fine-tune, Apache 2.0) | 1.0 / 0.98 GB            |
 
-The default set matches Node qmd. The **Granite set** swaps the reranker and the expansion model for
-ones built on IBM's open-weight Granite models, for a model set whose weights come from US
-organisations. On SciFact it retrieves better than the default (Recall@10 0.927 vs 0.907, MRR 0.828
+The default set matches Node qmd. The **Granite set** is for people and organisations that prefer not
+to use models from non-US developers: the embedding model is Google's, and the reranker and the
+query-expansion model are built on IBM's open-weight Granite models, so every base model comes from a
+US company. One caveat: the expansion model is our fine-tune of Granite on qmd's published
+expansion training data, and where that data originally came from is not documented. On SciFact it retrieves better than the default (Recall@10 0.927 vs 0.907, MRR 0.828
 vs 0.798, over 30 seeded runs) and produces no run-on expansions; on ConditionalQA, NFCorpus and
 CQADupStack it is within noise of the default. It is about 17% slower per query expansion. The
 details are in `docs/specs/2026-11-04-us-expansion-model-design.md`. The Granite reranker is English

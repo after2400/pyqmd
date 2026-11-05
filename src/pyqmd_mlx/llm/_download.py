@@ -7,6 +7,7 @@ the user did not select is never requested.
 See docs/specs/2026-11-04-model-sets-and-config-design.md.
 """
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -37,9 +38,14 @@ def active_models() -> list[tuple[str, str]]:
     ]
 
 
-def download_models(models: list[tuple[str, str]]) -> list[DownloadResult]:
+def download_models(
+    models: list[tuple[str, str]],
+    on_start: Callable[[str, str], None] | None = None,
+) -> list[DownloadResult]:
     """Fetch each (role, id) that is not already local or cached. A failure is
-    reported in its result; the remaining models are still attempted."""
+    reported in its result; the remaining models are still attempted.
+    `on_start(role, id)` is called just before each real download, so a caller
+    can announce it ahead of huggingface_hub's progress bar."""
     import huggingface_hub
 
     results = []
@@ -49,6 +55,8 @@ def download_models(models: list[tuple[str, str]]) -> list[DownloadResult]:
         elif is_downloaded(model_id):
             results.append(DownloadResult(role, model_id, "cached"))
         else:
+            if on_start is not None:
+                on_start(role, model_id)
             try:
                 huggingface_hub.snapshot_download(model_id)
             except Exception as exc:

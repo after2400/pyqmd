@@ -61,12 +61,15 @@ CROSS_ENCODER_MAX_TOKENS = 2048
 
 # Hub repo id -> (bias b, temperature t) mapping a cross-encoder's raw logit to
 # a 0..1 score, sigmoid((logit - b) / t). Unlisted checkpoints use (0.0, 1.0).
-# Fitted with scripts/eval_rerankers.py (300 SciFact test queries, 30 BM25 candidates
-# plus the judged documents each) so the median relevant and median other document
-# score as Qwen3-Reranker's do (~0.995 and ~0.0025), the scale the RRF blend and
-# --min-score assume.
+# Granite's entry is a quantile match to Qwen3-Reranker (the scale the RRF blend and
+# --min-score assume): on 4,800 query/document pairs from the real pipeline (40 queries
+# each from SciFact, NFCorpus and CQADupStack-unix, top 40 candidates), the line through
+# the 25 matched quantiles of Granite's logit against the logit of Qwen's score. The first
+# version (1.237, 0.0709) matched only the medians of SciFact's relevant and other
+# documents with scripts/eval_rerankers.py; it left Granite scoring loosely related
+# documents far above Qwen on other corpora (median 0.88 vs 0.38 on CQADupStack-unix).
 RERANK_CALIBRATION: dict[str, tuple[float, float]] = {
-    GRANITE_RERANK_MODEL: (1.237, 0.0709),
+    GRANITE_RERANK_MODEL: (1.363, 0.0756),
 }
 
 # Embedding context in tokens, Node's EMBED_CONTEXT_SIZE (llm.ts). embed()
