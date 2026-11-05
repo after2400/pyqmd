@@ -18,10 +18,13 @@ DEFAULT_DB_PATH = Path.home() / ".cache" / "pyqmd" / "index.sqlite"
 DB_PATH_ENV_VAR = "PYQMD_DB"
 
 
-def get_store(db_path: str | None = None) -> Store:
+def get_store(db_path: str | None = None, *, rerank_model: str | None = None) -> Store:
     """Open (creating parent directories if needed) the pyqmd database and
     return a Store. Resolution order: explicit `db_path` argument, then the
-    PYQMD_DB environment variable, then DEFAULT_DB_PATH."""
+    PYQMD_DB environment variable, then DEFAULT_DB_PATH.
+
+    `rerank_model` (the `--rerank-model` flag) beats PYQMD_RERANK_MODEL, which
+    beats the default reranker."""
     path = Path(db_path or os.environ.get(DB_PATH_ENV_VAR) or DEFAULT_DB_PATH)
     path.parent.mkdir(parents=True, exist_ok=True)
-    return Store(str(path))
+    return Store(str(path), rerank_model=rerank_model)

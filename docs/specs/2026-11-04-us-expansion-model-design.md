@@ -5,7 +5,7 @@
 a fine-tune of IBM Granite 4.0 1B, selected with `PYQMD_EXPAND_MODEL`. The default expansion model is unchanged
 (the Qwen3-1.7B-based one). See "Granite 4.0 1B local experiment" at the end for what was built and measured; the
 earlier sections are the design, written before the experiment.
-**Related:** the opt-in Granite reranker (the reranker half of the same effort; this spec doesn't redo it); `2026-09-24-expand-model-gguf-weights-design.md` (where the
+**Related:** `2026-11-04-granite-reranker-design.md` (the reranker half of the same effort; this spec doesn't redo it); `2026-09-24-expand-model-gguf-weights-design.md` (where the
 current weights come from); `2026-09-25-expand-model-requantize-design.md` (the mixed 4/6-bit
 recipe and the 30-salt rule); `2026-09-25-expansion-output-grammar-design.md` (the byte-level
 grammar this spec has to keep working); `2026-09-25-seeded-expansion-sampling-design.md`

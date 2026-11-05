@@ -15,7 +15,7 @@ from pyqmd_mlx.bench._fixture import BenchFixture
 from pyqmd_mlx.bench._metrics import ndcg_at_k, recall_at_k, reciprocal_rank
 from pyqmd_mlx.bench._pathmatch import canonicalize_ranked_ids
 from pyqmd_mlx.bench._sampling import RerankCache, salted_memo
-from pyqmd_mlx.llm import ExpansionModelError
+from pyqmd_mlx.llm import ExpansionModelError, RerankModelError
 from pyqmd_mlx.store import Store
 
 BACKENDS = ("bm25", "vector", "hybrid", "full")
@@ -125,9 +125,9 @@ def _score_backend(store: Store, backend_name: str, query, collection: str | Non
     start = time.monotonic()
     try:
         raw_paths = _BACKEND_RUNNERS[backend_name](store, query.query, limit, collection)
-    except ExpansionModelError:
-        # A misconfigured expansion model is a setup error, not one backend
-        # being unavailable: scoring it 0 would silently skew every
+    except (ExpansionModelError, RerankModelError):
+        # A misconfigured expansion or rerank model is a setup error, not one
+        # backend being unavailable: scoring it 0 would silently skew every
         # hybrid/full result, so let the command report it and exit.
         raise
     except Exception:

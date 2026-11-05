@@ -201,3 +201,15 @@ def test_expansion_model_error_in_a_later_sample_propagates():
 
     with pytest.raises(ExpansionModelError):
         run_benchmark(store, _fixture("alpha"), None, samples=3)
+
+
+def test_rerank_model_error_propagates_instead_of_scoring_the_backend_zero():
+    from pyqmd_mlx.llm import RerankModelError
+
+    def rerank(query, documents, model):
+        raise RerankModelError("Could not load rerank model 'bad/model': boom")
+
+    store = _SamplingStore(_expander([]), rerank)
+
+    with pytest.raises(RerankModelError):
+        run_benchmark(store, _fixture("alpha"), None)

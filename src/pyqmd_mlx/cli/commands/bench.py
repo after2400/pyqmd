@@ -134,6 +134,13 @@ def bench(
         metavar="N",
         help="Run hybrid/full N times with different expansion seeds; report mean and min–max.",
     ),
+    rerank_model: str = typer.Option(
+        None,
+        "--rerank-model",
+        metavar="MODEL",
+        help="Rerank with this Hugging Face repo id or local MLX model dir "
+        "(overrides PYQMD_RERANK_MODEL).",
+    ),
 ) -> None:
     """Run search-quality benchmarks against a fixture of queries and
     expected files, across all 4 retrieval backends (bm25/vector/hybrid/
@@ -142,7 +149,7 @@ def bench(
     fixture = run_or_exit(lambda: load_fixture(fixture_path))
     target_collection = collection or fixture.collection
 
-    store = get_store()
+    store = get_store(rerank_model=rerank_model)
     run_or_exit(lambda: check_collection_ready(store, target_collection))
 
     def on_sample(i: int, n: int) -> None:

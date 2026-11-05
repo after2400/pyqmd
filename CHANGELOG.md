@@ -1,6 +1,99 @@
 # CHANGELOG
 
 
+## v0.10.0 (2026-11-04)
+
+### ✨ Features
+
+- **cli**: Add --rerank-model to query and bench ([#25](https://github.com/after2400/pyqmd/pull/25),
+  [`fb949c5`](https://github.com/after2400/pyqmd/commit/fb949c53ebf9f4caee76f5b27f46af0cdd0582a1))
+
+Picks the reranker for one run, ahead of PYQMD_RERANK_MODEL, so two runs of the same bench fixture compare rerankers without touching the environment. get_store() takes the model and passes it to Store.
+
+- **llm**: Add cross-encoder reranker backend ([#25](https://github.com/after2400/pyqmd/pull/25),
+  [`fb949c5`](https://github.com/after2400/pyqmd/commit/fb949c53ebf9f4caee76f5b27f46af0cdd0582a1))
+
+A BERT-style sequence-classification checkpoint, loaded through mlx_embeddings, scores a (query, document) pair. Includes config-based detection, the SiLU classifier-head fix for mlx-embeddings 0.1.0, document-only truncation at 2048 tokens, and a per-model bias/temperature calibration of the raw logit.
+
+- **llm**: Add PYQMD_RERANK_MODEL override and RerankModelError
+  ([#25](https://github.com/after2400/pyqmd/pull/25),
+  [`fb949c5`](https://github.com/after2400/pyqmd/commit/fb949c53ebf9f4caee76f5b27f46af0cdd0582a1))
+
+resolve_rerank_model() mirrors resolve_expand_model(); Store uses it when no rerank_model is passed. RerankModelError is an expected exception for the CLI and MCP error handlers, and bench re-raises it instead of scoring a backend 0.
+
+- **llm**: Calibrate Granite reranker scores ([#25](https://github.com/after2400/pyqmd/pull/25),
+  [`fb949c5`](https://github.com/after2400/pyqmd/commit/fb949c53ebf9f4caee76f5b27f46af0cdd0582a1))
+
+Adds the fitted bias and temperature (1.237, 0.0709) for ibm-granite/granite-embedding-reranker-english-r2, so its scores land on Qwen3-Reranker's scale: median relevant 0.9954, median other 0.0025 on 300 SciFact test queries, against Qwen's 0.9954 and 0.0025.
+
+- **llm**: Opt-in Granite reranker and --rerank-model flag
+  ([#25](https://github.com/after2400/pyqmd/pull/25),
+  [`fb949c5`](https://github.com/after2400/pyqmd/commit/fb949c53ebf9f4caee76f5b27f46af0cdd0582a1))
+
+- **llm**: Route rerank() to the cross-encoder backend by config
+  ([#25](https://github.com/after2400/pyqmd/pull/25),
+  [`fb949c5`](https://github.com/after2400/pyqmd/commit/fb949c53ebf9f4caee76f5b27f46af0cdd0582a1))
+
+rerank() reads the checkpoint's config.json: a *ForSequenceClassification architecture is scored as a cross-encoder with calibrated logits; anything else keeps the yes/no-logit path. Load failures of either backend become a RerankModelError that names PYQMD_RERANK_MODEL. Empty input returns [] without loading a model.
+
+- **llm**: Warn when a cross-encoder has no score calibration
+  ([#25](https://github.com/after2400/pyqmd/pull/25),
+  [`fb949c5`](https://github.com/after2400/pyqmd/commit/fb949c53ebf9f4caee76f5b27f46af0cdd0582a1))
+
+Calibrations are keyed by Hub repo id and now matched case-insensitively. A checkpoint without an entry, such as a local copy of a calibrated model, gets the identity mapping and a RuntimeWarning, because its scores would otherwise be silently compressed and shift --min-score.
+
+- **scripts**: Add reranker-only SciFact evaluation and calibration fit
+  ([#25](https://github.com/after2400/pyqmd/pull/25),
+  [`fb949c5`](https://github.com/after2400/pyqmd/commit/fb949c53ebf9f4caee76f5b27f46af0cdd0582a1))
+
+Pools BM25 top-N candidates plus the judged-relevant documents per SciFact test query, scores them with any reranker, and reports MRR, nDCG@10 and recall@10. For cross-encoders it fits the bias and temperature that map raw logits to the reference reranker's score scale, by matching the median relevant and median other score, for RERANK_CALIBRATION.
+
+Platt scaling was tried first and rejected: it calibrates to SciFact's ~3% relevant prevalence and gave relevant documents a median score of 0.295 against Qwen3-Reranker's 0.995, which would flatten the rerank half of the RRF blend.
+
+- **skills**: Document PYQMD_RERANK_MODEL ([#25](https://github.com/after2400/pyqmd/pull/25),
+  [`fb949c5`](https://github.com/after2400/pyqmd/commit/fb949c53ebf9f4caee76f5b27f46af0cdd0582a1))
+
+The bundled pyqmd skill now tells an agent that a rerank-model load failure should be reported, and that PYQMD_RERANK_MODEL overrides the reranker, like the existing note about PYQMD_EXPAND_MODEL.
+
+### 📖 Documentation
+
+- Correct the Granite --intent note in CLAUDE.md ([#25](https://github.com/after2400/pyqmd/pull/25),
+  [`fb949c5`](https://github.com/after2400/pyqmd/commit/fb949c53ebf9f4caee76f5b27f46af0cdd0582a1))
+
+On ConditionalQA, with each question's scenario as the intent, the scenario raises Granite's nDCG@10 by about as much as it raises Qwen's. The earlier note, that
+--intent costs Granite ranking quality, came from a generic prefix on SciFact.
+
+- Document the --rerank-model flag ([#25](https://github.com/after2400/pyqmd/pull/25),
+  [`fb949c5`](https://github.com/after2400/pyqmd/commit/fb949c53ebf9f4caee76f5b27f46af0cdd0582a1))
+
+- Document the rerank model override ([#25](https://github.com/after2400/pyqmd/pull/25),
+  [`fb949c5`](https://github.com/after2400/pyqmd/commit/fb949c53ebf9f4caee76f5b27f46af0cdd0582a1))
+
+CLAUDE.md gains a rerank-model bullet (PYQMD_RERANK_MODEL, config-based backend choice, calibration, the tested Granite alternative); COMMAND_STATUS.md notes it on the query row.
+
+- **specs**: Add ConditionalQA results to the Granite reranker design
+  ([#25](https://github.com/after2400/pyqmd/pull/25),
+  [`fb949c5`](https://github.com/after2400/pyqmd/commit/fb949c53ebf9f4caee76f5b27f46af0cdd0582a1))
+
+Granite ties Qwen3-Reranker on 285 ConditionalQA questions (every difference within 0.016 nDCG@10, intervals include zero) and benefits from a real intent as Qwen does, which resolves the SciFact intent finding.
+
+- **specs**: Publish Granite reranker design ([#25](https://github.com/after2400/pyqmd/pull/25),
+  [`fb949c5`](https://github.com/after2400/pyqmd/commit/fb949c53ebf9f4caee76f5b27f46af0cdd0582a1))
+
+Cleaned copy of the design for the opt-in cross-encoder reranker, with the spike results, the rejected alternatives and the SciFact evaluation.
+
+
+## v0.9.2 (2026-11-04)
+
+### 🐞 Bug Fixes
+
+- **config**: Drop Claude-Session trailers from the changelog
+  ([#24](https://github.com/after2400/pyqmd/pull/24),
+  [`1c1f531`](https://github.com/after2400/pyqmd/commit/1c1f531aeb0b6942c58f530c4039b4d56b2a8c5f))
+
+Matched case-insensitively like the other trailers.
+
+
 ## v0.9.1 (2026-10-18)
 
 ### 🐞 Bug Fixes
