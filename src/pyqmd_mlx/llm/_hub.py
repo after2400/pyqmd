@@ -24,6 +24,25 @@ def is_cached(model_id: str) -> bool:
         return False
 
 
+def is_downloaded(model_id: str) -> bool:
+    """True for a local model directory, or a Hub repo whose config.json and
+    weights (a single file or a sharded index) are in the HF cache. Never
+    touches the network."""
+    if Path(model_id).is_dir():
+        return True
+    import huggingface_hub
+
+    def cached(filename: str) -> bool:
+        try:
+            return isinstance(huggingface_hub.try_to_load_from_cache(model_id, filename), str)
+        except Exception:
+            return False
+
+    return cached("config.json") and (
+        cached("model.safetensors") or cached("model.safetensors.index.json")
+    )
+
+
 def load_quietly_if_cached(model_id: str, loader: Callable[[str], T]) -> T:
     """Run loader(model_id), with HF progress bars off if nothing needs downloading."""
     if not is_cached(model_id):

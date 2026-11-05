@@ -30,6 +30,7 @@ from pyqmd_mlx.cli.commands import (
     documents,
     embed,
     mcp,
+    models,
     pull,
     search,
     skill,
@@ -49,6 +50,7 @@ app = typer.Typer(
 
 app.add_typer(collection.app, name="collection")
 app.add_typer(context.app, name="context")
+app.add_typer(models.app, name="models")
 app.add_typer(skill.app, name="skill")
 app.add_typer(skills.app, name="skills")
 app.add_typer(documents.app)
