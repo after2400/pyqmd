@@ -62,3 +62,19 @@ def test_get_store_rerank_model_wins_over_env_var(monkeypatch):
 
     assert store._rerank_model == "org/from-flag"
     store.close()
+
+
+def test_get_store_passes_expand_model_to_store():
+    store = get_store(":memory:", expand_model="org/some-expander")
+
+    assert store._expand_model == "org/some-expander"
+    store.close()
+
+
+def test_get_store_expand_model_wins_over_env_var(monkeypatch):
+    monkeypatch.setenv("PYQMD_EXPAND_MODEL", "org/from-env")
+
+    store = get_store(":memory:", expand_model="org/from-flag")
+
+    assert store._expand_model == "org/from-flag"
+    store.close()

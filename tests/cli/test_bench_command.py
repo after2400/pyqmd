@@ -276,7 +276,7 @@ def test_bench_rerank_model_flag_reaches_reranker(monkeypatch, tmp_path):
         seen.append(model)
         return [1.0 if query.lower() in doc.lower() else 0.1 for doc in documents]
 
-    def fake_get_store(db_path=None, *, rerank_model=None):
+    def fake_get_store(db_path=None, *, rerank_model=None, expand_model=None):
         store = Store(
             ":memory:",
             embed_fn=_fake_embed,
@@ -296,3 +296,32 @@ def test_bench_rerank_model_flag_reaches_reranker(monkeypatch, tmp_path):
 
     assert result.exit_code == 0
     assert seen and set(seen) == {"org/some-reranker"}
+
+
+def test_bench_expand_model_flag_reaches_the_expander(monkeypatch, tmp_path):
+    seen = []
+
+    def recording_expand(query, model, salt=None):
+        seen.append(model)
+        return [f"lex: {query} setup"]
+
+    def fake_get_store(db_path=None, *, rerank_model=None, expand_model=None):
+        store = Store(
+            ":memory:",
+            embed_fn=_fake_embed,
+            expand_fn=recording_expand,
+            rerank_fn=_fake_rerank,
+            expand_model=expand_model,
+        )
+        store.add_collection("notes", "/notes")
+        _seed_doc(store, "notes", "auth.md", "Auth", "authentication configuration guide content")
+        _seed_doc(store, "notes", "cooking.md", "Cooking", "pasta recipe instructions")
+        return store
+
+    monkeypatch.setattr("pyqmd_mlx.cli.commands.bench.get_store", fake_get_store)
+    fixture = _write_fixture(tmp_path, collection="notes")
+
+    result = runner.invoke(app, ["bench", fixture, "--expand-model", "org/some-expander", "--json"])
+
+    assert result.exit_code == 0
+    assert seen and set(seen) == {"org/some-expander"}
