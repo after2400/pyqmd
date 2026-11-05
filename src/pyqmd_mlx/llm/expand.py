@@ -6,7 +6,6 @@ settings under Node's output grammar (see _expand_grammar), seeded per
 """
 
 import hashlib
-import os
 import re
 from dataclasses import dataclass
 
@@ -14,6 +13,7 @@ from ._cache import get_or_load
 from ._constants import DEFAULT_EXPAND_MODEL, EXPAND_MODEL_ENV_VAR
 from ._expand_grammar import DEAD, START0, GrammarTables, build_tables, vocab_token_bytes
 from ._hub import load_quietly_if_cached
+from ._models import resolve_model
 
 _expand_cache: dict = {}
 # Used only by scripts/replay_query.py's unconstrained greedy mode: the
@@ -116,9 +116,9 @@ def _logits_processors() -> list:
 
 
 def resolve_expand_model() -> str:
-    """The effective expansion model: $PYQMD_EXPAND_MODEL when set and
-    non-empty, else DEFAULT_EXPAND_MODEL."""
-    return os.environ.get(EXPAND_MODEL_ENV_VAR) or DEFAULT_EXPAND_MODEL
+    """The effective expansion model: $PYQMD_EXPAND_MODEL, else the chosen
+    model set's (PYQMD_MODEL_SET or the config file), else DEFAULT_EXPAND_MODEL."""
+    return resolve_model("expand")
 
 
 class ExpansionModelError(RuntimeError):

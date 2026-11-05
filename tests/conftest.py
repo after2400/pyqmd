@@ -1,9 +1,19 @@
+import os
 import sys
+import tempfile
 from pathlib import Path
 
 import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
+
+# Keep the developer's own pyqmd config file and model-set variable out of the
+# tests: with them set, "the default model" would not be the default. Tests that
+# need a config point PYQMD_CONFIG at their own file with monkeypatch.
+os.environ["PYQMD_CONFIG"] = str(
+    Path(tempfile.mkdtemp(prefix="pyqmd-test-config-")) / "config.toml"
+)
+os.environ.pop("PYQMD_MODEL_SET", None)
 
 
 def _expansion_weights_present() -> bool:
