@@ -1,0 +1,41 @@
+# LoRA recipe for a non-Qwen expansion base with mlx_lm.lora (see README.md).
+# Same hyperparameters as Node qmd's finetune/configs/sft.yaml: r=16, alpha=32
+# (mlx-lm's `scale` is alpha/r = 2.0), lr 2e-4 cosine, 3% warmup, 5 epochs,
+# effective batch 16, max length 512. Fill in the three paths, then:
+#   mlx_lm.lora -c finetune/lora.yaml
+model: "ibm-granite/granite-4.0-1b"
+train: true
+data: "data/granite" # from prepare_data.py
+adapter_path: "runs/granite/adapters"
+fine_tune_type: lora
+optimizer: adamw
+seed: 42
+num_layers: -1
+batch_size: 4
+grad_accumulation_steps: 4
+iters: 3500 # 5 epochs of 2,806 examples at 4 per step
+val_batches: -1
+steps_per_report: 50
+steps_per_eval: 500
+save_every: 500
+max_seq_length: 512
+learning_rate: 2.0e-4
+lora_parameters:
+  keys:
+    [
+      "self_attn.q_proj",
+      "self_attn.k_proj",
+      "self_attn.v_proj",
+      "self_attn.o_proj",
+      "mlp.gate_proj",
+      "mlp.up_proj",
+      "mlp.down_proj",
+    ]
+  rank: 16
+  scale: 2.0
+  dropout: 0.0
+lr_schedule:
+  name: cosine_decay
+  warmup: 26 # optimizer steps (3500 / 4 accumulation = 875)
+  warmup_init: 0.0
+  arguments: [2.0e-4, 875, 0.0]
