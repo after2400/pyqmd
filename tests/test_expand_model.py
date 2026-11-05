@@ -225,3 +225,28 @@ def test_unknown_model_type_gets_the_plain_user_prompt(monkeypatch):
     assert _prompts_for(monkeypatch, object()) == [
         {"role": "user", "content": "Expand this search query: heart attack risk"}
     ]
+
+
+def test_granite_prompt_matches_the_fine_tuning_prompt():
+    # finetune/prepare_data.py trains on exactly this prompt (the bare user
+    # message; Granite's template adds its own default system text). Needs the
+    # tokenizer in the local Hugging Face cache; skipped otherwise.
+    from pyqmd_mlx.llm.expand import _PLAIN_STYLE, _messages
+
+    transformers = pytest.importorskip("transformers")
+    try:
+        tokenizer = transformers.AutoTokenizer.from_pretrained(
+            "ibm-granite/granite-4.0-1b", local_files_only=True
+        )
+    except OSError:
+        pytest.skip("ibm-granite/granite-4.0-1b tokenizer is not in the local cache")
+
+    prompt = tokenizer.apply_chat_template(
+        _messages("heart attack risk", _PLAIN_STYLE), tokenize=False, add_generation_prompt=True
+    )
+    assert prompt == (
+        "<|start_of_role|>system<|end_of_role|>You are a helpful assistant. Please ensure "
+        "responses are professional, accurate, and safe.<|end_of_text|>\n"
+        "<|start_of_role|>user<|end_of_role|>Expand this search query: heart attack risk"
+        "<|end_of_text|>\n<|start_of_role|>assistant<|end_of_role|>"
+    )
