@@ -1,6 +1,47 @@
 # CHANGELOG
 
 
+## v0.12.1 (2026-11-05)
+
+### 🐞 Bug Fixes
+
+- **cli**: Keep download progress bars from running into pull's result lines
+  ([#28](https://github.com/after2400/pyqmd/pull/28),
+  [`6ec61f2`](https://github.com/after2400/pyqmd/commit/6ec61f2c50f5801800d319e076d63b3a22143704))
+
+Each real download is announced on stderr before its progress bar, and the result table starts on a fresh line after the last bar.
+
+- **llm**: Quieter Granite reranker, tidier model downloads, refit Granite score mapping
+  ([#28](https://github.com/after2400/pyqmd/pull/28),
+  [`6ec61f2`](https://github.com/after2400/pyqmd/commit/6ec61f2c50f5801800d319e076d63b3a22143704))
+
+- **llm**: Refit the Granite reranker's score mapping across three corpora
+  ([#28](https://github.com/after2400/pyqmd/pull/28),
+  [`6ec61f2`](https://github.com/after2400/pyqmd/commit/6ec61f2c50f5801800d319e076d63b3a22143704))
+
+Median matching on SciFact alone left Granite scoring loosely related documents far above Qwen on other corpora (80% vs 52% for the same top result on a real notes index). A quantile match over 4,800 pairs from SciFact, NFCorpus and CQADupStack-unix narrows that gap on two of three corpora; SciFact retrieval is unchanged (MRR 0.828, nDCG@10 0.841, Recall@10 0.931 over 10 salts).
+
+- **llm**: Stop the Granite reranker's tokenizer warning on every load
+  ([#28](https://github.com/after2400/pyqmd/pull/28),
+  [`6ec61f2`](https://github.com/after2400/pyqmd/commit/6ec61f2c50f5801800d319e076d63b3a22143704))
+
+IBM's reranker ships clean_up_tokenization_spaces=true on a BPE tokenizer, so recent transformers printed a warning each time it loaded. A cross-encoder only encodes, so the clean-up is switched off at load time.
+
+- **skills**: Tell agents the Granite set uses US-developed base models
+  ([#28](https://github.com/after2400/pyqmd/pull/28),
+  [`6ec61f2`](https://github.com/after2400/pyqmd/commit/6ec61f2c50f5801800d319e076d63b3a22143704))
+
+### 📖 Documentation
+
+- Record the Granite reranker's refit in its spec and CLAUDE.md
+  ([#28](https://github.com/after2400/pyqmd/pull/28),
+  [`6ec61f2`](https://github.com/after2400/pyqmd/commit/6ec61f2c50f5801800d319e076d63b3a22143704))
+
+- Say plainly who the Granite set is for and its one provenance caveat
+  ([#28](https://github.com/after2400/pyqmd/pull/28),
+  [`6ec61f2`](https://github.com/after2400/pyqmd/commit/6ec61f2c50f5801800d319e076d63b3a22143704))
+
+
 ## v0.12.0 (2026-11-05)
 
 ### ✨ Features
