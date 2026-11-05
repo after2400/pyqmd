@@ -10,6 +10,16 @@ from pyqmd_mlx.store import Store
 runner = CliRunner()
 
 
+def test_no_arguments_shows_help():
+    # A bare `pyqmd` prints the command list (as Node qmd does) instead of
+    # Click's terse "Missing command" error.
+    result = runner.invoke(app, [])
+    assert "Missing command" not in result.output
+    assert "Usage: " in result.output
+    for command in ("collection", "query", "search", "status"):
+        assert command in result.output
+
+
 def test_help_lists_all_top_level_commands():
     result = runner.invoke(app, ["--help"])
     assert result.exit_code == 0

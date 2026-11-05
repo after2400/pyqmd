@@ -135,7 +135,8 @@ def test_expand_query_samples_with_a_per_query_seed(monkeypatch):
         return messages[-1]["content"]
 
     tokenizer = types.SimpleNamespace(apply_chat_template=apply_chat_template)
-    _fake_mlx_lm(monkeypatch, lambda model_id: (object(), tokenizer), fake_generate)
+    qwen3_model = types.SimpleNamespace(args=types.SimpleNamespace(model_type="qwen3"))
+    _fake_mlx_lm(monkeypatch, lambda model_id: (qwen3_model, tokenizer), fake_generate)
     monkeypatch.setattr(expand_mod, "_expand_cache", {})
     monkeypatch.setattr(expand_mod, "_build_grammar_tables", lambda tok: "tables")
     monkeypatch.setattr(expand_mod, "_keyed_sampler", lambda seed: ("sampler", seed))
@@ -185,4 +186,67 @@ def test_system_prompt_is_node_llama_cpps_default():
         "If a question does not make any sense, or is not factually coherent, explain why instead "
         "of answering something incorrectly. If you don't know the answer to a question, don't "
         "share false information."
+    )
+
+
+def _prompts_for(monkeypatch, model_obj):
+    """The messages expand_query sends for a loaded model object."""
+    import pyqmd_mlx.llm.expand as expand_mod
+
+    seen = []
+
+    def apply_chat_template(messages, tokenize, add_generation_prompt):
+        seen.append(messages)
+        return messages[-1]["content"]
+
+    tokenizer = types.SimpleNamespace(apply_chat_template=apply_chat_template)
+    _fake_mlx_lm(monkeypatch, lambda model_id: (model_obj, tokenizer), lambda *a, **k: "lex: x\n")
+    monkeypatch.setattr(expand_mod, "_expand_cache", {})
+    monkeypatch.setattr(expand_mod, "_build_grammar_tables", lambda tok: "tables")
+    monkeypatch.setattr(expand_mod, "_keyed_sampler", lambda seed: None)
+    monkeypatch.setattr(expand_mod, "_logits_processors", lambda: [])
+    monkeypatch.setattr(expand_mod, "_grammar_processor", lambda tables: None)
+    expand_query("heart attack risk", model="test/fake-expander")
+    return seen[0]
+
+
+def test_non_qwen_models_get_a_plain_user_prompt(monkeypatch):
+    # /no_think is a Qwen3 control word and the system prompt is Node's
+    # runtime default for its Qwen3 model; a retrained base is trained and
+    # served with the bare user message (whatever default system text its
+    # own chat template adds applies to both).
+    granite = types.SimpleNamespace(args=types.SimpleNamespace(model_type="granitemoehybrid"))
+    assert _prompts_for(monkeypatch, granite) == [
+        {"role": "user", "content": "Expand this search query: heart attack risk"}
+    ]
+
+
+def test_unknown_model_type_gets_the_plain_user_prompt(monkeypatch):
+    assert _prompts_for(monkeypatch, object()) == [
+        {"role": "user", "content": "Expand this search query: heart attack risk"}
+    ]
+
+
+def test_granite_prompt_matches_the_fine_tuning_prompt():
+    # finetune/prepare_data.py trains on exactly this prompt (the bare user
+    # message; Granite's template adds its own default system text). Needs the
+    # tokenizer in the local Hugging Face cache; skipped otherwise.
+    from pyqmd_mlx.llm.expand import _PLAIN_STYLE, _messages
+
+    transformers = pytest.importorskip("transformers")
+    try:
+        tokenizer = transformers.AutoTokenizer.from_pretrained(
+            "ibm-granite/granite-4.0-1b", local_files_only=True
+        )
+    except OSError:
+        pytest.skip("ibm-granite/granite-4.0-1b tokenizer is not in the local cache")
+
+    prompt = tokenizer.apply_chat_template(
+        _messages("heart attack risk", _PLAIN_STYLE), tokenize=False, add_generation_prompt=True
+    )
+    assert prompt == (
+        "<|start_of_role|>system<|end_of_role|>You are a helpful assistant. Please ensure "
+        "responses are professional, accurate, and safe.<|end_of_text|>\n"
+        "<|start_of_role|>user<|end_of_role|>Expand this search query: heart attack risk"
+        "<|end_of_text|>\n<|start_of_role|>assistant<|end_of_role|>"
     )

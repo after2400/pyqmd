@@ -40,6 +40,9 @@ from pyqmd_mlx.cli.commands import (
 
 app = typer.Typer(
     help="pyqmd: hybrid search over your markdown collections.",
+    # A bare `pyqmd` lists the commands (as Node qmd does) instead of failing
+    # with "Missing command".
+    no_args_is_help=True,
     # Node qmd accepts -h too; child command contexts inherit this.
     context_settings={"help_option_names": ["--help", "-h"]},
 )

@@ -8,6 +8,7 @@ settings under Node's output grammar (see _expand_grammar), seeded per
 import hashlib
 import os
 import re
+from dataclasses import dataclass
 
 from ._cache import get_or_load
 from ._constants import DEFAULT_EXPAND_MODEL, EXPAND_MODEL_ENV_VAR
@@ -40,6 +41,38 @@ _SYSTEM_PROMPT = (
     "of answering something incorrectly. If you don't know the answer to a question, don't "
     "share false information."
 )
+
+
+@dataclass(frozen=True)
+class _PromptStyle:
+    """How a model family wants the expansion request phrased. It has to
+    match what the model was fine-tuned on."""
+
+    no_think: bool  # prefix "/no_think ": a Qwen3 control word
+    system: str | None  # explicit system message; None leaves it to the chat template
+
+
+# Node's fine-tune of Qwen3 (and any Qwen3 override): "/no_think" plus the
+# system message Node sends implicitly. Any other base is trained and served
+# with the bare user message, so it also works with whatever default system
+# text its own chat template adds, identically in training and here.
+_QWEN3_STYLE = _PromptStyle(no_think=True, system=_SYSTEM_PROMPT)
+_PLAIN_STYLE = _PromptStyle(no_think=False, system=None)
+_PROMPT_STYLES = {"qwen3": _QWEN3_STYLE}
+
+
+def _prompt_style(model) -> _PromptStyle:
+    """The style for a loaded mlx-lm model, by its config's model_type."""
+    model_type = getattr(getattr(model, "args", None), "model_type", None)
+    return _PROMPT_STYLES.get(model_type, _PLAIN_STYLE)
+
+
+def _messages(query: str, style: _PromptStyle) -> list[dict]:
+    prefix = "/no_think " if style.no_think else ""
+    messages = [{"role": "user", "content": f"{prefix}Expand this search query: {query}"}]
+    if style.system is not None:
+        messages.insert(0, {"role": "system", "content": style.system})
+    return messages
 
 
 def _seed_for(query: str, model: str, salt: str | None = None) -> int:
@@ -164,10 +197,7 @@ def _generate_expansion(query: str, model: str, seed: int) -> list[str]:
     expand_model, tokenizer, tables = get_or_load(_expand_cache, model, _load)
 
     prompt = tokenizer.apply_chat_template(
-        [
-            {"role": "system", "content": _SYSTEM_PROMPT},
-            {"role": "user", "content": f"/no_think Expand this search query: {query}"},
-        ],
+        _messages(query, _prompt_style(expand_model)),
         tokenize=False,
         add_generation_prompt=True,
     )

@@ -129,6 +129,12 @@ stranger's installed pyqmd) and must not drift apart.
   `Error:` + exit 1 (CLI, including `bench`) / `is_error` (MCP).
   An older gitignored `models/qmd-query-expansion-1.7b-mlx` dir in a dev
   checkout holds the broken pre-fix weights; delete it.
+  Opt-in alternative on a US-made base:
+  `PYQMD_EXPAND_MODEL=after2400/qmd-query-expansion-granite-1b-mlx-mixed-4-6`, a fine-tune of IBM's
+  Granite 4.0 1B (Apache 2.0), recipe in `finetune/`. The prompt is chosen per model family from the
+  loaded model's `model_type` (`llm/expand.py`, `_PROMPT_STYLES`): Qwen3 models get `/no_think` and
+  Node's system prompt, everything else the bare `Expand this search query: <q>` message the model
+  was trained on, so a new base needs its prompt added there and in `finetune/prepare_data.py`.
 - Rerank model: default `mlx-community/Qwen3-Reranker-0.6B-mxfp8` (yes/no-logit scoring on
   mlx-lm); override it with `--rerank-model` (`query`, `bench`) or `PYQMD_RERANK_MODEL` (a Hub
   repo id or a local MLX model dir; the flag wins). A
