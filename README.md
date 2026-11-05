@@ -66,6 +66,69 @@ pyqmd --help
 Index lives at `~/.cache/pyqmd/index.sqlite`, distinct from the live Node `qmd`'s
 `~/.cache/qmd/index.sqlite` — both can coexist during the transition.
 
+## Models
+
+`pyqmd query` uses three MLX models, downloaded from the Hugging Face Hub the first time they are
+needed (`pyqmd pull` fetches them ahead of time):
+
+| Role            | Default                                                                                  | Granite set                                                                                         | Size (default / Granite) |
+| --------------- | ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------ |
+| Embedding       | `mlx-community/embeddinggemma-300m-8bit` (Google)                                        | same                                                                                                | 0.35 GB                  |
+| Reranking       | `mlx-community/Qwen3-Reranker-0.6B-mxfp8` (Alibaba)                                      | `ibm-granite/granite-embedding-reranker-english-r2` (IBM, English only)                             | 0.60 / 0.57 GB           |
+| Query expansion | `after2400/qmd-query-expansion-1.7B-mlx-mixed-4-6` (Qwen3-1.7B fine-tune, from Node qmd) | `after2400/qmd-query-expansion-granite-1b-mlx-mixed-4-6` (IBM Granite 4.0 1B fine-tune, Apache 2.0) | 1.0 / 0.98 GB            |
+
+The default set matches Node qmd. The **Granite set** swaps the reranker and the expansion model for
+ones built on IBM's open-weight Granite models, for a model set whose weights come from US
+organisations. On SciFact it retrieves better than the default (Recall@10 0.927 vs 0.907, MRR 0.828
+vs 0.798, over 30 seeded runs) and produces no run-on expansions; on ConditionalQA, NFCorpus and
+CQADupStack it is within noise of the default. It is about 17% slower per query expansion. The
+details are in `docs/specs/2026-11-04-us-expansion-model-design.md`. The Granite reranker is English
+only; keep the default set for other languages.
+
+Choose a set once and pyqmd remembers it, for the command line and for `pyqmd mcp` alike:
+
+```sh
+pyqmd models                       # what is in use, where each choice came from, what is downloaded
+pyqmd models list                  # the available sets
+pyqmd models use granite           # saves the choice in the config file; downloads nothing
+pyqmd models use granite --download   # ...and fetches the Granite set's models now
+pyqmd models use default           # back to the default set
+pyqmd pull                         # download whatever is currently selected
+```
+
+`models use` never contacts a model. In particular `pyqmd models use granite` on a machine that
+cannot reach the default models never asks for them, and neither does anything that runs afterwards.
+
+Each role's model comes from the first of these that is set:
+
+1. a flag: `--rerank-model` or `--expand-model` (on `query` and `bench`);
+2. `PYQMD_RERANK_MODEL` / `PYQMD_EXPAND_MODEL` (a Hub repo id or a local MLX model directory);
+3. `PYQMD_MODEL_SET` (`default` or `granite`);
+4. an explicit `expand` or `rerank` entry in the config file;
+5. the config file's `set`;
+6. the default set.
+
+The config file is `~/.config/pyqmd/config.toml` (or `$XDG_CONFIG_HOME/pyqmd/config.toml`, or the path
+in `PYQMD_CONFIG`):
+
+```toml
+[models]
+set = "granite"
+# expand = "org/repo-or-local-dir"   # explicit entries beat `set`
+# rerank = "org/repo-or-local-dir"
+```
+
+`pyqmd models use` rewrites the file and drops any comments in it. The embedding model is the same
+in every set: changing it means re-indexing, so it is not configurable.
+
+**If a download is blocked.** A model that cannot be loaded or downloaded (a network filter denying
+the repository, a proxy that inspects TLS traffic, no connection) fails with one `Error:` line that
+says why and what to do, for example run `pyqmd models use granite`, set `PYQMD_MODEL_SET=granite`, or
+point the matching variable at another repository or a local directory. Behind a proxy that
+re-signs HTTPS traffic, set `SSL_CERT_FILE` to your organisation's CA bundle. Nothing is cached from
+a failed attempt, so the next run starts clean. pyqmd never falls back to a different model on its
+own, because results would change silently.
+
 ## Optional: heading breadcrumbs
 
 Set `PYQMD_EMBED_BREADCRUMBS=1` to embed markdown chunks together with their section-heading path (`Doc > Section > Subsection`). In a vector-search benchmark on structured documents this found the right passage a few points more often, but after full-text fusion the gain was small and not statistically clear, and we have not measured it through the reranker, so it is off by default. Turning it on (or off again) changes what gets embedded, so run `pyqmd embed` afterwards; `pyqmd status` says so until you do. The setting must be the same everywhere pyqmd runs, including an MCP client's server config, or the server will report documents as pending.
